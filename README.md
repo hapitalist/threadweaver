@@ -13,7 +13,12 @@ Everything: the `hapi-member-sync` function pulls hashed emails of paying member
 Edge functions (Thread Weaver project): `library-url`, `checkout`, `book-checkout-webhook`,
 `apple-iap-verify`, `apple-iap-notifications`, `google-play-verify`, `serial`, `delete-account`,
 `tw-auth` (sign-up / reset / sign-in-link emails, sent through Amazon SES from wannabepress.com),
-`hapi-member-sync`.
+`hapi-member-sync`, `google-play-voided` (hourly: takes back Google Play refunds; log in `play_voided`).
+
+Refunds: Stripe refunds/disputes arrive at `book-checkout-webhook`. Apple notifies ONE address (the
+Hapitalist project's `apple-iap-notifications`); it and this project's listener pass every verified
+Thread Weaver notice to each other, so purchases in either database are revoked. Stripe Checkout is
+branded "Wannabe Press · Thread Weaver" per session (the Stripe account is shared with Hapitalist).
 
 ## Layout
 
