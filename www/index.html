@@ -67,7 +67,9 @@ section{padding:34px 0 8px;border-top:1px solid #1c1730}
 .keepgrid div{display:flex;align-items:center;gap:8px;font-size:14px;color:#c9bfda}
 .foot{text-align:center;padding:22px 24px 40px;font-family:'DM Mono';font-size:10px;letter-spacing:2px;color:#5a5470;line-height:1.9}
 </style>
-<script src="cordova.js"></script>
+<script>/* 1.16.2: this is the WEBSITE landing page. Inside the packaged app go straight to the library
+   (its "/app" links only exist on the website). The app starts on app.html; this is the backstop. */
+(function(){ var p=location.protocol,h=location.hostname;var nat=p==='app:'||p==='file:'||p==='capacitor:'||p==='ionic:'||(p==='https:'&&h==='localhost'&&!location.port); if(nat) location.replace("app.html"+location.search+location.hash); })();</script>
 </head><body>
 
 <div class="hero">

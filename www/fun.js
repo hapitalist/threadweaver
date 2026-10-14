@@ -221,30 +221,77 @@
       return !hasUnlocks && !hasReading;
     }catch(e){ return false; }
   }
+  /* 1.16.2: on the web the login screen comes first. The welcome used to be built (and marked seen)
+     underneath it, measured a header that wasn't on screen yet, and then sat in the wrong place after
+     sign-in. It now waits until the library is actually showing: no login wall, shell visible. */
+  function libraryShowing(){
+    try{
+      var w=document.getElementById("loginWall");
+      if(w && getComputedStyle(w).display!=="none") return false;
+      var sh=document.getElementById("shell");
+      if(!sh || getComputedStyle(sh).display==="none") return false;
+      var b=document.querySelector("#shell .brand");
+      return !!(b && b.getBoundingClientRect().height>40);
+    }catch(e){ return false; }
+  }
   function offerQuiz(){
     if(!isFirstRun()) return;
+    if(!libraryShowing()){ setTimeout(offerQuiz, 500); return; }
+    if(document.getElementById("funWelcome")) return;
     try{ localStorage.setItem("tw_seen_intro","1"); }catch(e){}
     // gentle: a takeover-style welcome that launches the quiz or dismisses
     var o=document.createElement("div"); o.id="funWelcome";
-    /* 1.16.1: it sat at z-index 50, BELOW the header, store buttons and search (z 52), and its middle was
-       half transparent, so the whole page bled through the text. It now covers the page outright; it is
-       still dismissed by \"Just let me browse\" or a tap anywhere outside the card, so nothing is blocked. */
-    o.style.cssText="position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 40%,#2a1d4d,#07050d 75%);padding:24px";
-    o.innerHTML='<div style="max-width:400px;text-align:center;background:rgba(22,16,38,.92);border:1px solid #3a2d5c;border-radius:16px;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6)">'+
-      '<div style="font-size:54px;color:#e8b53a;filter:drop-shadow(0 0 16px rgba(232,181,58,.5))">\u2726</div>'+
-      '<div style="font-family:\'Cinzel\',serif;font-size:24px;color:#e8b53a;margin:12px 0 6px">Welcome, Weaver</div>'+
-      '<div style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:18px;color:#cdbfe6;line-height:1.45;margin-bottom:22px">Every game, book, and comic here is a thread in one vast story. As you read, the Weave \u2014 a codex of 864 secrets \u2014 lights up. Not sure where to start? Let\u2019s find your thread.</div>'+
+    /* 1.16.2: the welcome sits UNDER the header (z 51 vs the header's 52, account bar 160) so the
+       title, Store button and Sign in stay visible and tappable on first launch (App Review 2.1(a)/(b);
+       covering them got build 11464 rejected, and 1.16.1 briefly did it again). It is fully opaque
+       and the card starts below the header, so nothing bleeds through. Dismiss: "Just let me browse"
+       or a tap anywhere outside the card. */
+    o.style.cssText="position:fixed;inset:0;z-index:51;display:flex;align-items:flex-start;justify-content:center;background:radial-gradient(120% 90% at 50% 40%,#2a1d4d,#07050d 75%);padding:24px;overflow-y:auto;-webkit-overflow-scrolling:touch";
+    function fwPlace(){ try{
+      var b=document.querySelector("#shell .brand"); var y=b?Math.max(0,b.getBoundingClientRect().bottom):0;
+      o.style.paddingTop=Math.round(y+14)+"px"; o.style.zIndex="51";
+      // short phones: tighten the card so both buttons fit on screen under the header (copy unchanged)
+      var c=document.getElementById("fwCard"); if(!c) return;
+      var small=(innerHeight-(y+14)-12) < 400;
+      if(small!==o._fwSmall){ o._fwSmall=small;
+        var st=document.getElementById("fwStar"), ti=document.getElementById("fwTitle"), bd=document.getElementById("fwBody");
+        c.style.padding=small?"14px 14px":"28px 22px";
+        st.style.fontSize=small?"26px":"54px";
+        ti.style.fontSize=small?"19px":"24px"; ti.style.margin=small?"4px 0 4px":"12px 0 6px";
+        bd.style.fontSize=small?"15px":"18px"; bd.style.lineHeight=small?"1.32":"1.45"; bd.style.marginBottom=small?"12px":"22px";
+        ["fwGo","fwSkip"].forEach(function(id){ var x=document.getElementById(id); if(x){ x.style.padding=small?"9px 14px":(id==="fwGo"?"12px 24px":"12px 18px"); x.style.margin=small?"3px":(id==="fwGo"?"0 8px 0 0":"0"); } });
+      }
+      // still no room (small phone on the WEB, where the app-store buttons stack and make the header
+      // tall): start the card under the account bar instead, so Sign in/out stays reachable and the
+      // buttons are on screen. Native hides those store buttons, so its card keeps to under the header.
+      if(y+14+c.offsetHeight > innerHeight-12){
+        var ab=document.getElementById("acctbar"); var ay=ab?Math.max(0,ab.getBoundingClientRect().bottom):0;
+        o.style.paddingTop=Math.round(ay+10)+"px";
+        o.style.zIndex="53";   // over the header (52), still under the account bar (54)
+      } else { o.style.zIndex="51"; }
+    }catch(e){} }
+    o.innerHTML='<div id="fwCard" style="max-width:400px;text-align:center;background:rgba(22,16,38,.92);border:1px solid #3a2d5c;border-radius:16px;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6)">'+
+      '<div id="fwStar" style="font-size:54px;color:#e8b53a;filter:drop-shadow(0 0 16px rgba(232,181,58,.5))">\u2726</div>'+
+      '<div id="fwTitle" style="font-family:\'Cinzel\',serif;font-size:24px;color:#e8b53a;margin:12px 0 6px">Welcome, Weaver</div>'+
+      '<div id="fwBody" style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:18px;color:#cdbfe6;line-height:1.45;margin-bottom:22px">Every game, book, and comic here is a thread in one vast story. As you read, the Weave \u2014 a codex of 864 secrets \u2014 lights up. Not sure where to start? Let\u2019s find your thread.</div>'+
       '<button id="fwGo" style="font-family:\'DM Mono\',monospace;font-size:13px;background:linear-gradient(150deg,#7b5fd0,#3a2a6e);border:1px solid #e8b53a;color:#fff;padding:12px 24px;border-radius:10px;cursor:pointer;letter-spacing:1px;margin-right:8px">Find my thread</button>'+
       '<button id="fwSkip" style="font-family:\'DM Mono\',monospace;font-size:13px;background:#1d1830;border:1px solid #2e2742;color:#9b91ac;padding:12px 18px;border-radius:10px;cursor:pointer">Just let me browse</button>'+
       '</div>';
     document.body.appendChild(o);
-    $("fwGo").onclick=function(){ o.remove(); if(have("openDiscover")) window.openDiscover(); };
-    $("fwSkip").onclick=function(){ o.remove(); };
+    // the floating Weave bar (#dock, z 55) would sit on the card: hide it while the welcome is up
+    var dock=document.getElementById("dock"), dockWas=dock?dock.style.display:""; if(dock) dock.style.display="none";
+    fwPlace(); window.addEventListener("resize", fwPlace); window.addEventListener("scroll", fwPlace, {passive:true});
+    // the header grows after first paint (fonts, the progress line once purchases load): follow it
+    var fwRO=null; try{ if(window.ResizeObserver){ fwRO=new ResizeObserver(fwPlace); fwRO.observe(document.querySelector("#shell .brand")); var ab=document.getElementById("acctbar"); if(ab) fwRO.observe(ab); } }catch(e){}
+    var fwIv=setInterval(fwPlace, 400); setTimeout(function(){ clearInterval(fwIv); }, 8000);
+    var fwClose=function(){ o.remove(); if(dock) dock.style.display=dockWas; clearInterval(fwIv); try{ if(fwRO) fwRO.disconnect(); }catch(e){} window.removeEventListener("resize", fwPlace); window.removeEventListener("scroll", fwPlace); };
+    $("fwGo").onclick=function(){ fwClose(); if(have("openDiscover")) window.openDiscover(); };
+    $("fwSkip").onclick=fwClose;
     /* Apple 2.1(a) (build 11464): this full-screen first-run layer sat at z-index 140 over
        the whole app, so the "Log in to save your place" button under it appeared dead to
        App Review. Tapping ANYWHERE outside the card now dismisses it, so no control can be
        permanently blocked. (It was previously masked by the old forced-login wall.) */
-    o.addEventListener("click", function(ev){ if(ev.target === o) o.remove(); });
+    o.addEventListener("click", function(ev){ if(ev.target === o) fwClose(); });
   }
 
   /* ---------------- wire it together ---------------- */

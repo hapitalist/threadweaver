@@ -497,9 +497,32 @@ def check_redirects_targets_exist():
             bad.append(src + " -> " + dst)
     return ("every _redirects rewrite target exists", not bad, ", ".join(bad[:6]))
 
+def check_native_start_page():
+    """N10 (1.16.2). The packaged app must START in the app. config.xml pointed at index.html, the
+    WEBSITE landing page, whose "/app" links only exist on Netlify: the app opened on a marketing page
+    with App Store buttons and "Start reading" led to an error page."""
+    cfg = open("../config.xml", encoding="utf-8").read() if os.path.exists("../config.xml") else ""
+    m = _re.search(r'<content\s+src="([^"]+)"', cfg)
+    src = m.group(1) if m else ""
+    idx = open("index.html", encoding="utf-8", errors="replace").read() if os.path.exists("index.html") else ""
+    fwd = 'location.replace("app.html"' in idx
+    ok = src == "app.html" and os.path.exists("app.html") and fwd
+    return ("native: app starts on app.html (and index.html forwards there inside the app)", ok,
+            "" if ok else "content src=%r, index.html forwards=%s" % (src, fwd))
+
+def check_native_bridge_loaded():
+    """N11 (1.16.2). app.html must load cordova.js inside the packaged app. Without it 'deviceready'
+    never fires: the app ran as the website (forced login) and in-app purchases never initialised."""
+    t = open("app.html", encoding="utf-8", errors="replace").read()
+    head = t[:t.find("</head>")] if "</head>" in t else t[:6000]
+    ok = "cordova.js" in head and "app:" in head and "localhost" in head
+    return ("native: app.html loads cordova.js inside the app (deviceready, in-app purchases)", ok,
+            "" if ok else "no in-app cordova.js loader in app.html <head>")
+
 NATIVE_CHECKS = [check_no_dynamic_import, check_local_refs_exist, check_sw_precache_exists,
                  check_version_stamps_agree, check_no_cdn_scripts, check_no_secrets_in_www,
-                 check_rpc_names_known, check_endpoint_names_known, check_redirects_targets_exist]
+                 check_rpc_names_known, check_endpoint_names_known, check_redirects_targets_exist,
+                 check_native_start_page, check_native_bridge_loaded]
 
 def run_native_checks():
     fails = 0
@@ -512,7 +535,7 @@ def run_native_checks():
 
 
 _native_fails = run_native_checks()
-print("RESULT:", "ALL PASS" if not FAIL else f"{len(FAIL)} FAILURE(S)")
+print("RESULT (core + native):", "PASS" if not (FAIL or _native_fails) else f"{len(FAIL) + _native_fails} FAILURE(S)")
 
 
 # ============================================================================
@@ -811,8 +834,18 @@ def check_no_overlay_blocks_controls():
     if m:
         mz = _re.search(r"z-index:(\d+)", m.group(1))
         barz = int(mz.group(1)) if mz else 0
-    if barz < 150:
-        bad.append("account bar z-index=%d does not outrank overlays (needs > 140)" % barz)
+    # 1.16.2: the bar must sit ABOVE the first-run welcome (auto-shown, can cover Sign in) and BELOW the
+    # layers a user opens on purpose (store sheet, reader host, unlock modal) - at z 160 it floated over them.
+    fun = open("fun.js", encoding="utf-8", errors="replace").read()
+    fw = _re.search(r'id="funWelcome";[\s\S]{0,1500}?z-index:(\d+)', fun)
+    fwz = int(fw.group(1)) if fw else 0
+    app = open("app.html", encoding="utf-8", errors="replace").read()
+    def _z(sel):
+        mm = _re.search(r'%s\{[^}]*?z-index:(\d+)' % _re.escape(sel), app)
+        return int(mm.group(1)) if mm else 10**6
+    ceiling = min(_z("#sheet"), _z("#host"), _z("#unlockModal"))
+    if not (fwz < barz < ceiling):
+        bad.append("account bar z-index=%d must be above the welcome (%d) and below the store/reader/unlock layers (%d)" % (barz, fwz, ceiling))
     return ("Apple 2.1(a): no overlay can block interactive controls", not bad, "; ".join(bad[:4]))
 
 
@@ -970,4 +1003,6 @@ if _play_fails:
 
 
 # --- combined verdict: original checks + native + store compliance ---
-sys.exit(1 if (FAIL or _native_fails or _store_fails or _play_fails) else 0)
+_total = len(FAIL) + _native_fails + _store_fails + _play_fails
+print("\nRESULT: ALL PASS" if not _total else "\nRESULT: %d FAILURE(S) - DO NOT SUBMIT" % _total)
+sys.exit(1 if _total else 0)

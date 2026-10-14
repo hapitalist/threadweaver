@@ -162,7 +162,10 @@
     if (!bar) {
       bar = document.createElement("div");
       bar.id = "acctbar";
-      bar.style.cssText = "position:relative;z-index:160;max-width:920px;margin:0 auto;padding:10px 20px 0;display:flex;justify-content:flex-end;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:12px;color:#9b91ac";
+      // 1.16.2: z 54 = above the header (52) and the first-run welcome (51), so Sign in is never covered,
+      // but BELOW everything the user opens on purpose (dock 55, reader 60, store sheet 80, unlock 90...).
+      // At 160 it floated over the store list and the reader.
+      bar.style.cssText = "position:relative;z-index:54;max-width:920px;margin:0 auto;padding:10px 20px 0;display:flex;justify-content:flex-end;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:12px;color:#9b91ac";
       var shell = document.getElementById("shell") || document.body;
       shell.parentNode.insertBefore(bar, shell);
     }
