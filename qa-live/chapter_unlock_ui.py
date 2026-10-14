@@ -84,7 +84,10 @@ with sync_playwright() as p:
         pg.wait_for_timeout(500)
     rec("web: tapping it goes to a $1 Stripe Checkout", bool(stripe) and "cs_live_" in stripe[0], (stripe[0][:80] if stripe else "no redirect"))
     # 4) the email's link
-    stripe.clear(); pg.goto(SITE + "/app?serial=dragon-strife&unlock=next")
+    stripe.clear()
+    try: pg.goto(SITE + "/app?serial=dragon-strife&unlock=next", wait_until="commit")
+    except Exception as e:   # the app can leave for Stripe before "load" fires - that is the success case
+        if "interrupted by another navigation" not in str(e): raise
     for _ in range(40):
         if stripe: break
         pg.wait_for_timeout(500)

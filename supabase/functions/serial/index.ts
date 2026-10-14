@@ -675,10 +675,20 @@ export async function handle(req: Request): Promise<Response> {
       form.set("cancel_url", `${SITE}/app?serial=${encodeURIComponent(s.id)}`);
       form.set("client_reference_id", user.id);
       if (email) form.set("customer_email", email);
+      // the Stripe account is shared with Hapitalist: show readers who they are paying
+      form.set("branding_settings[display_name]", "Wannabe Press · Thread Weaver");
+      form.set("branding_settings[button_color]", "#b8862a");
+      form.set("branding_settings[icon][type]", "url");
+      form.set("branding_settings[icon][url]", SITE + "/icons/icon-192.png");
       for (const [k, v] of Object.entries({ kind: "chapter", app: "threadweaver", user_id: user.id, serial: s.id, g: String(g), chapter: c.title.slice(0, 200) })) {
         form.set(`metadata[${k}]`, v); form.set(`payment_intent_data[metadata][${k}]`, v);
       }
-      const r = await d.stripeSession(form);
+      let r = await d.stripeSession(form);
+      if (!r.url && /branding/i.test(r.error || "")) {
+        // never lose a sale over the page's look: if Stripe refuses the branding, sell without it
+        for (const k of [...form.keys()].filter((k) => k.startsWith("branding_settings"))) form.delete(k);
+        r = await d.stripeSession(form);
+      }
       if (!r.url) return out({ error: "payments unavailable", detail: r.error }, 502);
       return out({ url: r.url, g, title: c.title });
     }
