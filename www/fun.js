@@ -226,8 +226,11 @@
     try{ localStorage.setItem("tw_seen_intro","1"); }catch(e){}
     // gentle: a takeover-style welcome that launches the quiz or dismisses
     var o=document.createElement("div"); o.id="funWelcome";
-    o.style.cssText="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 40%,rgba(60,40,110,.5),rgba(6,4,12,.94));padding:24px";
-    o.innerHTML='<div style="max-width:400px;text-align:center">'+
+    /* 1.16.1: it sat at z-index 50, BELOW the header, store buttons and search (z 52), and its middle was
+       half transparent, so the whole page bled through the text. It now covers the page outright; it is
+       still dismissed by \"Just let me browse\" or a tap anywhere outside the card, so nothing is blocked. */
+    o.style.cssText="position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 40%,#2a1d4d,#07050d 75%);padding:24px";
+    o.innerHTML='<div style="max-width:400px;text-align:center;background:rgba(22,16,38,.92);border:1px solid #3a2d5c;border-radius:16px;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6)">'+
       '<div style="font-size:54px;color:#e8b53a;filter:drop-shadow(0 0 16px rgba(232,181,58,.5))">\u2726</div>'+
       '<div style="font-family:\'Cinzel\',serif;font-size:24px;color:#e8b53a;margin:12px 0 6px">Welcome, Weaver</div>'+
       '<div style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:18px;color:#cdbfe6;line-height:1.45;margin-bottom:22px">Every game, book, and comic here is a thread in one vast story. As you read, the Weave \u2014 a codex of 864 secrets \u2014 lights up. Not sure where to start? Let\u2019s find your thread.</div>'+
