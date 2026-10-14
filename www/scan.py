@@ -781,11 +781,14 @@ def check_demo_account_documented():
     """S17 / Apple 2.1(a) - apps with a login MUST ship working demo credentials to
     App Review, and the backend must be live. Track them in-repo so they are never
     stale at submission."""
-    ok = os.path.exists("qa-review-notes.json")
+    # 1.16.3: in a native package the notes sit OUTSIDE www/ (anything in www/ is compiled into the app and
+    # can be extracted from it - the file holds the App Review demo password). Look in both places.
+    notes = "qa-review-notes.json" if os.path.exists("qa-review-notes.json") else "../qa-review-notes.json"
+    ok = os.path.exists(notes)
     detail = ""
     if ok:
         import json as _json
-        d = _json.load(open("qa-review-notes.json"))
+        d = _json.load(open(notes))
         need = ["demo_email", "demo_password"]
         missing = [k for k in need if not d.get(k)]
         if missing:
