@@ -1,0 +1,184 @@
+{
+ "_note": "Weave Threader progression. XP comes from every kind of Weave exploration: playing games, reading books/comics, discovering codex entries, finding relics. Rank is derived from total XP.",
+ "xp": {
+  "game_played": 15,
+  "book_started": 10,
+  "book_finished": 50,
+  "comic_started": 8,
+  "comic_finished": 30,
+  "codex_entry": 12,
+  "relic_found": 20,
+  "thread_completed": 100
+ },
+ "ranks": [
+  {
+   "min": 0,
+   "title": "Unwoven",
+   "blurb": "You haven't touched a thread yet."
+  },
+  {
+   "min": 40,
+   "title": "Novice Weaver",
+   "blurb": "You've felt the first strand."
+  },
+  {
+   "min": 150,
+   "title": "Thread-Walker",
+   "blurb": "You move between worlds with ease."
+  },
+  {
+   "min": 350,
+   "title": "Pattern-Reader",
+   "blurb": "You see how the threads connect."
+  },
+  {
+   "min": 650,
+   "title": "Loom-Keeper",
+   "blurb": "The Weave answers when you pull."
+  },
+  {
+   "min": 1000,
+   "title": "Master Weaver",
+   "blurb": "Reality bends around your hands."
+  },
+  {
+   "min": 1600,
+   "title": "Architect of the Weave",
+   "blurb": "Few have ever threaded so much of reality."
+  }
+ ],
+ "badges": [
+  {
+   "id": "first_thread",
+   "name": "First Thread",
+   "icon": "\ud83e\uddf5",
+   "desc": "Open your first book, comic, or game.",
+   "check": "any_started"
+  },
+  {
+   "id": "first_finish",
+   "name": "Woven Through",
+   "icon": "\u2705",
+   "desc": "Finish your first book or comic.",
+   "check": "any_finished"
+  },
+  {
+   "id": "game_player",
+   "name": "Player of Worlds",
+   "icon": "\ud83c\udfae",
+   "desc": "Play a game.",
+   "check": "game_played"
+  },
+  {
+   "id": "godsverse_owner",
+   "name": "Agent of the Godschurch",
+   "icon": "\u2625",
+   "desc": "Unlock the Godsverse.",
+   "check": "owns_godsverse"
+  },
+  {
+   "id": "ichabod_owner",
+   "name": "Monster Hunter",
+   "icon": "\ud83d\udde1",
+   "desc": "Unlock Ichabod Jones.",
+   "check": "owns_ichabod"
+  },
+  {
+   "id": "codex_10",
+   "name": "Lore-Seeker",
+   "icon": "\ud83d\udcd6",
+   "desc": "Discover 10 entries in the Weave.",
+   "check": "codex>=10"
+  },
+  {
+   "id": "codex_all",
+   "name": "Keeper of Secrets",
+   "icon": "\u2728",
+   "desc": "Discover every entry in the Weave.",
+   "check": "codex_all"
+  },
+  {
+   "id": "relic_5",
+   "name": "Relic Hunter",
+   "icon": "\u2697",
+   "desc": "Find 5 relics across the threads.",
+   "check": "relics>=5"
+  },
+  {
+   "id": "thread_one",
+   "name": "Thread Complete",
+   "icon": "\u2756",
+   "desc": "Finish every book in a single thread.",
+   "check": "any_thread_complete"
+  },
+  {
+   "id": "polymath",
+   "name": "Polymath of the Weave",
+   "icon": "\ud83c\udf0c",
+   "desc": "Read in 3 different threads.",
+   "check": "threads>=3"
+  }
+ ],
+ "relics": [
+  {
+   "id": "dagger_obsolescence",
+   "name": "Dagger of Obsolescence",
+   "icon": "\ud83d\udde1",
+   "blurb": "One of the five weapons that can kill a god.",
+   "anchors": [
+    {
+     "book": "05-death",
+     "chapter": 3
+    }
+   ]
+  },
+  {
+   "id": "eye_of_horus",
+   "name": "The Eye of Horus",
+   "icon": "\ud83d\udc41",
+   "blurb": "An artifact of sight beyond sight.",
+   "anchors": [
+    {
+     "book": "04-heaven",
+     "chapter": 2
+    }
+   ]
+  },
+  {
+   "id": "necronomicon",
+   "name": "Necronomicon",
+   "icon": "\ud83d\udcd5",
+   "blurb": "A book that should not be read aloud.",
+   "anchors": [
+    {
+     "book": "07-hell",
+     "chapter": 4
+    }
+   ]
+  },
+  {
+   "id": "pixie_dust",
+   "name": "Pixie Dust",
+   "icon": "\u2728",
+   "blurb": "Snorted by pixies for power; it drives them mad.",
+   "anchors": [
+    {
+     "book": "01-magic",
+     "chapter": 1
+    }
+   ]
+  },
+  {
+   "id": "purple_tulip",
+   "name": "Purple Tulip of Valhalla",
+   "icon": "\ud83c\udf37",
+   "blurb": "A gift from Akta's mother, carried out of Valhalla.",
+   "anchors": [
+    {
+     "book": "07-hell",
+     "chapter": 2
+    }
+   ]
+  }
+ ]
+}

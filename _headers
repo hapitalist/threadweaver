@@ -1,0 +1,24 @@
+# Force browsers to revalidate on every deploy so published changes actually reach
+# users instead of being served from stale cache. (Lesson: a deploy "worked once"
+# then appeared broken because cached pages kept serving.) Conditional caching (304s)
+# keeps it fast; nothing is served blindly from cache.
+
+# Service worker — never cache
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# All routes + explicit HTML — revalidate every load
+/*
+  Cache-Control: no-cache, must-revalidate
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# App scripts (stable filenames) — revalidate
+/*.js
+  Cache-Control: no-cache, must-revalidate
+
+# Vendored lib + fonts (content rarely changes; revalidate cheaply)
+/lib/*
+  Cache-Control: public, max-age=0, must-revalidate
+/fonts/*
+  Cache-Control: public, max-age=86400

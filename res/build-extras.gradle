@@ -1,0 +1,11 @@
+// Resolve Kotlin stdlib duplicate-class conflict (cordova-plugin-purchase pulls
+// kotlin-stdlib 1.8.22; an older dep pulls kotlin-stdlib-jdk7/jdk8 1.6.21, whose
+// classes were merged into the main stdlib in Kotlin 1.8+). Pin the jdk7/jdk8
+// artifacts to 1.8.22 so they become empty stubs and stop duplicating classes.
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    }
+}

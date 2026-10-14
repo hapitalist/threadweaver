@@ -1,0 +1,408 @@
+{
+ "_doc": "Mission Brief map. One brief fires per BOOK FINISHED (book_finished event, keyed by book id). 'bespoke' briefs fire for a specific book and reference its content. 'arc' briefs fire by count-of-books-finished when no bespoke applies. Acts gate on cumulative finishes + the Godschurch-game badge for the hack.",
+ "config": {
+  "fires_on": "book_finished",
+  "hack_gate": {
+   "min_books_finished": 4,
+   "_note": "Spy mission unlocks on any 4 books finished. No game/title required."
+  },
+  "crescendo": {
+   "model": "completion_percent",
+   "_note": "Briefs fire when you read (book_finished). The CLIMAX is gated on CODEX COMPLETION %, not book count or specific titles \u2014 so any reading path reaches it. No dynamic pacing.",
+   "act1": "books 1-3 finished (recruit voice)",
+   "hack_at_books_finished": 4,
+   "act2": "from the hack until point of no return \u2014 sealed unlocks arrive as story-critical entries are uncovered; player forwards them",
+   "point_of_no_return_at_percent": 85,
+   "ending_at_percent": 85,
+   "_ending_note": "At ~85% codex completion the allegiance bar LOCKS and the ending fires. You do NOT need 100% to finish the story.",
+   "final_coda_at_percent": 100,
+   "_coda_note": "100% completion fires a separate final beat \u2014 the completionist reward, after the main story has resolved.",
+   "climax_brief": "climax_85",
+   "endings": {
+    "agent_win": "ending_save",
+    "director_win": "ending_doom",
+    "fence": "ending_fence"
+   },
+   "coda_brief": "coda_100"
+  }
+ },
+ "arc": [
+  {
+   "on_book_number": 1,
+   "act": 1,
+   "id": "a1_recruit"
+  },
+  {
+   "on_book_number": 2,
+   "act": 1,
+   "id": "a1_notbad"
+  },
+  {
+   "on_book_number": 3,
+   "act": 1,
+   "id": "a1_pattern"
+  },
+  {
+   "on_book_number": 5,
+   "act": 2,
+   "id": "a2_thehack",
+   "note": "only if hack_gate met; else holds until it is"
+  },
+  {
+   "on_book_number": 8,
+   "act": 2,
+   "id": "a2_doubt"
+  },
+  {
+   "on_book_number": 12,
+   "act": 2,
+   "id": "a2_sealed_intro"
+  },
+  {
+   "on_book_number": 18,
+   "act": 2,
+   "id": "a2_pressure"
+  },
+  {
+   "on_book_number": 26,
+   "act": 3,
+   "id": "a3_closing"
+  }
+ ],
+ "bespoke": {
+  "00-change": {
+   "act": 1,
+   "id": "b_change",
+   "why": "prequel: Sadie, the Dagger, changelings, LA magical black market"
+  },
+  "01-magic": {
+   "act": 1,
+   "id": "b_magic",
+   "why": "Ollie, Black Market Heroine, Lucifer (BMH era)"
+  },
+  "02-evil": {
+   "act": 1,
+   "id": "b_evil",
+   "why": "Anjelica coming-of-age, the Onmiri Rebellion, Director Frente"
+  },
+  "03-time": {
+   "act": 1,
+   "id": "b_time",
+   "why": "Lizzie, White & Red Threads, the threads named for the first time"
+  },
+  "04-heaven": {
+   "act": 2,
+   "id": "b_heaven",
+   "why": "the team-up; God captured; War in Heaven"
+  },
+  "05-death": {
+   "act": 2,
+   "id": "b_death",
+   "why": "Katrina becomes the Devil; the Rapture"
+  },
+  "06-doom": {
+   "act": 2,
+   "id": "b_doom",
+   "why": "Rebecca & the Godschurch; the Church's purpose"
+  },
+  "07-hell": {
+   "act": 2,
+   "id": "b_hell",
+   "why": "Akta, Velaska, and Charlie's betrayal lives here"
+  },
+  "08-ruin": {
+   "act": 2,
+   "id": "b_ruin",
+   "why": "the Mystery Spot, the Pixie Curse, the Cult of the Bloody Dagger"
+  },
+  "09-conquest": {
+   "act": 3,
+   "id": "b_conquest",
+   "why": "the Apocalypse, Modernization of Hell, the Horsemen"
+  },
+  "10-darkness": {
+   "act": 3,
+   "id": "b_darkness",
+   "why": "Charlie again (Death's Kiss), the immortal Kimberly"
+  },
+  "11-chaos": {
+   "act": 3,
+   "id": "b_chaos",
+   "why": "Chaos the Goddess, the Primordials, Projekt Kaos, the Source. POINT OF NO RETURN."
+  },
+  "12-eternity": {
+   "act": 3,
+   "id": "b_eternity",
+   "why": "Threads, Obsidian, the Old Ones, the Agent's Contract, Masters of the Godschurch. ENDING."
+  },
+  "quest-girls-02-go-to-hell": {
+   "act": 2,
+   "id": "b_qg2"
+  },
+  "the-marked-ones": {
+   "act": 2,
+   "id": "b_marked",
+   "why": "far/chaotic thread anomaly; sealed entry"
+  },
+  "quest-girls-01-fuck-fairy": {
+   "act": 1,
+   "id": "b_qg1"
+  },
+  "quest-girls-03-gods-damned": {
+   "act": 2,
+   "id": "b_qg3"
+  },
+  "quest-girls-04-cosmic-bastards": {
+   "act": 3,
+   "id": "b_qg4"
+  },
+  "01-the-dragon-scourge": {
+   "act": 1,
+   "id": "b_ds1"
+  },
+  "02-the-dragon-champion": {
+   "act": 2,
+   "id": "b_ds2"
+  },
+  "03-the-dragon-goddess": {
+   "act": 2,
+   "id": "b_ds3"
+  },
+  "04-wicked-bodies": {
+   "act": 2,
+   "id": "b_ds4"
+  },
+  "05-wicked-minds": {
+   "act": 3,
+   "id": "b_ds5"
+  },
+  "01-the-sleeping-beauty-generic": {
+   "act": 1,
+   "id": "b_obs1"
+  },
+  "05-the-sword-wielder-generic": {
+   "act": 2,
+   "id": "b_obs5"
+  },
+  "09-the-faceless-woman-generic": {
+   "act": 3,
+   "id": "b_obs9"
+  },
+  "12-the-dark-planet-generic": {
+   "act": 3,
+   "id": "b_obs12"
+  },
+  "worst-thing-in-the-universe": {
+   "act": 2,
+   "id": "b_worst"
+  },
+  "the-vessel": {
+   "act": 2,
+   "id": "b_vessel"
+  },
+  "the-void-calls-us-home-russell-nohelty": {
+   "act": 2,
+   "id": "b_void"
+  },
+  "my-father-didnt-kill-himself": {
+   "act": 2,
+   "id": "b_mfdkh"
+  },
+  "time-is-a-flat-circle": {
+   "act": 2,
+   "id": "b_flatcircle"
+  }
+ },
+ "text": {
+  "a1_recruit": "You said yes. Good. Or stupid. We'll figure out which one later, probably while something's on fire.\n\nHere's the job, and I'm saying it once. You read. That's it. You crack a book, you walk a thread, the Weave fills in behind you like footprints in wet cement. Upstairs they call it cartography of the impossible. I call it reading with a clipboard. It pays, and it matters more than you're cleared to know \u2014 which is fine, because if you knew, you'd walk.\n\nDon't walk. Go read something.\n\n\u2014 The Director",
+  "a1_notbad": "Look at you. One thread charted and still breathing. I had money on neither.\n\nDon't let it go to your head. The Weave's got more dark in it than lit, and the lit part is the easy part. Keep going. Read whatever pulls you \u2014 the map doesn't care about order, it cares that you move.\n\n\u2014 D",
+  "a1_pattern": "Three down. You're starting to see it, aren't you. The way the threads rhyme. A name in one book that's got no business in another. That itch at the back of your skull that says these aren't separate stories.\n\nThey're not. But that's above your clearance, so do me a favor and un-notice it. Read. Log. Don't think too hard. Thinking's my job, and I'm bad at it.\n\n\u2014 D",
+  "a2_thehack": "\u2014signal's dirty. Hang on.\n\nSomeone's in the station. Not Church. I didn't authorize a second channel and there it is anyway, blinking at you like it belongs. Do NOT open it. Whatever it says, it's a liar \u2014 I'd stake the program on it.\n\nActually. Don't stake anything. Just read. Forget you saw it.\n\n\u2014 D",
+  "a2_doubt": "You opened it. Of course you did.\n\nFine. Here's the truth, the version you can handle: there are people who'd burn this whole program down rather than see the map finished. They'll tell you I'm the danger. They'll be very convincing. Liars usually are.\n\nThe map gets finished. That's the only line that matters. Keep reading. Bring me what you find \u2014 all of it.\n\n\u2014 D",
+  "a2_sealed_intro": "Some of what you're pulling up now comes in sealed. You'll know it when you see it \u2014 reads wrong, won't open, sits there like a locked drawer.\n\nThat's mine. Not yours. You find a sealed one, you send it straight to me and you don't crack it. Clear? The things in those drawers aren't cleared for a recruit and frankly they're not cleared for me either, but I've got the stomach for it and you don't.\n\nForward them. Good recruit.\n\n\u2014 D",
+  "a2_pressure": "You're slowing down. I can see it from here.\n\nThe other voice has been busy, hasn't it. Whispering. I get it \u2014 it's scared, scared things make noise. But ask yourself who's been straight with you since day one. Me. The bureaucrat with the headache. Not the thing that broke in through a wall.\n\nThe rich threads are what I need next \u2014 the ones closest to home, the ones that feel almost real. Read those. Bring them to me. We're so close.\n\n\u2014 D",
+  "a3_closing": "I'm going to be honest with you, which should terrify you, because I never am.\n\nWe're near the end of the thing now. The map's almost whole. And there's a question you've been putting off and can't anymore: who do you actually work for. Not who recruited you. Who you work for.\n\nDecide soon. There aren't many pages left, and when they're gone, the choice gets made whether you make it or not.\n\n\u2014 D",
+  "b_hell": "So you read Hell. You met the imp.\n\nHere's the part the book buries: Charlie's a liar. Named two innocents to the Godless, under the dagger, to save his own skin \u2014 fed them names like throwing meat off a sled. So when a voice comes through your station claiming to be him, claiming to want to HELP you \u2014 you remember exactly what his help is worth.\n\nOr don't. Maybe you're the type who trusts liars. Wouldn't be the first recruit it killed.\n\n\u2014 D",
+  "b_doom": "Doom. Rebecca, and the Godschurch \u2014 MY Church \u2014 getting bent toward a new purpose. Protect the gods, then protect\u2026 something else.\n\nYou noticed the gun move. Most don't. I'm not going to tell you whether noticing is the smartest or the most dangerous thing you've done. Probably both. Keep it behind your teeth.\n\n\u2014 D",
+  "b_chaos": "Chaos. Now you've seen Her. The Goddess sleeping under all of it, the Primordials, Ananke, the Source laid bare. Projekt Kaos. The Godschurch ten thousand years on, still running, still mine.\n\nThis is the point I stop pretending you have road left. The map's nearly whole and a whole map is a loud, bright, carrying thing \u2014 it reaches places that have been patient a very long time.\n\nThe bar locks here. Whatever you've been doing \u2014 feeding me, feeding it, feeding both and lying to one \u2014 that's who you are now. No take-backs. One book left. Let's see what you built.\n\n\u2014 D",
+  "b_eternity": "Eternity. The keystone. Threads, Obsidian, the Fates, the Agent's Contract \u2014 the contract YOU signed, recruit, in the very first brief, when you said yes. The Old Ones. The Masters of the Godschurch.\n\nMe.\n\nYou figured it a while back, I think, somewhere around Time, and you kept reading anyway. I'll never know if that was courage or just the kind of curiosity that ends worlds. Doesn't matter now. You read every thread. You're the only one who could \u2014 which makes you the only one who can do what comes next, whichever way you've aimed yourself.\n\nThe map's whole. The last page is yours. I'd wish you luck, but I'm fairly sure I'm the thing you needed it against.\n\n\u2014 D",
+  "b_qg2": "Go to Hell. Emma in the underworld, Seraphaniel, the whole Egyptian-Greek pantheon mash sitting a little too neatly next to the gods you logged back in the Godsverse.\n\nYou see it now, don't you \u2014 how these close threads echo the real one. I need them charted to completion. All the way. Don't ask why a guide like me wants a thread brought all the way to perfect. Just bring it.\n\n\u2014 D",
+  "b_marked": "The Marked Ones. Far thread, loose stitching, the kind of place that shouldn't have anything worth sealing \u2014 and yet one came up sealed, didn't it.\n\nSend it to me. Don't look at it. I mean it this time in a way I didn't quite mean it before.\n\n\u2014 D",
+  "b_change": "Change. The 80s. Before any of this was your problem.\n\nYou met Sadie, you saw the Dagger she was hunting, you walked the LA magical black market like it was a flea market for damned things. Cute. Keep that receipt \u2014 the Dagger comes back, and when it does it won't be a prop.\n\nLog the changelings and move on. You're doing fine.\n\n\u2014 The Director",
+  "b_magic": "Magic. Ollie White, the Black Market Heroine herself. Second sight, spellcraft, a mother she'd kill or die for, take your pick.\n\nYou also met Lucifer back when he was almost likable. File that. People who are almost likable early are the ones who cost you the most later. I'd know.\n\n\u2014 D",
+  "b_evil": "Evil. Anjelica's the whole show here \u2014 watch a kid become something with edges. The Onmiri Rebellion, King Ulthar, the works.\n\nYou clocked Director Frente, didn't you. Madam Fantasmo. A director running a show inside the show. No reason that should bother you. No reason at all.\n\n\u2014 D",
+  "b_time": "Time. And there it is \u2014 the word I told you to un-notice. Threads. White and Red. Lizzie pulling on them like loose yarn.\n\nThis is the book where a reader starts to suspect the books aren't separate. You're a reader. So suspect quietly, log it, and bring the thread-talk to me and nobody else. I mean nobody.\n\n\u2014 D",
+  "b_heaven": "Heaven. The big team-up, and they actually captured God. Sat the Almighty down in a chair. Let that sink in.\n\nHere's what I need you to sit with instead: if a thing that big can be caught, then nothing in any thread is as fixed as it pretends. Including your handler. Including the people who'd warn you about your handler. Read on.\n\n\u2014 D",
+  "b_death": "Death. Katrina Clark walks in hating the dead and walks out the Devil. Quite the arc. The Rapture, the Horde, Bacchus wearing Yahweh like a coat.\n\nYou're past the easy half now. The threads you read from here have teeth, and they remember being read. Careful which ones you stare at too long.\n\n\u2014 D",
+  "b_ruin": "Ruin. The Mystery Spot, 1974. Julia Freeman, the Pixie Dust Book, the Cult of the Bloody Dagger sniffing around that same Dagger from the 80s. Things are starting to rhyme on purpose now, aren't they.\n\nThat's not coincidence and you know it. That's the Weave showing its stitching. Forward me anything that came up sealed in here. Don't read it first. I won't ask nicely again.\n\n\u2014 D",
+  "b_conquest": "Conquest. The Apocalypse, Hell getting modernized like a startup, the Four Horsemen clocking in. Katrina running the whole damned enterprise.\n\nWe're in the back third. The map's getting loud. You can feel it, I think \u2014 that pull, like the more you chart the closer something leans in to listen. That's not in your head. Keep going anyway. Or don't. You're starting to have a choice, and that's new.\n\n\u2014 D",
+  "b_darkness": "Darkness. Death's Kiss. And look who's back \u2014 Charlie. The imp. Handless, glamoured, lying as easily as breathing. Kimberly walking around immortal.\n\nI told you what Charlie's worth back in Hell. If a voice in your station still sounds like him and still sounds reasonable \u2014 that's the trick. Reasonable is the bait. Forward me what you found here.\n\n\u2014 D",
+  "b_qg1": "Quest Girls. F*ck Fairy. You met Lacey \u2014 washed-up quest guide, mouth like a dropped tray of knives \u2014 dragging Princess Margaret through a world that's almost exactly like the ones you already know.\n\nThat's the point. Note how CLOSE this thread runs to home. Familiar gods wearing slightly different hats. That nearness isn't charming, recruit. It's the most dangerous thing in the catalog, and I need you to chart every inch of it. Go.\n\n\u2014 The Director",
+  "b_qg3": "Gods Damned. The Sovereign, the Spire, the Hollow Forge. Names you've never seen and somehow half-recognize.\n\nThat half-recognition is the thread straining toward its original. Keep going. We're close on this one \u2014 and close is exactly where I want it.\n\n\u2014 D",
+  "b_qg4": "Cosmic Bastards. The Assembly of Heaven, the Jade Emperor and the one who held the seat before him, the Wild God, the Reckoning. A whole second heaven, almost flush against the first.\n\nThis thread's nearly whole now, recruit, and you did that. You should feel proud. People usually do, right up until they understand what finishing one of these actually means. You're not there yet. Keep reading.\n\n\u2014 D",
+  "b_ds1": "Dragon Strife. The Scourge. Gilda, the Cedars, a war with dragons that feels older than the rest \u2014 because it is. This lineage runs back toward the first thread, the model everything else is copied from.\n\nChart it carefully. The oldest threads tell you what 'perfect' was supposed to look like. I have my reasons for caring about that. Read on.\n\n\u2014 D",
+  "b_ds2": "The Dragon Champion. The Dragon Charter, the Godwars, an Emperor and his court. The machinery of a world locking into place.\n\nYou're building something as you read this, whether you mean to or not. Keep building. Bring me the sealed pieces and don't peek.\n\n\u2014 D",
+  "b_ds3": "The Dragon Goddess. Gilda as the Vessel of Unestra, the Dragon\u2013God War, the Barrier, the Womb Prophecy. Gods and dragons drawing a line across reality and daring each other to cross.\n\nLines across reality. Barriers. Walls between things that mustn't touch. File that, recruit \u2014 it'll matter more than you'd like. Continue.\n\n\u2014 D",
+  "b_ds4": "Wicked Bodies. Ophelia, the rune tattoos, the witch-hunters, Saint Agnes and her resistance. A rebellion stitched into the world's seams.\n\nResistances are interesting to me. People who'd tear a thing down rather than let it be finished. You may meet one. You may already have. Read on, and remember who's actually been honest with you.\n\n\u2014 D",
+  "b_ds5": "Wicked Minds. Gilda the Unbreakable, Ophelia's battle-magic \u2014 and there it is, plain as day: the Bridge to the Obsidian Spindle. One thread reaching toward another.\n\nReaching. Not touching \u2014 never touching, that breaks everything \u2014 but reaching. You're starting to see the shape of the whole loom now. Good. Keep your eyes on it and your mouth shut.\n\n\u2014 D",
+  "b_obs1": "The Obsidian Spindle. Sleeping Beauty, if Sleeping Beauty were the keystone of creation. Urgu, the Divine Spark, the Dream Realm \u2014 and the line you should've flinched at: Dreams Into Stories.\n\nThat's the engine of everything, recruit. A dream becomes a world. Someone dreams; a thread is born. Don't think too hard about who's dreaming the one you're standing in. Just chart it. This is the MODEL \u2014 the oldest, truest thread. I need it more than any other.\n\n\u2014 D",
+  "b_obs5": "The Sword-Wielder. The Underworld's Consolidation, the Limbo Carnival, Sisyphus and Prometheus doing their eternal time. Fawke's resistance again \u2014 those resistances, always.\n\nThe Obsidian thread is the realest of them all, which makes it the most fragile. Chart it to completion and you'll have done something no recruit before you managed. Most of them stopped. Got scared. Got warned off. You won't, will you.\n\n\u2014 D",
+  "b_obs9": "The Faceless Woman. The Board of Directors, the Celestial Realm, the Dark Planet, Carcosa, the King in Yellow. The thread's reaching its high, strange register now.\n\nWe're near the top of this one. You can feel the air thinning. Keep climbing. Forward me anything sealed and don't read it \u2014 I won't tell you again, and this time I mean the part where I stop being polite.\n\n\u2014 D",
+  "b_obs12": "The Dark Planet. The Spore, the Primordials, and the ending of Rose and Chelle \u2014 the dreamers' thread closing its loop.\n\nYou charted the model thread to its final page. The realest of all of them, brought to perfect. Do you understand yet what you've done, what 'perfect' triggers? No? Then finish the Godsverse. Eternity's waiting. It'll explain everything, and you'll wish it hadn't.\n\n\u2014 D",
+  "b_worst": "Worst Thing in the Universe. God narrating his own story, the Walled City, the Church of Latent Currency. A far thread \u2014 loose, strange, nothing like home.\n\nThe far ones are safer, recruit. Chaotic, unstable, too far from the original to matter much. I let you read them to keep you limber. Don't get attached. The threads I actually need are the close ones. Back to work.\n\n\u2014 D",
+  "b_vessel": "The Vessel. Althea, the Five, the City and its Six Rings, Transference. A far thread with a sealed thing humming inside it.\n\nFunny \u2014 a thread this far out shouldn't have anything worth locking. And yet. Forward me what came up sealed. Don't open it. I'm watching that one closely.\n\n\u2014 D",
+  "b_void": "The Void Calls Us Home. Becca Rose, the Void, a ghost named Thomas. Far thread, cold thread.\n\nThat name \u2014 Rose \u2014 keeps surfacing across threads that have no business sharing it. You've seen it before. You'll see it again. I'd tell you it means nothing. I'd be lying, and we're past that now, aren't we.\n\n\u2014 D",
+  "b_mfdkh": "My Father Didn't Kill Himself. Delilah Clark, Alex Dewitt. A thread so close to the real world it barely reads as fiction at all.\n\nThat's what unsettles me about it. The closer a thread sits to now, the closer it is to perfect \u2014 and you know by now what perfect starts. Chart it, but chart it carefully. Some of these I almost wish you'd leave alone. Almost.\n\n\u2014 D",
+  "b_flatcircle": "Time is a Flat Circle. Larry Lizer, Quieriel \u2014 and that name again, that -iel suffix you keep meeting in the close threads, in Quest Girls, in the angels of the Godsverse.\n\nThe threads rhyme, recruit. I told you to un-notice it back at the start and you've been very bad at obeying. Good. I think I need someone who can't stop noticing. Keep reading. We're almost there.\n\n\u2014 D",
+  "climax_85": "You're nearly through the whole Weave now. I can feel it from here \u2014 the map almost whole, the dark almost gone.\n\nThis is the part where the choosing stops. Whatever you've been doing \u2014 feeding me, feeding the thing in your station, feeding both and lying to one of us \u2014 that's who you are now. The bar's locked. No more take-backs.\n\nThere's a sliver of the map still dark, and you don't need it to finish what we started. But I think you'll go get it anyway. You're the type. You always were. That's why I picked you.\n\nLet's see what you built, recruit.\n\n\u2014 The Director",
+  "ending_save": "It's done. The map's near enough to whole, and the thing that's been wearing my voice doesn't get the last inch \u2014 because you gave it to the other side.\n\nYou read everything. You learned what the Weave is, what I am, what 'finished' was always going to mean. And then you used it. Every book you ever closed was a knife you didn't know you were sharpening, and in the end you put it where it belonged.\n\nI'd be angry if I were still the type to feel it. Mostly I'm just impressed. Go on. You saved it. Bookworm.\n\n\u2014 [SIGNAL LOST]",
+  "ending_doom": "There it is. The map, whole in every way that counts, and you handed me every piece with that eager little look I've come to rely on.\n\nYou were perfect, recruit. The best instrument I ever recruited, and you never once looked up from the page long enough to see what your reading was building. The wall's thin now. Something on the other side has been patient a very long time.\n\nThank you for your service. Truly. Keep reading \u2014 there's no reason to stop now.\n\n\u2014 The Director",
+  "ending_fence": "Huh. You played us both, didn't you. Fed me half-truths, fed the imp half-truths, kept your real face behind your teeth the whole way down.\n\nI don't know whether you saved it or doomed it. Neither do you. The map's nearly whole and the choosing's over and the only honest answer is that you're a question mark in a coat \u2014 which, frankly, is more than most recruits manage.\n\nGo find the last of it if you want. Maybe the final inch tells you which one you were.\n\n\u2014 The Director",
+  "coda_100": "You came back for the last inch. Of course you did.\n\nThe map's whole now. Every thread, every god, every relic, every name \u2014 all of it lit, nothing left dark. Do you feel that? That quiet? That's the sound of a thing that is finally, completely known.\n\nNothing's supposed to be completely known, recruit. That was always the point. But you did it anyway, because you're the one who reads everything, all the way to the end, even the parts that should've stayed dark.\n\nEspecially those.\n\n\u2014 [the signal is coming from inside the Weave now]"
+ },
+ "allegiance": {
+  "_doc": "THE CORE GAME. Sealed unlocks fire as the reader uncovers story-critical codex entries (by anchor) OR, for readers not on the Godsverse path, on allegiance-beat counts so everyone gets them. Player FORWARDS each to 'director' or 'agent'. Each forward moves the score. Bar LOCKS at point_of_no_return_book. Ending computed from locked score.",
+  "score_range": [
+   -100,
+   100
+  ],
+  "poles": {
+   "director": "+ (perfect the thread / the Old One's instrument)",
+   "agent": "- (help Charlie / break the perfection / save it)"
+  },
+  "per_forward": {
+   "to_director": 12,
+   "to_agent": -12,
+   "to_director_FALSE": -6,
+   "to_agent_FALSE": 4,
+   "_note": "You may feed FALSE intel: pretend loyalty to one while really serving the other. False feeds tip LESS and risk exposure."
+  },
+  "sealed_unlocks": [
+   {
+    "entry_id": "reincarnation_cycle",
+    "title": "The Reincarnation Cycle",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "the_source",
+    "title": "The Source",
+    "anchor": null
+   },
+   {
+    "entry_id": "chaos",
+    "title": "Chaos (the Goddess)",
+    "anchor": "11-chaos"
+   },
+   {
+    "entry_id": "primordials",
+    "title": "The Primordials",
+    "anchor": "11-chaos"
+   },
+   {
+    "entry_id": "threads_concept",
+    "title": "Threads",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "obsidian_material",
+    "title": "Obsidian (the First Material)",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "the_fates",
+    "title": "The Fates",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "dagger_obsolescence",
+    "title": "The Dagger of Obsolescence",
+    "anchor": "07-hell"
+   },
+   {
+    "entry_id": "the_godless",
+    "title": "The Godless",
+    "anchor": "07-hell"
+   },
+   {
+    "entry_id": "the_source_city",
+    "title": "The Source (revealed)",
+    "anchor": "11-chaos"
+   },
+   {
+    "entry_id": "the_cosmic_weave",
+    "title": "The Cosmic Weave",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "the_old_ones",
+    "title": "The Old Ones",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "the_godschurch_contract",
+    "title": "The Agent's Contract",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "the_masters",
+    "title": "The Masters of the Godschurch",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "obsidian_weapons",
+    "title": "The God-Killing Weapons (forged)",
+    "anchor": "12-eternity"
+   },
+   {
+    "entry_id": "dreams_into_stories",
+    "title": "Dreams Into Stories",
+    "anchor": "obs1-sleeping"
+   }
+  ],
+  "lock_event": "point_of_no_return (act_thresholds.point_of_no_return_book)",
+  "endings": {
+   "agent_win": {
+    "score_lte": -40,
+    "id": "end_save",
+    "badge": "the_unwoven_truth"
+   },
+   "director_win": {
+    "score_gte": 40,
+    "id": "end_doom",
+    "badge": "hand_that_lit_the_dark"
+   },
+   "fence": {
+    "between": [
+     -39,
+     39
+    ],
+    "id": "end_fence",
+    "badge": "double_agent",
+    "_note": "played both sides; ambiguous"
+   }
+  }
+ },
+ "badges": {
+  "_doc": "Allegiance badges. Earned by the PATTERN of forwarding, visible as you play.",
+  "first_forward_director": {
+   "name": "Loyal Recruit",
+   "when": "first sealed unlock sent to the Director"
+  },
+  "first_forward_agent": {
+   "name": "First Leak",
+   "when": "first sealed unlock sent to Charlie/the Agent"
+  },
+  "double_agent": {
+   "name": "Double Agent",
+   "when": "sent FALSE intel to either pole at least 3 times"
+  },
+  "the_unwoven_truth": {
+   "name": "The Unwoven Truth",
+   "when": "reach the save ending (agent_win)"
+  },
+  "hand_that_lit_the_dark": {
+   "name": "The Hand That Lit the Dark",
+   "when": "reach the doom ending (director_win)"
+  }
+ }
+}

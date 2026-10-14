@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.russellnohelty.threadweaver" version="1.16.0" ios-CFBundleVersion="11600" android-versionCode="11600" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <icon src="resources/iconTemplate.png" />
+    <name>Wannabe Press Thread Weaver</name>
+    <description>Thread Weaver — A Reading RPG by Russell Nohelty. Story games, novels, comics, and The Weave lore codex.</description>
+    <author email="russell@wannabepress.com" href="https://wannabepress.com">Russell Nohelty</author>
+
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+
+    <!-- Network access for Supabase (auth, entitlements, reading sync, streamed texts) -->
+    <access origin="*" />
+    <allow-navigation href="https://*.supabase.co/*" />
+    <allow-navigation href="https://thread.wannabepress.com/*" />
+
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="BackupWebStorage" value="local" />
+    <preference name="Orientation" value="default" />
+    <preference name="Fullscreen" value="false" />
+
+    <platform name="ios">
+        <preference name="WKWebViewOnly" value="true" />
+        <preference name="AllowInlineMediaPlayback" value="true" />
+        <preference name="deployment-target" value="15.0" />
+        <allow-navigation href="*" />
+
+        <!-- App icons -->
+    </platform>
+
+    <!-- Cordova core plugins -->
+    <platform name="android">
+        <preference name="android-targetSdkVersion" value="36" />
+        <preference name="android-compileSdkVersion" value="36" />
+        <preference name="android-minSdkVersion" value="24" />
+        <allow-navigation href="*" />
+        <resource-file src="res/build-extras.gradle" target="app/build-extras.gradle" />
+    </platform>
+
+    <!-- statusbar is now internal to cordova-android 15; explicit plugin removed to avoid a duplicate-registration conflict. window.StatusBar JS API remains available. -->
+    <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
+    <plugin name="cordova-plugin-inappbrowser" spec="^6.0.0" />
+    <plugin name="cordova-plugin-purchase" spec="^13.11.1" />
+
+    <engine name="ios" spec="^7.1.0" />
+    <engine name="android" spec="^15.0.0" />
+</widget>

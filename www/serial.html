@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Serial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=DM+Mono&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap">
+<style>
+:root{--bg:#0e0a16;--ink:#e9e1f6;--dim:#9b91ac;--gold:#e8b53a;--edge:#2e2742;--green:#7fd08a}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:'Newsreader','Iowan Old Style','Palatino Linotype',Georgia,serif;font-size:19px;line-height:1.65;-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:22px 20px calc(60px + env(safe-area-inset-bottom))}
+.kick{font-family:'DM Mono',ui-monospace,monospace;font-size:11px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-height:1.25;margin:6px 0 22px}
+#text p{margin:0 0 1em}
+#text h1,#text h2,#text h3{display:none}
+#text blockquote{margin:1em 1.2em;color:#cdbfe6;font-style:italic}
+#text hr{border:none;text-align:center;margin:1.6em 0}
+#text hr:after{content:"\2726";color:var(--dim)}
+.end{margin-top:36px;padding:20px 18px;border:1px solid var(--edge);border-radius:14px;background:linear-gradient(150deg,#1d1530,#120d1d);text-align:center}
+.end .t{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:17px;margin-bottom:6px}
+.end .s{color:#b8aed0;font-size:15px;line-height:1.5;margin-bottom:14px}
+.btn{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:13px;border-radius:10px;border:none;font-weight:800;font-size:15px;cursor:pointer;font-family:system-ui,-apple-system,sans-serif}
+.go{background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f}
+.alt{background:#241b33;color:var(--ink);border:1px solid #3a3150}
+.nav{display:flex;gap:10px;margin-top:14px}
+.nav .btn{margin-top:0}
+#state{color:var(--dim);font-family:'DM Mono',ui-monospace,monospace;font-size:13px;text-align:center;padding:60px 10px}
+</style>
+</head>
+<body>
+<main>
+  <div id="state">Opening chapter…</div>
+  <article id="chap" hidden>
+    <div class="kick" id="kick"></div>
+    <h1 id="ttl"></h1>
+    <div id="text"></div>
+    <div class="end" id="end"></div>
+  </article>
+</main>
+<script>
+(function(){
+  var P = new URLSearchParams(location.search), SID = P.get("serial"), G = Math.max(0, +P.get("g") || 0);
+  var DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var parentWin = (window.parent && window.parent !== window) ? window.parent : null;
+  function token(){ try{ return parentWin && parentWin.twAccessToken ? parentWin.twAccessToken() : null; }catch(e){ return null; } }
+  function fnBase(){ try{ return (parentWin && parentWin.twFnBase) || "https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1"; }catch(e){ return "https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1"; } }
+  function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function nice(iso){ try{ var d=new Date(iso+"T12:00:00"); return DAYS[d.getDay()]+", "+d.toLocaleDateString(undefined,{month:"long",day:"numeric"}); }catch(e){ return iso; } }
+  function post(m){ try{ parentWin && parentWin.postMessage(m, "*"); }catch(e){} }
+  function go(g){ location.replace("serial.html?serial="+encodeURIComponent(SID)+"&g="+g); }
+  window.twBuy = function(b){ post({ type:"serial-buy", bundle:b }); };
+  window.twGo = go;
+  function state(html){ document.getElementById("state").innerHTML = html; document.getElementById("state").hidden = false; document.getElementById("chap").hidden = true; }
+
+  var t = token();
+  if (!t) { state('Sign in to read your serial.<br><br><button class="btn go" style="max-width:280px;margin:0 auto" onclick="try{parent.promptSignin()}catch(e){}">Sign in</button>'); return; }
+  fetch(fnBase()+"/serial", { method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+t },
+    body: JSON.stringify({ action:"chapter", serial:SID, g:G, tz:new Date().getTimezoneOffset() }) })
+  .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ return { s:r.status, j:j }; }); })
+  .then(function(res){
+    var j = res.j;
+    if (j.locked || (res.s === 403 && j.error === "locked")) {
+      var buy = j.bundle ? '<button class="btn go" onclick="twBuy(\''+esc(j.bundle)+'\')">Read the rest now</button>' : '';
+      state('<div class="end" style="text-align:center"><div class="t">This chapter isn’t out yet</div><div class="s">' +
+        (j.unlock_on ? 'It arrives <b>'+nice(j.unlock_on)+'</b>.' : 'Follow this serial to get a chapter every week.') +
+        '</div>'+buy+(G>0?'<button class="btn alt" onclick="twGo('+(G-1)+')">← Previous chapter</button>':'')+'</div>');
+      return;
+    }
+    if (res.s === 401) { state('Sign in to read your serial.'); return; }
+    if (res.s !== 200 || !j.html) { state(j.end ? 'That’s the end of this serial.' : 'Couldn’t open this chapter. Check your connection and try again.<br><br><button class="btn alt" style="max-width:240px;margin:0 auto" onclick="location.reload()">Try again</button>'); return; }
+    document.title = j.title;
+    document.getElementById("kick").textContent = j.serial_title + (j.book && j.book.title && j.book.title !== j.serial_title ? " · " + j.book.title : "");
+    document.getElementById("ttl").textContent = j.title;
+    document.getElementById("text").innerHTML = j.html;   // cleaned server-side: text tags only, no attributes
+    var end = "", prev = G>0 ? '<button class="btn alt" onclick="twGo('+(G-1)+')">← Previous</button>' : '';
+    if (!j.next) {
+      end = '<div class="t">The end</div><div class="s">You’ve reached the end of this serial.</div>' + (prev ? '<div class="nav">'+prev+'</div>' : '');
+    } else if (j.next.ready) {
+      end = '<div class="nav">'+prev+'<button class="btn go" onclick="twGo('+j.next.g+')">Next: '+esc(j.next.title)+' →</button></div>';
+    } else {
+      end = '<div class="t">Next chapter '+(j.next.unlock_on ? nice(j.next.unlock_on) : 'next week')+'</div>' +
+        '<div class="s">“'+esc(j.next.title)+'” arrives with your next delivery. Can’t wait?</div>' +
+        (j.bundle ? '<button class="btn go" onclick="twBuy(\''+esc(j.bundle)+'\')">Read the rest now</button>' : '') +
+        (prev ? '<div class="nav" style="margin-top:10px">'+prev+'</div>' : '');
+    }
+    document.getElementById("end").innerHTML = end;
+    document.getElementById("state").hidden = true; document.getElementById("chap").hidden = false;
+    window.scrollTo(0, 0);
+    post({ type:"serial-progress", serial:SID, g:G });
+  })
+  .catch(function(){ state('You’re offline. Serial chapters need a connection.<br><br><button class="btn alt" style="max-width:240px;margin:0 auto" onclick="location.reload()">Try again</button>'); });
+})();
+</script>
+</body>
+</html>

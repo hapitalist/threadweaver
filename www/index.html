@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thread Weaver — A Reading RPG by Russell Nohelty</title>
+<meta name="theme-color" content="#0a0810">
+<meta property="og:title" content="Thread Weaver — A Reading RPG">
+<meta property="og:description" content="Seven story RPGs, 49 novels, 13 comics, and a living lore codex. Reading levels you up. Free to play.">
+<style>
+@font-face{font-family:'Cinzel';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/cinzel-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/cinzel-latin-700-normal.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/cormorant-garamond-latin-500-normal.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:500;font-display:swap;src:url('fonts/cormorant-garamond-latin-500-italic.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/dm-mono-latin-500-normal.woff2') format('woff2');}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0810;color:#ece3d0;font-family:'Cormorant Garamond',Georgia,serif;line-height:1.5;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+.hero{text-align:center;padding:64px 20px 44px;background:radial-gradient(140% 100% at 50% -20%,#22163b,#0a0810 62%)}
+.kick{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:6px;color:#9b91ac}
+h1{font-family:'Cinzel';font-size:clamp(40px,9vw,60px);letter-spacing:6px;color:#e8b53a;margin:12px 0 10px;text-shadow:0 0 36px rgba(232,181,58,.28)}
+.tag{font-size:clamp(18px,3.4vw,22px);font-style:italic;color:#c9bfda;max-width:580px;margin:0 auto;line-height:1.5}
+.btn{display:inline-block;font-family:'DM Mono',monospace;font-size:13px;letter-spacing:1px;color:#16121f;background:#e8b53a;border-radius:10px;padding:14px 26px;font-weight:700;text-decoration:none;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn2{display:inline-block;font-family:'DM Mono';font-size:12px;letter-spacing:1px;color:#e8b53a;background:#191324;border:1px solid #2e2742;border-radius:9px;padding:13px 22px;text-decoration:none}
+.sub{font-family:'DM Mono';font-size:10px;letter-spacing:1px;color:#7a7090;margin-top:14px}
+section{padding:34px 0 8px;border-top:1px solid #1c1730}
+.eyebrow{font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:#7fd08a;text-align:center}
+.h2{font-family:'Cinzel';font-size:clamp(20px,4vw,24px);color:#ece3d0;text-align:center;margin:7px 0 6px}
+.lead{font-size:16px;color:#9b91ac;text-align:center;max-width:560px;margin:0 auto 22px;line-height:1.5}
+.stats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:18px 0 4px}
+.stat{text-align:center;padding:6px 18px}
+.stat .n{font-family:'Cinzel';font-size:26px;color:#e8b53a}
+.stat .l{font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:#9b91ac}
+.rankcard{background:linear-gradient(150deg,#3a2e10,#1a1206);border:1px solid #e8b53a;border-radius:18px;padding:20px;max-width:520px;margin:0 auto 10px;text-align:center}
+.rankcard .ic{font-size:40px}
+.rankcard .rt{font-family:'Cinzel';font-size:22px;color:#e8b53a;letter-spacing:1px}
+.rankcard .rb{font-size:15px;font-style:italic;color:#c9bfda;margin-bottom:14px}
+.bar{height:7px;background:#160f08;border-radius:4px;overflow:hidden;margin-bottom:6px}
+.bar>div{height:100%;background:linear-gradient(90deg,#b8862a,#e8b53a)}
+.barlbl{display:flex;justify-content:space-between;font-family:'DM Mono';font-size:9px;color:#9a8f6a;letter-spacing:1px}
+.xpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;max-width:560px;margin:14px auto 0}
+.xp{background:#120d1c;border:1px solid #2e2742;border-radius:10px;padding:9px;text-align:center}
+.xp .l{font-family:'DM Mono';font-size:9px;color:#7a7090;letter-spacing:1px}
+.xp .v{font-family:'Cinzel';font-size:17px;color:#e8b53a}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:560px;margin:0 auto}
+.codex{background:linear-gradient(180deg,#191324,#120d1c);border:1px solid #2e2742;border-radius:12px;padding:13px}
+.codex.lock{background:linear-gradient(180deg,#14101c,#0e0a16);border:1px dashed #2e2742;opacity:.65}
+.codex .t{font-family:'Cinzel';font-size:14px;color:#e8b53a}
+.codex.lock .t{color:#7a7090}
+.codex .b{font-size:13px;color:#9b91ac;line-height:1.35;margin-top:3px}
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;max-width:580px;margin:0 auto}
+.badge{background:#120d1c;border:1px solid #2e2742;border-radius:11px;padding:12px 8px;text-align:center}
+.badge.gold{background:#1a1206;border-color:#9a6f1f}
+.badge .ic{font-size:24px}
+.badge .l{font-family:'DM Mono';font-size:8.5px;color:#c9bfda;letter-spacing:.5px;margin-top:4px}
+.badge.gold .l{color:#e8b53a}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;max-width:600px;margin:0 auto 12px}
+.tier{background:linear-gradient(180deg,#191324,#120d1c);border:1px solid #2e2742;border-radius:12px;padding:12px 14px}
+.tier .nm{font-family:'Cinzel';font-size:13px;color:#ece3d0}
+.tier .d{font-size:12px;color:#9b91ac;margin:2px 0 7px}
+.tier .p{font-family:'DM Mono';font-size:12px;color:#e8b53a;font-weight:700}
+.tier.games{border-style:dashed;display:flex;align-items:center;justify-content:center;text-align:center}
+.everything{max-width:600px;margin:0 auto;background:linear-gradient(165deg,#241a06,#15100a 70%);border:2px solid #e8b53a;border-radius:18px;overflow:hidden}
+.everything .ribbon{background:linear-gradient(90deg,#e8b53a,#9a6f1f);padding:6px;text-align:center;font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:#16121f;font-weight:700}
+.everything .body{padding:22px 22px 22px;text-align:center}
+.everything .et{font-family:'Cinzel';font-size:28px;letter-spacing:2px;color:#e8b53a}
+.keepbox{background:#0c0a14;border:1px solid #3a2e10;border-radius:13px;padding:16px;margin:16px auto 0;max-width:460px;text-align:left}
+.keepbox .kh{font-family:'DM Mono';font-size:10px;letter-spacing:2px;color:#7fd08a;text-align:center;margin-bottom:12px}
+.keepbox .kd{font-size:15px;color:#ece3d0;text-align:center;line-height:1.5;margin-bottom:14px}
+.keepgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.keepgrid div{display:flex;align-items:center;gap:8px;font-size:14px;color:#c9bfda}
+.foot{text-align:center;padding:22px 24px 40px;font-family:'DM Mono';font-size:10px;letter-spacing:2px;color:#5a5470;line-height:1.9}
+</style>
+<script src="cordova.js"></script>
+</head><body>
+
+<div class="hero">
+  <div class="kick">A READING RPG FROM WANNABE PRESS</div>
+  <h1>THREAD WEAVER</h1>
+  <div class="tag">Don't just read the books. Walk the worlds, hunt the relics, and rise from Unwoven to Architect of the Weave — one thread at a time.</div>
+  <div style="margin-top:26px"><a class="btn" href="/app">▸ START READING — FREE</a></div>
+  <div class="sub">16 books &amp; 5 comics free inside · plays offline</div>
+  <!-- App store download links on the marketing landing page -->
+  <div style="margin-top:22px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="https://apps.apple.com/us/app/wannabe-press-thread-weaver/id6785677915" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:8px;background:#000;color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;border:1px solid #3a3a3a"><span style="font-size:16px"></span> Download on the App Store</a>
+    <a href="https://play.google.com/store/apps/details?id=com.russellnohelty.threadweaver" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:8px;background:#000;color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;border:1px solid #3a3a3a"><span style="font-size:15px">&#9654;</span> Get it on Google Play</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="stats">
+    <div class="stat"><div class="n">7</div><div class="l">STORY RPGS</div></div>
+    <div class="stat"><div class="n">49</div><div class="l">NOVELS</div></div>
+    <div class="stat"><div class="n">13</div><div class="l">COMICS</div></div>
+    <div class="stat"><div class="n">&#8734;</div><div class="l">THE WEAVE</div></div>
+  </div>
+
+  <section>
+    <div class="eyebrow">THE HOOK</div>
+    <div class="h2">Reading is how you level up.</div>
+    <div class="lead">Every book, comic, and game you touch earns Weave XP. The deeper you go, the higher your rank — and the more of the universe reveals itself.</div>
+    <div class="rankcard">
+      <div class="ic">&#129525;</div>
+      <div class="rt">Pattern-Reader</div>
+      <div class="rb">"You see how the threads connect."</div>
+      <div class="bar"><div style="width:62%"></div></div>
+      <div class="barlbl"><span>420 XP</span><span>NEXT: LOOM-KEEPER</span></div>
+    </div>
+    <div class="xpgrid">
+      <div class="xp"><div class="l">FINISH A BOOK</div><div class="v">+50 XP</div></div>
+      <div class="xp"><div class="l">FIND A RELIC</div><div class="v">+20 XP</div></div>
+      <div class="xp"><div class="l">COMPLETE A THREAD</div><div class="v">+100 XP</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">THE WEAVE — A LIVING CODEX</div>
+    <div class="h2">The lore unlocks as you read.</div>
+    <div class="lead">Hundreds of entries — gods, worlds, characters, weapons — hidden until your reading reveals them. A timeline, the threads of reality, and every place you've charted.</div>
+    <div class="grid2">
+      <div class="codex"><div class="t">&#10022; The Dagger of Obsolescence</div><div class="b">One of the five weapons that can kill a god.</div></div>
+      <div class="codex lock"><div class="t">&#128274; ??? Undiscovered</div><div class="b">Found by reading the threads.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">EARN YOUR MARKS</div>
+    <div class="h2">Relics to hunt. Badges to claim.</div>
+    <div style="height:6px"></div>
+    <div class="badges">
+      <div class="badge"><div class="ic">&#129525;</div><div class="l">FIRST THREAD</div></div>
+      <div class="badge"><div class="ic">&#127918;</div><div class="l">PLAYER OF WORLDS</div></div>
+      <div class="badge"><div class="ic">&#9879;</div><div class="l">RELIC HUNTER</div></div>
+      <div class="badge"><div class="ic">&#128214;</div><div class="l">LORE-SEEKER</div></div>
+      <div class="badge gold"><div class="ic">&#127756;</div><div class="l">POLYMATH</div></div>
+    </div>
+    <div style="text-align:center;font-family:'DM Mono';font-size:10px;color:#7a7090;margin-top:10px">10 badges &middot; 5 relics &middot; 7 ranks &middot; a whole universe to thread</div>
+  </section>
+
+  <section>
+    <div class="h2" style="font-size:20px;letter-spacing:2px;color:#9b91ac">UNLOCK MORE WORLDS</div>
+    <div class="lead" style="font-size:15px;color:#7a7090;margin-bottom:18px">The app is free forever. Claim a single series — or take the whole tapestry and keep it.</div>
+    <div class="tiers">
+      <div class="tier"><div class="nm">Quest Girls</div><div class="d">Books 2–4 · <span style="color:#7fd08a">Bk 1 free</span></div><div class="p">$20</div></div>
+      <div class="tier"><div class="nm">Dragon Strife</div><div class="d">5 books + game</div><div class="p">$20</div></div>
+      <div class="tier"><div class="nm">Ichabod Jones</div><div class="d">4 comics + game</div><div class="p">$20</div></div>
+      <div class="tier"><div class="nm">The Godsverse</div><div class="d">13 books + 4 comics</div><div class="p">$50</div></div>
+      <div class="tier"><div class="nm">Obsidian Spindle</div><div class="d">12 books + game</div><div class="p">$50</div></div>
+      <div class="tier games"><div style="font-family:'DM Mono';font-size:10px;color:#7a7090;line-height:1.5">Just the 7 games?<br><span style="color:#e8b53a;font-size:13px">$5</span></div></div>
+    </div>
+
+    <div class="everything">
+      <div class="ribbon">THE COMPLETE COLLECTION</div>
+      <div class="body">
+        <div style="font-size:42px">&#10039;</div>
+        <div class="et">Everything</div>
+        <div style="font-size:17px;font-style:italic;color:#c9bfda;max-width:440px;margin:6px auto 4px;line-height:1.45">Unlock the entire app — every book, comic, game, and the full Weave.</div>
+        <div class="keepbox">
+          <div class="kh">&#9733; AND IT'S YOURS TO KEEP &#9733;</div>
+          <div class="kd">We also deliver <b style="color:#e8b53a">150+ DRM-free files</b> straight to you — read &amp; listen on any device, forever. No app required.</div>
+          <div class="keepgrid">
+            <div><span style="font-size:17px">&#128218;</span> Ebooks (ePub)</div>
+            <div><span style="font-size:17px">&#127911;</span> Audiobooks</div>
+            <div><span style="font-size:17px">&#127897;</span> Audio commentary</div>
+            <div><span style="font-size:17px">&#128214;</span> Full comics</div>
+          </div>
+          <div style="font-family:'DM Mono';font-size:9.5px;color:#7a7090;text-align:center;margin-top:12px;letter-spacing:.5px">Delivered by BookFunnel · keep them on any reader, phone, or app</div>
+        </div>
+        <div style="margin-top:22px"><a class="btn" href="/app">CLAIM EVERYTHING · $99.99</a></div>
+        <div style="font-family:'DM Mono';font-size:9.5px;color:#7a7090;margin-top:18px;letter-spacing:1px">ONE-TIME · NO SUBSCRIPTION · INSTANT DELIVERY</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">FREE TO PLAY · READS OFFLINE · ONE-TIME PURCHASE · NO SUBSCRIPTION<br>thread.wannabepress.com</div>
+
+</div>
+</body></html>

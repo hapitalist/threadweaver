@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co; font-src 'self' data: blob:; connect-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>Comic</title>
+<style>
+:root{--bg:#08060d;--ink:#ece3d0;--gold:#e8b53a;--dim:#9b91ac;--edge:#2e2742}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'DM Mono',monospace;overflow:hidden}
+#bar{position:fixed;top:0;left:0;right:0;height:calc(46px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:rgba(8,6,13,.92);border-bottom:1px solid var(--edge);z-index:20;transition:transform .25s}
+#bar.hidden{transform:translateY(-100%)}
+#bar .ttl{font-family:Georgia,serif;font-size:14px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%}
+#bar .right{display:flex;gap:6px;align-items:center}
+#bar .pg{font-size:11px;color:var(--dim)}
+#bar button{font-family:'DM Mono';font-size:10px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:8px 9px;border-radius:8px;cursor:pointer;letter-spacing:.4px}
+#bar button.play{background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f;border:none;font-weight:700}
+#stage{position:absolute;inset:0;overflow:hidden;touch-action:none}
+#stage img{position:absolute;transform-origin:top left;will-change:transform}
+#stage img.glide{transition:transform .7s cubic-bezier(.33,0,.2,1)}
+.tz{position:fixed;top:calc(46px + env(safe-area-inset-top));bottom:0;width:40%;z-index:15}
+#tzL{left:0}#tzR{right:0}
+.tz.off{display:none}
+#stage.off{display:none}
+#scroll{position:absolute;top:calc(46px + env(safe-area-inset-top));right:0;bottom:0;left:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+#scroll.on{display:block}
+#scroll #pages{max-width:820px;margin:0 auto}
+#scroll #pages img{display:block;width:100%;height:auto}
+#dots{position:fixed;bottom:0;left:0;right:0;min-height:30px;display:flex;align-items:center;justify-content:center;gap:4px;z-index:18;background:linear-gradient(0deg,rgba(8,6,13,.9),transparent);flex-wrap:wrap;padding:6px 20px}
+#dots .d{width:5px;height:5px;border-radius:50%;background:#46395c}
+#dots .d.on{background:var(--gold)}
+/* movie controls */
+#movieCtl{position:fixed;bottom:0;left:0;right:0;z-index:19;display:none;align-items:center;justify-content:center;gap:14px;
+  padding:12px 18px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(8,6,13,.95),transparent)}
+#movieCtl.on{display:flex}
+#movieCtl button{font-family:'DM Mono';font-size:18px;background:#1d1830;border:1px solid var(--gold);color:var(--gold);width:48px;height:48px;border-radius:50%;cursor:pointer}
+#movieCtl .speed{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--dim)}
+#movieCtl .speed button{width:auto;height:auto;font-size:11px;padding:6px 9px;border-radius:8px;color:var(--ink);border-color:var(--edge)}
+#movieCtl .speed button.sel{border-color:var(--gold);color:var(--gold)}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px;z-index:30}
+#navbtns{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;z-index:17;pointer-events:none}
+#navbtns button{pointer-events:auto;font-family:'DM Mono';font-size:12px;background:rgba(29,24,48,.9);border:1px solid var(--edge);color:var(--ink);padding:11px 16px;border-radius:10px;cursor:pointer;letter-spacing:.5px}
+#navbtns button:active{border-color:var(--gold);color:var(--gold)}
+#navbtns.hideMovie{display:none}
+#hint{position:fixed;bottom:44px;left:0;right:0;text-align:center;color:var(--dim);font-size:11px;z-index:18;opacity:0;transition:opacity .4s;pointer-events:none}
+#hint.show{opacity:.85}
+</style>
+<script src="lib/supabase.js"></script>
+</head>
+<body>
+<div id="bar">
+  <span class="ttl" id="ttl">Loading&hellip;</span>
+  <div class="right">
+    <span class="pg" id="pg"></span>
+    <button id="playBtn" class="play" onclick="toggleMovie()">&#9654; PLAY</button>
+    <button id="modeBtn" onclick="toggleMode()">GUIDED</button>
+  </div>
+</div>
+<div id="stage"></div>
+<div id="tzL" class="tz" onclick="prev()"></div>
+<div id="tzR" class="tz" onclick="next()"></div>
+<div id="scroll"><div id="pages"></div></div>
+<div id="dots"></div>
+<div id="movieCtl">
+  <div class="speed">
+    <button onclick="setSpeed(0.7)" data-s="0.7">Slow</button>
+    <button onclick="setSpeed(1)" data-s="1" class="sel">Normal</button>
+    <button onclick="setSpeed(1.5)" data-s="1.5">Fast</button>
+  </div>
+  <button id="ppBtn" onclick="moviePlayPause()">&#10074;&#10074;</button>
+  <button onclick="stopMovie()">&#9632;</button>
+</div>
+<div id="navbtns"><button id="backBtn" onclick="navBack()">&#8249; Back</button><button id="nextBtn" onclick="navNext()">Next &#8250;</button></div>
+<div id="hint">Tap right to advance &middot; left to go back &middot; pinch to zoom</div>
+<div id="loading">Opening comic&hellip;</div>
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var id=params.get('id');
+  var posKey='comic_panel_'+id;
+  if(!id){ document.getElementById('loading').textContent='No comic specified.'; return; }
+  var comic=null, panelMap=null, flat=[], idx=0;
+  // ---- Weave codex unlocking (page-anchored, mirrors the novel reader) ----
+  var WEAVE=null, maxPage=0, UNLOCK_STORE='weave.unlocked';
+  fetch('books/weave.json').then(function(r){return r.ok?r.json():null;}).then(function(w){ WEAVE=w; checkComicUnlocks(); }).catch(function(){});
+  function getUnlocked(){ try{return JSON.parse(localStorage.getItem(UNLOCK_STORE)||'{}');}catch(e){return {};} }
+  function checkComicUnlocks(){
+    if(!WEAVE||!WEAVE.entries) return;
+    var owned=getUnlocked(), changed=false, fresh=[];
+    WEAVE.entries.forEach(function(e){
+      if(!e.anchors) return;
+      e.anchors.forEach(function(a){
+        if(a.book===id && typeof a.page==='number' && maxPage>=a.page){
+          if(!owned[e.id]){ owned[e.id]=Date.now(); changed=true; fresh.push(e.id); }
+        }
+      });
+    });
+    if(changed){
+      try{ localStorage.setItem(UNLOCK_STORE,JSON.stringify(owned)); }catch(e){}
+      try{ parent.postMessage({type:'weave-unlock', ids:fresh}, '*'); }catch(e){}
+    }
+  }
+  var mode='page';   // 'page' === vertical-scroll webtoon (default); 'panel'=guided, 'movie'=auto-pan
+  var stage=document.getElementById('stage'), imgCache={}, curNode=null, curBase=null;
+  var movieTimer=null, moviePlaying=false, speed=1;
+  // zoom state
+  var z=1, zx=0, zy=0;
+
+  // --- Supabase image resolution (paid comics live in the private 'library'
+  // bucket, exactly like paid books; free comics are bundled in the app). ---
+  var SB_URL="https://nzkgurdmvgkizvzisqxt.supabase.co";
+  var SB_KEY="sb_publishable_XhncOLTTqr5qTs_G9O3Ecw_m6m5fU0f";
+  var _sb=null, _sbPromise=null;
+  function getSb(){
+    if(_sbPromise) return _sbPromise;
+    _sbPromise=(window.SBVendor?Promise.resolve(window.SBVendor):Promise.reject(new Error("supabase vendor script missing"))).then(function(m){
+      _sb=m.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit"}});
+      return _sb;
+    });
+    return _sbPromise;
+  }
+  // pageUrl[fn] -> the actual fetchable URL for that page image.
+  var pageUrl={};
+  function localPath(fn){ return 'comics/'+comic.dir+'/'+fn; }
+  function urlFor(fn){ return pageUrl[fn] || localPath(fn); }
+
+  // Probe ONE local page. If the comic is bundled in the app, every page is
+  // local and we use relative paths (works offline, no auth). If it's not
+  // bundled (paid comic in Supabase 'library'), the buyer is logged in, so
+  // sign every page USING THEIR SESSION (the bucket is authed-read only).
+  function resolveComicUrls(){
+    var first=comic.pages[0];
+    return fetch(localPath(first),{method:'HEAD'}).then(function(r){
+      if(r && r.ok) return 'local';     // bundled in the app
+      throw new Error('not-local');
+    }).catch(function(err){
+      if(err && err.message!=='not-local' && err.message!==undefined){ /* network HEAD fail: still try cloud */ }
+      // Supabase-hosted. Must sign as the logged-in user.
+      // Paid pages are signed by the library-url edge function, which checks
+      // that this user actually owns the comic's bundle. Storage has no blanket
+      // read policy, so signing direct from the client cannot work (and must
+      // not — it would hand the whole catalogue to any free account).
+      return getSb().then(function(sb){
+        return sb.auth.getSession().then(function(s){
+          var sess=s && s.data && s.data.session;
+          if(!sess) throw new Error('not-signed-in');
+          var keys=comic.pages.map(function(fn){ return 'comics/'+comic.dir+'/'+fn; });
+          // 1.14.82: a paid comic's panel layout is private too - sign it in the
+          // same batch so guided panel mode works for paid comics.
+          if(!panelMap) keys.push('comics/'+comic.dir+'/layout.json');
+          return fetch(SB_URL+'/functions/v1/library-url',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+sess.access_token},
+            body:JSON.stringify({ paths:keys })
+          });
+        });
+      }).then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(j){
+          if(r.status===401) throw new Error('not-signed-in');
+          if(r.status===403) throw new Error('not-owned');
+          var map=(j&&j.urls)||{};
+          var n=0;
+          comic.pages.forEach(function(fn){
+            var u=map['comics/'+comic.dir+'/'+fn];
+            if(u){ pageUrl[fn]=u; n++; }
+          });
+          if(!n) throw new Error('no-signed-urls');
+          var lay=map['comics/'+comic.dir+'/layout.json'];
+          if(!panelMap && lay){
+            return fetch(lay).then(function(lr){ return lr.ok?lr.json():null; })
+              .then(function(pm){ if(pm) panelMap=pm; return 'cloud'; })
+              .catch(function(){ return 'cloud'; });
+          }
+          return 'cloud';
+        });
+      });
+    });
+  }
+
+  Promise.all([
+    fetch('comics/comics.json').then(function(r){return r.json();}),
+    fetch('comics/'+id+'/layout.json').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var list=res[0]; panelMap=res[1];
+    comic=list.find(function(x){return x.id===id;});
+    if(!comic){ document.getElementById('loading').textContent='Comic not found.'; return; }
+    document.getElementById('ttl').textContent=comic.title; document.title=comic.title;
+    resolveComicUrls().then(function(){
+      buildFlat(); buildScrollMode(); restore(); showIdx(idx,true);
+      // Every comic opens in vertical scroll (webtoon). Guided/panel is opt-in
+      // via the SCROLL/GUIDED toggle in the top bar.
+      setMode('page');    // 'page' === vertical-scroll webtoon view
+      document.getElementById('loading').style.display='none'; flashHint();
+    }).catch(function(e){
+      var msg=(e&&e.message==='not-signed-in')
+        ? 'Please log in to read this comic.'
+        : 'Could not load this comic. Pull to refresh, or check your connection.';
+      document.getElementById('loading').textContent=msg;
+    });
+  }).catch(function(){ document.getElementById('loading').textContent='Could not load comic.'; });
+
+  function buildFlat(){
+    flat=[];
+    comic.pages.forEach(function(fn){
+      var info=panelMap&&panelMap[fn];
+      if(!info){ flat.push({page:fn,box:null}); return; }
+      if(info.type==='text' && info.textbox){ flat.push({page:fn,box:info.textbox}); return; }
+      if(info.type==='blank'){ flat.push({page:fn,box:null}); return; }
+      if(info.type==='splash' || !info.tiers || !info.tiers.length){ flat.push({page:fn,box:null}); return; }
+      // art: walk tiers top->bottom, panels left->right within tier
+      info.tiers.forEach(function(t){
+        (t.panels||[]).forEach(function(box){ flat.push({page:fn,box:box}); });
+      });
+    });
+  }
+  function loadImg(fn){ if(imgCache[fn])return imgCache[fn]; var im=new Image(); im.src=urlFor(fn); imgCache[fn]=im; return im; }
+
+  // base transform that frames a panel (SMART FRAMING: fill the screen, fit the limiting dimension)
+  function frameFor(item, im){
+    var natW=im.naturalWidth||800, natH=im.naturalHeight||1200;
+    var vw=window.innerWidth, vh=window.innerHeight-46;
+    var box=item.box||[0,0,natW,natH];
+    var bw=box[2]-box[0], bh=box[3]-box[1];
+    // fill: use the larger scale so the panel fills the screen (may crop slightly); fit for splashes
+    var fit=Math.min(vw/bw, vh/bh);
+    var fill=Math.max(vw/bw, vh/bh);
+    // for wide/tall panels, lean toward fill but cap so we don't overcrop badly
+    var scale = item.box ? Math.min(fill, fit*1.6) : fit*0.97;
+    var tx=(vw-bw*scale)/2 - box[0]*scale;
+    var ty=(vh-bh*scale)/2 - box[1]*scale + 46;
+    return {scale:scale, tx:tx, ty:ty, natW:natW, natH:natH};
+  }
+  function applyTransform(node, base){
+    // combine base framing with user zoom (z, zx, zy)
+    var s=base.scale*z;
+    var tx=base.tx - zx; var ty=base.ty - zy;
+    node.style.width=(base.natW*s)+'px'; node.style.height=(base.natH*s)+'px';
+    node.style.transform='translate('+tx+'px,'+ty+'px)';
+  }
+
+  function showIdx(i,instant){
+    if(i<0)i=0; if(i>=flat.length)i=flat.length-1; idx=i;
+    z=1; zx=0; zy=0;                 // reset zoom on panel change
+    var item=flat[i], im=loadImg(item.page);
+    function place(){
+      var base=frameFor(item, im);
+      stage.innerHTML='';
+      var node=im.cloneNode();
+      node.className = instant ? '' : 'glide';
+      curNode=node; curBase=base;
+      applyTransform(node, base);
+      stage.appendChild(node);
+    }
+    if(im.complete) place(); else im.onload=place;
+    updateHud();
+    try{ localStorage.setItem(posKey,String(idx)); }catch(e){}
+    try{ if(idx>=flat.length-1){ localStorage.setItem('comic_done_'+id, Date.now()); } }catch(e){}
+    // track furthest page reached and fire codex unlocks
+    var curPage=comic.pages.indexOf(item.page)+1;
+    if(curPage>maxPage){ maxPage=curPage; checkComicUnlocks(); }
+    if(flat[i+1]) loadImg(flat[i+1].page);
+  }
+  function updateHud(){
+    var item=flat[idx], pageNo=comic.pages.indexOf(item.page)+1;
+    document.getElementById('pg').textContent='p'+pageNo+'/'+comic.pages.length;
+    var pool=flat.filter(function(x){return x.page===item.page;});
+    var pos=pool.indexOf(item), dd='';
+    for(var k=0;k<pool.length;k++) dd+='<span class="d'+(k===pos?' on':'')+'"></span>';
+    document.getElementById('dots').innerHTML=dd;
+  }
+  window.next=function(){ if(idx<flat.length-1) showIdx(idx+1); };
+  window.navNext=function(){
+    if(mode==='page'){ var sc=document.getElementById('scroll'); sc.scrollBy({top:sc.clientHeight*0.85,behavior:'smooth'}); }
+    else { next(); }
+  };
+  window.navBack=function(){
+    if(mode==='page'){ var sc=document.getElementById('scroll'); sc.scrollBy({top:-sc.clientHeight*0.85,behavior:'smooth'}); }
+    else { prev(); }
+  };
+  window.prev=function(){ if(idx>0) showIdx(idx-1); };
+
+  // ---------- ZOOM (pinch + double-tap) ----------
+  var pinchStart=null, lastTap=0;
+  stage.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){
+      pinchStart={d:dist(e.touches),z:z,
+        mx:(e.touches[0].clientX+e.touches[1].clientX)/2,
+        my:(e.touches[0].clientY+e.touches[1].clientY)/2, zx:zx, zy:zy};
+    }
+  },{passive:true});
+  stage.addEventListener('touchmove',function(e){
+    if(e.touches.length===2 && pinchStart && curNode){
+      var nd=dist(e.touches);
+      var nz=Math.max(1,Math.min(4, pinchStart.z*(nd/pinchStart.d)));
+      // zoom toward pinch midpoint
+      var f=nz/pinchStart.z;
+      zx=(pinchStart.zx+pinchStart.mx)*f-pinchStart.mx;
+      zy=(pinchStart.zy+pinchStart.my)*f-pinchStart.my;
+      z=nz; curNode.className=''; applyTransform(curNode,curBase);
+      e.preventDefault();
+    }
+  },{passive:false});
+  stage.addEventListener('touchend',function(e){
+    if(e.touches.length===0) pinchStart=null;
+    var now=Date.now();
+    if(now-lastTap<300 && curNode){ // double-tap zoom toggle
+      if(z>1.05){ z=1; zx=0; zy=0; } else { z=2.2; }
+      curNode.className='glide'; applyTransform(curNode,curBase);
+    }
+    lastTap=now;
+  },{passive:true});
+  // drag to pan while zoomed
+  var dragStart=null;
+  stage.addEventListener('touchstart',function(e){ if(e.touches.length===1&&z>1.05) dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY,zx:zx,zy:zy}; },{passive:true});
+  stage.addEventListener('touchmove',function(e){
+    if(e.touches.length===1&&z>1.05&&dragStart&&curNode){
+      zx=dragStart.zx-(e.touches[0].clientX-dragStart.x);
+      zy=dragStart.zy-(e.touches[0].clientY-dragStart.y);
+      curNode.className=''; applyTransform(curNode,curBase); e.preventDefault();
+    }
+  },{passive:false});
+  function dist(t){ var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.hypot(dx,dy); }
+
+  // ---------- SWIPE to turn pages (panel/guided only, when not zoomed) ----------
+  var swX=0, swY=0, swT=0, swOK=false;
+  stage.addEventListener('touchstart',function(e){
+    if(e.touches.length===1 && z<=1.05 && mode!=='page'){
+      swOK=true; swX=e.touches[0].clientX; swY=e.touches[0].clientY; swT=Date.now();
+    } else { swOK=false; }
+  },{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(!swOK) return; swOK=false;
+    var t=e.changedTouches&&e.changedTouches[0]; if(!t) return;
+    var dx=t.clientX-swX, dy=t.clientY-swY, dt=Date.now()-swT;
+    if(Math.abs(dx)<45 || Math.abs(dy)>70 || dt>800) return;
+    if(dx<0) next(); else prev();
+  },{passive:true});
+
+  // ---------- MOVIE (autoplay) ----------
+  function holdFor(item){
+    // pace by text/bubble amount; base 2.4s + per-bubble. Default if unknown.
+    var base=2200;
+    var info=panelMap&&panelMap[item.page];
+    var bubbles=(info&&info.bubbles)?info.bubbles.filter(function(bb){return inBox(bb,item.box);}).length:0;
+    var ms=base + bubbles*900 + (item.box? (area(item.box)>180000?700:0):1500);
+    return ms/speed;
+  }
+  function inBox(bb,box){ if(!box)return true; var cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2; return cx>=box[0]&&cx<=box[2]&&cy>=box[1]&&cy<=box[3]; }
+  function area(b){ return (b[2]-b[0])*(b[3]-b[1]); }
+  window.toggleMovie=function(){
+    if(mode==='movie'){ stopMovie(); return; }
+    setMode('movie');
+    moviePlaying=true; document.getElementById('ppBtn').innerHTML='&#10074;&#10074;';
+    document.getElementById('bar').classList.add('hidden');
+    stepMovie();
+  };
+  function stepMovie(){
+    if(!moviePlaying) return;
+    showIdx(idx,false);
+    movieTimer=setTimeout(function(){
+      if(idx<flat.length-1){ idx++; stepMovie(); }
+      else { moviePlaying=false; document.getElementById('ppBtn').innerHTML='&#9654;'; }
+    }, holdFor(flat[idx]));
+  }
+  window.moviePlayPause=function(){
+    moviePlaying=!moviePlaying;
+    document.getElementById('ppBtn').innerHTML=moviePlaying?'&#10074;&#10074;':'&#9654;';
+    if(moviePlaying) stepMovie(); else if(movieTimer) clearTimeout(movieTimer);
+  };
+  window.stopMovie=function(){
+    moviePlaying=false; if(movieTimer) clearTimeout(movieTimer);
+    document.getElementById('bar').classList.remove('hidden');
+    setMode('panel');
+  };
+  window.setSpeed=function(s){
+    speed=s;
+    document.querySelectorAll('#movieCtl .speed button').forEach(function(b){ b.classList.toggle('sel', parseFloat(b.dataset.s)===s); });
+  };
+
+  // ---------- MODE SWITCH ----------
+  function setMode(m){
+    mode=m;
+    var g=(m==='panel'||m==='movie');
+    document.getElementById('stage').classList.toggle('off', m==='page');
+    document.getElementById('tzL').classList.toggle('off', m!=='panel');
+    document.getElementById('tzR').classList.toggle('off', m!=='panel');
+    document.getElementById('scroll').classList.toggle('on', m==='page');
+    document.getElementById('dots').style.display=(m==='panel')?'flex':'none';
+    document.getElementById('movieCtl').classList.toggle('on', m==='movie');
+    document.getElementById('navbtns').classList.toggle('hideMovie', m==='movie');
+    document.getElementById('playBtn').innerHTML=(m==='movie')?'&#9632; STOP':'&#9654; PLAY';
+    document.getElementById('modeBtn').style.display=(m==='movie')?'none':'';
+    document.getElementById('modeBtn').textContent=(m==='page')?'GUIDED':'SCROLL';
+    if(g) showIdx(idx,true);
+  }
+  window.toggleMode=function(){ var to=(mode==='page')?'panel':'page'; setMode(to); if(to==='page'){ var fn=flat[idx].page,t=document.querySelector('#pages img[data-page="'+fn+'"]'); if(t)t.scrollIntoView(); } };
+
+  function buildScrollMode(){ var h=''; comic.pages.forEach(function(fn){ h+='<img src="'+urlFor(fn)+'" loading="lazy" data-page="'+fn+'">'; }); document.getElementById('pages').innerHTML=h; }
+  function restore(){ try{ var s=localStorage.getItem(posKey); if(s!==null) idx=Math.min(parseInt(s,10)||0, flat.length-1);}catch(e){} }
+  function flashHint(){ var h=document.getElementById('hint'); h.classList.add('show'); setTimeout(function(){h.classList.remove('show');},2800); }
+  document.addEventListener('keyup',function(e){ if(mode==='panel'){ if(e.key==='ArrowRight')next(); if(e.key==='ArrowLeft')prev(); } });
+  window.addEventListener('resize',function(){ if(mode!=='page') showIdx(idx,true); });
+  window.__flat=function(){return flat;};
+})();
+</script>
+</body></html>

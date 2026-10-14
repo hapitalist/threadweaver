@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; font-src 'self' data: blob:; frame-src 'self' blob: data:; child-src 'self' blob: data:; connect-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>Reader</title>
+<style>
+:root{--bg:#0f0c16;--ink:#ece3d0;--gold:#e8b53a;--dim:#9b91ac;--edge:#2e2742}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,serif;overflow:hidden}
+#bar{position:fixed;top:0;left:0;right:0;height:calc(46px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:#0e0b16;border-bottom:1px solid var(--edge);z-index:10}
+#bar .ttl{font-family:Georgia,serif;font-size:14px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+#bar .ctl{display:flex;gap:6px}
+#bar button{font-family:monospace;font-size:13px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);
+  width:34px;height:30px;border-radius:8px;cursor:pointer}
+#bar button:active{border-color:var(--gold);color:var(--gold)}
+#area{position:absolute;top:calc(46px + env(safe-area-inset-top));bottom:42px;left:50%;transform:translateX(-50%);width:100%;max-width:42rem;padding:0 24px;box-sizing:border-box}
+#viewer{height:100%;width:100%}
+#nav{position:fixed;bottom:0;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:#0e0b16;border-top:1px solid var(--edge);z-index:10;font-family:monospace;font-size:12px;color:var(--dim)}
+#nav .arrow{font-size:20px;color:var(--gold);cursor:pointer;padding:0 18px;user-select:none}
+#pct{letter-spacing:1px}
+/* tap zones for page turn */
+.zone{position:fixed;top:calc(46px + env(safe-area-inset-top));bottom:42px;width:28%;z-index:5}
+#zL{left:0}#zR{right:0}
+#zC{left:28%;right:28%;width:auto}
+/* hide chrome (immersive reading) */
+body.chrome-off #bar,body.chrome-off #nav{transform:translateY(0);opacity:0;pointer-events:none}
+body.chrome-off #bar{transform:translateY(-100%)}
+body.chrome-off #nav{transform:translateY(100%)}
+#bar,#nav{transition:transform .2s ease,opacity .2s ease}
+/* chapter label in the footer */
+#chap{font-family:monospace;font-size:11px;color:var(--dim);max-width:46%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+/* TOC drawer */
+#toc{position:fixed;top:calc(46px + env(safe-area-inset-top));bottom:42px;left:0;width:80%;max-width:340px;background:#0e0b16;border-right:1px solid var(--edge);z-index:30;transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;padding:10px 0}
+#toc.on{transform:translateX(0)}
+#search{position:fixed;top:calc(46px + env(safe-area-inset-top));bottom:42px;left:0;width:88%;max-width:380px;background:#0e0b16;border-right:1px solid var(--edge);z-index:31;transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;padding:10px 0}
+#search.on{transform:translateX(0)}
+#search .toc-head{font-family:monospace;font-size:11px;letter-spacing:2px;color:var(--gold);padding:8px 18px 12px;border-bottom:1px solid var(--edge)}
+#searchbox{display:flex;gap:8px;padding:12px 16px}
+#searchInput{flex:1;background:#161122;border:1px solid var(--edge);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit}
+#searchGo{background:#1d1830;border:1px solid var(--edge);color:var(--ink);border-radius:8px;padding:0 16px;cursor:pointer;font-family:monospace;font-size:13px}
+#searchStatus{font-family:monospace;font-size:11px;color:var(--dim);padding:2px 18px 8px}
+#searchResults a{display:block;padding:11px 18px;color:var(--ink);text-decoration:none;font-size:13px;line-height:1.45;border-bottom:1px solid rgba(255,255,255,.04)}
+#searchResults a b{color:var(--gold);font-weight:700}
+#searchResults a .rchap{display:block;font-family:monospace;font-size:10px;color:var(--dim);margin-top:3px}
+#toc .toc-head{font-family:monospace;font-size:11px;letter-spacing:2px;color:var(--gold);padding:8px 18px 12px;border-bottom:1px solid var(--edge)}
+#toc a{display:block;padding:11px 18px;color:var(--ink);text-decoration:none;font-size:14px;line-height:1.3;border-bottom:1px solid rgba(255,255,255,.04)}
+#toc a:active{background:#1d1830;color:var(--gold)}
+#notebook{position:fixed;top:calc(46px + env(safe-area-inset-top));bottom:42px;left:0;width:88%;max-width:380px;background:#0e0b16;border-right:1px solid var(--edge);z-index:31;transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;padding:10px 0}
+#notebook.on{transform:translateX(0)}
+#notebook .toc-head{font-family:monospace;font-size:11px;letter-spacing:2px;color:var(--gold);padding:8px 18px 12px;border-bottom:1px solid var(--edge)}
+#nbFilters{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--edge)}
+.nbchip{background:transparent;border:1px solid var(--edge);color:var(--dim);font-family:monospace;font-size:11px;padding:5px 12px;border-radius:14px;cursor:pointer}
+.nbchip.on{border-color:var(--gold);color:var(--gold)}
+#nbStatus{font-family:monospace;font-size:11px;color:var(--dim);padding:10px 18px 4px}
+.nbrow{display:flex;align-items:flex-start;gap:10px;padding:11px 14px 11px 18px;border-bottom:1px solid rgba(255,255,255,.04)}
+.nbrow .nbmain{flex:1;min-width:0;cursor:pointer}
+.nbrow .nbmain .nbtxt{display:block;color:var(--ink);font-size:13px;line-height:1.45;text-decoration:none}
+.nbrow .nbmain .nbmeta{display:block;font-family:monospace;font-size:10px;color:var(--dim);margin-top:4px}
+.nbrow .nbkind{flex:0 0 auto;font-size:13px;color:var(--gold);line-height:1.45}
+.nbrow .nbdot{flex:0 0 auto;width:13px;height:13px;border-radius:50%;margin-top:4px;border:1px solid rgba(255,255,255,.25)}
+.nbrow .nbnote{display:block;color:var(--gold);font-size:12px;line-height:1.4;margin-top:5px;font-style:italic;border-left:2px solid var(--gold);padding-left:8px}
+.nbrow .nbshare{flex:0 0 auto;background:transparent;border:none;color:var(--dim);font-size:16px;line-height:1;padding:0 4px;cursor:pointer}
+.nbrow .nbshare:active{color:var(--gold)}
+.nbrow .nbdel{flex:0 0 auto;background:transparent;border:none;color:var(--dim);font-size:18px;line-height:1;padding:0 4px;cursor:pointer}
+.nbrow .nbdel:active{color:#e06363}
+#nbList .nbempty{font-family:monospace;font-size:12px;color:var(--dim);padding:20px 18px;line-height:1.6}
+#selpop{position:fixed;z-index:40;display:none;background:#0e0b16;border:1px solid var(--gold);border-radius:10px;padding:6px;box-shadow:0 6px 22px rgba(0,0,0,.55);align-items:center;gap:6px}
+#selpop.on{display:flex}
+#selpop .sp-colors{display:flex;gap:5px}
+#selpop .sp-sw{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
+#selpop .sp-sw:active{transform:scale(.9)}
+/* dictionary definition card */
+#defcard{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:560px;background:#fff;color:#1a1422;border-radius:16px 16px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.4);padding:20px 20px 26px;z-index:140;display:none}
+#defcard.on{display:block}
+#defcard.dark{background:#181226;color:#e9e2f5}
+#defcard .defx{position:absolute;right:12px;top:12px;background:none;border:none;font-size:24px;color:#9890a8;cursor:pointer;line-height:1}
+#defcard .defw{font-family:'Cinzel',serif;font-size:23px;font-weight:600;margin-bottom:12px;text-transform:capitalize}
+#defcard .defsec{margin-bottom:14px}
+#defcard .deflbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#a87f2a;margin-bottom:4px}
+#defcard.dark .deflbl{color:#e8b53a}
+#defcard .defbody{font-size:16px;line-height:1.5}
+#defcard .defcat{font-family:'DM Mono',monospace;font-size:11px;color:#9890a8;margin-top:4px;text-transform:capitalize}
+#defcard .defnone{font-size:15px;color:#9890a8;font-style:italic}
+#selpop .sp-act{background:transparent;border:none;color:var(--ink);font-family:monospace;font-size:12px;padding:6px 10px;cursor:pointer;border-radius:6px;border-left:1px solid var(--edge)}
+#selpop .sp-act:active{background:#1d1830;color:var(--gold)}
+/* settings sheet */
+#settings{position:fixed;left:0;right:0;bottom:42px;background:#0e0b16;border-top:1px solid var(--edge);z-index:30;transform:translateY(120%);transition:transform .22s ease;padding:8px 16px calc(10px + env(safe-area-inset-bottom))}
+#settings.on{transform:translateY(0)}
+#settings .set-row{display:flex;justify-content:space-between;align-items:center;padding:11px 2px;font-family:monospace;font-size:13px;color:var(--ink);border-bottom:1px solid rgba(255,255,255,.05)}
+#settings .set-row:last-child{border-bottom:none}
+#settings button{font-family:monospace;font-size:14px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);width:40px;height:32px;border-radius:8px;cursor:pointer;margin-left:6px}
+#settings button:active{border-color:var(--gold);color:var(--gold)}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;color:var(--dim);font-size:13px;z-index:20}
+body.sepia{--bg:#f4ecd8;--ink:#3a2f1e;--dim:#8a7a5a;--edge:#d8c9a8}
+body.light{--bg:#ffffff;--ink:#1a1a1a;--dim:#888;--edge:#ddd}
+body.black{--bg:#000000;--ink:#c8c2d0;--dim:#6a6478;--edge:#1a1726}
+@font-face{font-family:'Atkinson Hyperlegible';src:url('fonts/atkinson-400.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';src:url('fonts/atkinson-700.woff2') format('woff2');font-weight:700;font-display:swap}
+/* reading light: a warm dimming overlay above the page, below the chrome */
+#dimmer{position:fixed;inset:0;z-index:8;pointer-events:none;background:#000;opacity:0;transition:opacity .2s,background-color .2s}
+</style>
+<script src="lib/jszip.min.js"></script>
+<script src="lib/epub.min.js"></script>
+<script src="lib/supabase.js"></script>
+</head>
+<body>
+<div id="bar">
+  <span class="ttl" id="ttl">Loading…</span>
+  <div class="ctl">
+    <button onclick="toggleTOC()" title="Contents" aria-label="Table of contents">&#9776;</button>
+    <button onclick="toggleSearch()" title="Search in book" aria-label="Search inside this book">&#128269;</button>
+    <button onclick="toggleBookmark()" id="bmBtn" title="Bookmark this page" aria-label="Bookmark this page">&#9734;</button>
+    <button onclick="toggleNotebook()" title="Notebook" aria-label="Bookmarks and highlights notebook">&#128278;</button>
+    <button onclick="setFont(-1)" title="Smaller text" aria-label="Decrease text size">A&#8722;</button>
+    <button onclick="setFont(1)" title="Bigger text" aria-label="Increase text size">A+</button>
+    <button onclick="toggleSettings()" title="Display settings" aria-label="Display and accessibility settings">Aa</button>
+    <button onclick="cycleTheme()" title="Theme" aria-label="Change color theme">&#9681;</button>
+  </div>
+</div>
+<div id="area"><div id="viewer"></div></div>
+<div id="zL" class="zone" onclick="prev()" aria-label="Previous page"></div>
+<div id="zC" class="zone" onclick="toggleChrome()" aria-label="Toggle reading controls"></div>
+<div id="zR" class="zone" onclick="next()" aria-label="Next page"></div>
+<div id="nav">
+  <span class="arrow" onclick="prev()" role="button" aria-label="Previous page">&#8249;</span>
+  <span id="chap"></span>
+  <span id="pct">&#8212;</span>
+  <span class="arrow" onclick="next()" role="button" aria-label="Next page">&#8250;</span>
+</div>
+<div id="toc"><div class="toc-head">Contents</div><div id="toclist"></div></div>
+<div id="search">
+  <div class="toc-head">Search this book</div>
+  <div id="searchbox">
+    <input id="searchInput" type="search" placeholder="Find a word or phrase&#8230;" aria-label="Search text" autocomplete="off" autocapitalize="off">
+    <button onclick="runSearch()" id="searchGo" aria-label="Run search">Go</button>
+  </div>
+  <div id="searchStatus" aria-live="polite"></div>
+  <div id="searchResults"></div>
+</div>
+<div id="notebook">
+  <div class="toc-head">Notebook</div>
+  <div id="nbFilters">
+    <button class="nbchip on" data-filt="all" onclick="nbFilter('all')">All</button>
+    <button class="nbchip" data-filt="bookmark" onclick="nbFilter('bookmark')">Bookmarks</button>
+    <button class="nbchip" data-filt="highlight" onclick="nbFilter('highlight')">Highlights</button>
+  </div>
+  <div id="nbStatus" aria-live="polite"></div>
+  <div id="nbList"></div>
+</div>
+<div id="settings" role="dialog" aria-label="Display and accessibility settings">
+  <div class="set-row"><span>Font</span><span><button onclick="cycleFont()" id="fontBtn" aria-label="Change font">Serif</button></span></div>
+  <div class="set-row"><span>Line spacing</span><span><button onclick="setLead(-1)" aria-label="Decrease line spacing">&#8722;</button><button onclick="setLead(1)" aria-label="Increase line spacing">+</button></span></div>
+  <div class="set-row"><span>Margins</span><span><button onclick="setMargin(-1)" aria-label="Decrease margins">&#8722;</button><button onclick="setMargin(1)" aria-label="Increase margins">+</button></span></div>
+  <div class="set-row"><span>Justify text</span><span><button onclick="toggleJustify()" id="justBtn" aria-label="Toggle justified text">On</button></span></div>
+  <div class="set-row"><span>Reading light</span><span><button onclick="setDim(-1)" aria-label="Brighter">&#9788;</button><button onclick="setDim(1)" aria-label="Dimmer">&#9789;</button></span></div>
+  <div class="set-row"><span>Warmth (night)</span><span><button onclick="setWarm(-1)" aria-label="Cooler">&#8722;</button><button onclick="setWarm(1)" aria-label="Warmer">+</button></span></div>
+  <div class="set-row"><span>Page mode</span><span><button onclick="toggleFlow()" id="flowBtn" aria-label="Toggle scroll or page mode">Pages</button></span></div>
+  <div class="set-row"><span>Reduce motion</span><span><button onclick="toggleMotion()" id="motionBtn" aria-label="Toggle reduce motion">Off</button></span></div>
+</div>
+<div id="dimmer" aria-hidden="true"></div>
+<div id="loading">Opening book&#8230;</div>
+<div id="selpop">
+  <div class="sp-colors">
+    <button class="sp-sw" data-color="#e8b53a" style="background:#e8b53a" onclick="hlFromSelection('#e8b53a')" aria-label="Gold highlight"></button>
+    <button class="sp-sw" data-color="#7ec96b" style="background:#7ec96b" onclick="hlFromSelection('#7ec96b')" aria-label="Green highlight"></button>
+    <button class="sp-sw" data-color="#6bb6e8" style="background:#6bb6e8" onclick="hlFromSelection('#6bb6e8')" aria-label="Blue highlight"></button>
+    <button class="sp-sw" data-color="#e87fb0" style="background:#e87fb0" onclick="hlFromSelection('#e87fb0')" aria-label="Pink highlight"></button>
+  </div>
+  <button class="sp-act" onclick="noteFromSelection()">Note</button>
+  <button class="sp-act" onclick="defineFromSelection()">Define</button>
+</div>
+<div id="defcard">
+  <button class="defx" onclick="closeDefine()" aria-label="Close">&#215;</button>
+  <div class="defw" id="defWord"></div>
+  <div class="defsec" id="defWv" style="display:none">
+    <div class="deflbl">In the Weave</div>
+    <div class="defbody" id="defWvBody"></div>
+    <div class="defcat" id="defWvCat"></div>
+  </div>
+  <div class="defsec" id="defEn" style="display:none">
+    <div class="deflbl">In English</div>
+    <div class="defbody" id="defEnBody"></div>
+  </div>
+  <div class="defnone" id="defNone" style="display:none">No definition found.</div>
+</div>
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var src=params.get('src');           // path to .epub
+  var bookId=params.get('id')||src;    // key for saving position
+  var fontSteps=[88,100,115,132,150,175,200,220];
+  var fontIdx=parseInt(localStorage.getItem('rdr_font')||'1',10);
+  var themes=['','sepia','light','black']; // '' = dark, black = OLED night
+  var themeIdx=parseInt(localStorage.getItem('rdr_theme')||'0',10);
+  var book,rendition;
+
+  if(!src){document.getElementById('loading').textContent='No book specified.';return;}
+  applyTheme();
+
+  // ---- Cross-device reading position (Supabase, with localStorage fallback) ----
+  // Non-sensitive, RLS-protected per user. Uses the same project as the store.
+  var SB_URL="https://nzkgurdmvgkizvzisqxt.supabase.co";
+  var SB_KEY="sb_publishable_XhncOLTTqr5qTs_G9O3Ecw_m6m5fU0f";
+  var _sb=null, _uid=null, _saveTimer=null, _lastSaved=0;
+  window.__saveProgress=function(id,cfi){
+    // always keep local fast-path
+    try{ localStorage.setItem('rdr_pos_'+id,cfi); }catch(e){}
+    if(!_sb||!_uid) return;
+    var now=Date.now(); if(now-_lastSaved<4000){ // throttle network writes
+      clearTimeout(_saveTimer);
+      _saveTimer=setTimeout(function(){ window.__saveProgress(id,cfi); },4000);
+      return;
+    }
+    _lastSaved=now;
+    try{
+      _sb.from('reading_progress').upsert(
+        {user_id:_uid,book_id:id,position:cfi,updated_at:new Date().toISOString()},
+        {onConflict:'user_id,book_id'}
+      ).then(function(){},function(){});
+    }catch(e){}
+  };
+
+  // ====================================================================
+  // ANNOTATIONS: highlights + bookmarks. Local-first (instant), cloud-
+  // synced via Supabase 'annotations' table (own-row RLS, same pattern
+  // as reading_progress). Records: {id,kind,cfi,text,created_at}.
+  //   kind = 'highlight' | 'bookmark'
+  // Local store key: rdr_ann_<bookId>.  Cloud upsert onConflict id.
+  // ====================================================================
+  var _curCfi=null;                       // updated on every 'relocated'
+  var __wireRelocate=function(){};        // (re)attaches the relocated handler; set in _openWith
+
+  // ====================================================================
+  // READING TIME TRACKER -> reading_sessions (per-day minutes + books).
+  // Accrues only ACTIVE time: counts while the reader tab is visible and
+  // there has been interaction within the last 2 minutes. Flushes locally
+  // every tick and to Supabase periodically. Streaks/goals derive from this.
+  // ====================================================================
+  var _rtSecs=0, _rtLastActive=Date.now(), _rtTick=null, _rtFlushAt=0;
+  function _today(){ return new Date().toISOString().slice(0,10); }
+  function _statKey(){ return 'rdr_stat_'+_today(); }
+  function rtMarkActive(){ _rtLastActive=Date.now(); }
+  function rtAccrueLocal(secs){
+    try{
+      var k=_statKey();
+      var cur=JSON.parse(localStorage.getItem(k)||'{"m":0,"books":[]}');
+      cur.m=(cur.m||0)+secs/60;
+      if(cur.books.indexOf(bookId)<0) cur.books.push(bookId);
+      localStorage.setItem(k, JSON.stringify(cur));
+      // maintain a lightweight day-index so the stats screen can compute streaks offline
+      var idx=JSON.parse(localStorage.getItem('rdr_stat_days')||'[]');
+      if(idx.indexOf(_today())<0){ idx.push(_today()); localStorage.setItem('rdr_stat_days', JSON.stringify(idx)); }
+    }catch(e){}
+  }
+  function rtFlushCloud(){
+    if(!_sb||!_uid) return;
+    try{
+      var cur=JSON.parse(localStorage.getItem(_statKey())||'{"m":0,"books":[]}');
+      _sb.from('reading_sessions').upsert(
+        {user_id:_uid, day:_today(), minutes:Math.round(cur.m||0),
+         books_read:cur.books||[], updated_at:new Date().toISOString()},
+        {onConflict:'user_id,day'}
+      ).then(function(){},function(){});
+    }catch(e){}
+  }
+  function rtStart(){
+    if(_rtTick) return;
+    _rtTick=setInterval(function(){
+      // only count if visible and active within the last 2 minutes
+      if(document.hidden) return;
+      if(Date.now()-_rtLastActive > 120000) return;
+      _rtSecs+=5;
+      rtAccrueLocal(5);
+      if(Date.now()-_rtFlushAt > 30000){ _rtFlushAt=Date.now(); rtFlushCloud(); }
+    }, 5000);
+    ['click','keydown','touchstart','scroll','mousemove'].forEach(function(ev){
+      document.addEventListener(ev, rtMarkActive, {passive:true});
+    });
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden) rtMarkActive(); });
+    window.addEventListener('pagehide', rtFlushCloud);
+    window.addEventListener('beforeunload', rtFlushCloud);
+  }
+  function annKey(){ return 'rdr_ann_'+bookId; }
+  function annLoad(){
+    try{ return JSON.parse(localStorage.getItem(annKey())||'[]'); }catch(e){ return []; }
+  }
+  function annSaveLocal(list){
+    try{ localStorage.setItem(annKey(), JSON.stringify(list)); }catch(e){}
+  }
+  function annId(){
+    // RFC4122 v4 — the annotations.id column is uuid, so this MUST be a real UUID
+    if(window.crypto&&crypto.randomUUID){ try{ return crypto.randomUUID(); }catch(e){} }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+      var r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+    });
+  }
+  // Push a single annotation to the cloud (best-effort, never blocks UI).
+  function annPushCloud(rec){
+    if(!_sb||!_uid) return;
+    try{
+      _sb.from('annotations').upsert(
+        {id:rec.id,user_id:_uid,book_id:bookId,kind:rec.kind,cfi:rec.cfi,
+         text_excerpt:rec.text||'',color:rec.color||null,note:rec.note||'',
+         created_at:rec.created_at||new Date().toISOString(),
+         updated_at:new Date().toISOString()},
+        {onConflict:'id'}
+      ).then(function(){},function(){});
+    }catch(e){}
+  }
+  function annDeleteCloud(id){
+    if(!_sb||!_uid) return;
+    try{ _sb.from('annotations').delete().eq('id',id).then(function(){},function(){}); }catch(e){}
+  }
+  // Pull cloud annotations once the session is ready; merge into local by id,
+  // then repaint highlights and refresh any open notebook. Cloud is the
+  // source of truth for cross-device; local-only rows are pushed up.
+  window.__annSyncFromCloud=function(){
+    if(!_sb||!_uid) return;
+    try{
+      _sb.from('annotations').select('id,kind,cfi,text_excerpt,color,note,created_at').eq('book_id',bookId)
+        .then(function(r){
+          var cloud=((r&&r.data)||[]).map(function(c){
+            return {id:c.id,kind:c.kind,cfi:c.cfi,text:c.text_excerpt||'',
+                    color:c.color||null,note:c.note||'',created_at:c.created_at};
+          });
+          var local=annLoad();
+          var byId={};
+          cloud.forEach(function(c){ byId[c.id]=c; });
+          // push any local rows the cloud doesn't have yet
+          local.forEach(function(l){ if(!byId[l.id]){ byId[l.id]=l; annPushCloud(l); } });
+          var merged=Object.keys(byId).map(function(k){ return byId[k]; });
+          merged.sort(function(a,b){ return (a.created_at<b.created_at)?-1:1; });
+          annSaveLocal(merged);
+          annPaintAll();
+          refreshBookmarkBtn();
+          if(document.getElementById('notebook').classList.contains('on')) nbRender();
+        },function(){});
+    }catch(e){}
+  };
+
+  // ---- Highlight painting (epub.js annotations API) ----
+  function annPaintOne(rec){
+    if(rec.kind!=='highlight'||!rendition||!rendition.annotations) return;
+    try{
+      var col=rec.color||'#e8b53a';
+      // epub.js Annotations.highlight(cfi, data={}, cb, className, styles={})
+      // signature confirmed against this build of epub.min.js.
+      rendition.annotations.highlight(
+        rec.cfi,
+        {id:rec.id},
+        function(){ /* tap handled by the notebook; no-op here */ },
+        'tw-hl',
+        {fill:col,'fill-opacity':'0.30','mix-blend-mode':'multiply'}
+      );
+    }catch(e){}
+  }
+  function annPaintAll(){
+    if(!rendition||!rendition.annotations) return;
+    annLoad().forEach(function(rec){ if(rec.kind==='highlight') annPaintOne(rec); });
+  }
+  function annUnpaint(rec){
+    if(!rendition||!rendition.annotations) return;
+    try{ rendition.annotations.remove(rec.cfi,'highlight'); }catch(e){}
+  }
+
+  // ---- Look up the selected word in the dictionary ----
+  window.defineFromSelection=function(){
+    var sel=_lastSel;
+    var word = sel && sel.text ? sel.text.trim().split(/\s+/)[0] : '';
+    // also accept a plain window selection if popover came from a single word
+    if(!word){ try{ var ws=window.getSelection&&window.getSelection().toString(); if(ws) word=ws.trim().split(/\s+/)[0]; }catch(e){} }
+    hideSelPop();
+    if(!word){ return; }
+    showDefine(word, true);
+  };
+  function showDefine(word, loadIfNeeded){
+    var card=document.getElementById('defcard');
+    // match reader theme
+    try{ if(document.body.classList.contains('theme-dark')||document.documentElement.classList.contains('dark')) card.classList.add('dark'); }catch(e){}
+    document.getElementById('defWord').textContent=word;
+    var enS=document.getElementById('defEn'), wvS=document.getElementById('defWv'), noneS=document.getElementById('defNone');
+    enS.style.display='none'; wvS.style.display='none'; noneS.style.display='none';
+    card.classList.add('on');
+    function paint(){
+      var d=defineWord(word);
+      if(!d){ noneS.style.display='block'; return; }
+      if(d.wv){ wvS.style.display='block'; document.getElementById('defWvBody').textContent=d.wv;
+                document.getElementById('defWvCat').textContent=d.t?('— '+d.t):''; }
+      if(d.en){ enS.style.display='block'; document.getElementById('defEnBody').textContent=d.en; }
+      if(!d.wv&&!d.en){ noneS.style.display='block'; }
+    }
+    if(TW_DICT){ paint(); }
+    else if(loadIfNeeded){ document.getElementById('defNone').style.display='block'; document.getElementById('defNone').textContent='Loading dictionary…'; document.getElementById('defNone').style.display='block';
+      loadDictionary().then(function(){ noneS.textContent='No definition found.'; noneS.style.display='none'; paint(); })
+        .catch(function(){ noneS.textContent='Dictionary unavailable offline yet.'; noneS.style.display='block'; }); }
+    else { noneS.style.display='block'; }
+  }
+  window.showDefine=showDefine;
+  window.closeDefine=function(){ document.getElementById('defcard').classList.remove('on'); };
+  // ---- Add a highlight (with color) from the current text selection ----
+  window.hlFromSelection=function(color){
+    hideSelPop();
+    var sel=_lastSel;
+    if(!sel||!sel.cfi) return;
+    var rec={id:annId(),kind:'highlight',cfi:sel.cfi,color:color||'#e8b53a',note:'',
+             text:(sel.text||'').slice(0,400),created_at:new Date().toISOString()};
+    var list=annLoad(); list.push(rec); annSaveLocal(list);
+    annPaintOne(rec); annPushCloud(rec);
+    try{ var s=sel.win&&sel.win.getSelection&&sel.win.getSelection(); if(s)s.removeAllRanges(); }catch(e){}
+    _lastSel=null;
+  };
+  // ---- Add a highlight AND attach a typed note ----
+  window.noteFromSelection=function(){
+    var sel=_lastSel;
+    hideSelPop();
+    if(!sel||!sel.cfi) return;
+    var note=window.prompt('Your note:','');
+    if(note===null){ _lastSel=null; return; }   // cancelled
+    var rec={id:annId(),kind:'highlight',cfi:sel.cfi,color:'#e8b53a',note:(note||'').slice(0,1000),
+             text:(sel.text||'').slice(0,400),created_at:new Date().toISOString()};
+    var list=annLoad(); list.push(rec); annSaveLocal(list);
+    annPaintOne(rec); annPushCloud(rec);
+    try{ var s=sel.win&&sel.win.getSelection&&sel.win.getSelection(); if(s)s.removeAllRanges(); }catch(e){}
+    _lastSel=null;
+    if(document.getElementById('notebook').classList.contains('on')) nbRender();
+  };
+
+  // ---- Selection capture inside the rendered iframe ----
+  var _lastSel=null;
+  function bindSelection(doc, win){
+    if(!doc) return;
+    function onUp(){
+      try{
+        var s=win.getSelection&&win.getSelection();
+        if(!s||s.isCollapsed||!(''+s).trim()){ hideSelPop(); _lastSel=null; return; }
+        var range=s.getRangeAt(0);
+        var cfi=null;
+        // primary: the Contents object whose document matches this iframe
+        var contents=_contentsFor(doc);
+        try{ if(contents&&contents.cfiFromRange) cfi=contents.cfiFromRange(range); }catch(e){}
+        // fallback: any current Contents (single-view reflowable is the norm here)
+        if(!cfi){
+          try{
+            var cs=rendition&&rendition.getContents&&rendition.getContents();
+            if(cs&&cs.length&&cs[0].cfiFromRange) cfi=cs[0].cfiFromRange(range);
+          }catch(e){}
+        }
+        // No CFI means we can't anchor a highlight — don't offer a dead button.
+        if(!cfi){ hideSelPop(); _lastSel=null; return; }
+        _lastSel={cfi:cfi,text:(''+s),win:win};
+        var rect=range.getBoundingClientRect();
+        showSelPop(rect, doc);
+      }catch(e){ hideSelPop(); _lastSel=null; }
+    }
+    doc.addEventListener('mouseup',onUp);
+    // touch: let the selection settle before reading it (iOS fires touchend early)
+    doc.addEventListener('touchend',function(){ setTimeout(onUp, 10); });
+    // Kindle-style: double-tap (or double-click) a single word to look it up directly.
+    doc.addEventListener('dblclick',function(ev){
+      try{
+        var s=win.getSelection&&win.getSelection();
+        var word=s?(''+s).trim():'';
+        if(!word){ // fall back to the word under the caret
+          var r=doc.caretRangeFromPoint?doc.caretRangeFromPoint(ev.clientX,ev.clientY):null;
+          if(r&&r.startContainer&&r.startContainer.textContent){
+            var t=r.startContainer.textContent, i=r.startOffset;
+            var a=t.slice(0,i).search(/[A-Za-z'-]+$/), b=t.slice(i).search(/[^A-Za-z'-]/);
+            if(a>-1){ word=t.slice(a, b<0?t.length:i+b); }
+          }
+        }
+        word=(word||'').split(/\s+/)[0];
+        if(word && window.showDefine){ hideSelPop(); window.showDefine(word, true); }
+      }catch(e){}
+    });
+    // dismiss the popover if the user taps elsewhere without selecting
+    doc.addEventListener('selectionchange',function(){
+      try{ var s=win.getSelection&&win.getSelection(); if(!s||s.isCollapsed){ hideSelPop(); _lastSel=null; } }catch(e){}
+    });
+  }
+  // find the epub.js Contents object whose document matches doc
+  function _contentsFor(doc){
+    try{
+      var cs=rendition&&rendition.getContents&&rendition.getContents();
+      if(!cs) return null;
+      for(var i=0;i<cs.length;i++){ if(cs[i].document===doc) return cs[i]; }
+      return cs[0]||null;
+    }catch(e){ return null; }
+  }
+  function showSelPop(rect, doc){
+    var pop=document.getElementById('selpop');
+    // iframe rect is relative to the iframe; offset by the iframe's own position
+    var ifr=document.querySelector('#viewer iframe');
+    var ox=0, oy=0;
+    if(ifr){ var ir=ifr.getBoundingClientRect(); ox=ir.left; oy=ir.top; }
+    pop.classList.add('on');
+    var top=oy+rect.top-48; if(top<50) top=oy+rect.bottom+10;
+    var left=ox+rect.left+(rect.width/2)-95; if(left<6) left=6;
+    var maxL=window.innerWidth-200; if(left>maxL) left=Math.max(6,maxL);
+    pop.style.top=top+'px'; pop.style.left=left+'px';
+  }
+  function hideSelPop(){ var p=document.getElementById('selpop'); if(p) p.classList.remove('on'); }
+
+  // ---- Bookmark toggle (current page CFI) ----
+  window.toggleBookmark=function(){
+    if(!_curCfi){ return; }
+    var list=annLoad();
+    // is there already a bookmark on (roughly) this page?
+    var existing=null;
+    for(var i=0;i<list.length;i++){ if(list[i].kind==='bookmark'&&list[i].cfi===_curCfi){ existing=list[i]; break; } }
+    if(existing){
+      list=list.filter(function(r){ return r.id!==existing.id; });
+      annSaveLocal(list); annDeleteCloud(existing.id);
+    }else{
+      var rec={id:annId(),kind:'bookmark',cfi:_curCfi,text:'',created_at:new Date().toISOString()};
+      list.push(rec); annSaveLocal(list); annPushCloud(rec);
+    }
+    refreshBookmarkBtn();
+    if(document.getElementById('notebook').classList.contains('on')) nbRender();
+  };
+  function refreshBookmarkBtn(){
+    var btn=document.getElementById('bmBtn'); if(!btn||!_curCfi) return;
+    var on=false, list=annLoad();
+    for(var i=0;i<list.length;i++){ if(list[i].kind==='bookmark'&&list[i].cfi===_curCfi){ on=true; break; } }
+    btn.innerHTML= on ? '\u2605' : '\u2606';   // filled vs outline star
+    btn.style.color= on ? 'var(--gold)' : '';
+  }
+
+  // ---- Notebook panel ----
+  var _nbFilt='all';
+  window.toggleNotebook=function(){
+    var el=document.getElementById('notebook');
+    document.getElementById('toc').classList.remove('on');
+    document.getElementById('search').classList.remove('on');
+    document.getElementById('settings').classList.remove('on');
+    var opening=!el.classList.contains('on');
+    el.classList.toggle('on');
+    if(opening) nbRender();
+  };
+  window.nbFilter=function(f){
+    _nbFilt=f;
+    Array.prototype.forEach.call(document.querySelectorAll('#nbFilters .nbchip'),function(b){
+      b.classList.toggle('on', b.getAttribute('data-filt')===f);
+    });
+    nbRender();
+  };
+  function nbChapLabel(cfi){
+    // best-effort: use current chapter label store if available, else blank
+    try{ return chapLabelFor((rendition&&rendition.currentLocation&&rendition.currentLocation().start.href)||''); }catch(e){ return ''; }
+  }
+  function nbRender(){
+    var list=annLoad().slice().reverse();   // newest first
+    if(_nbFilt!=='all') list=list.filter(function(r){ return r.kind===_nbFilt; });
+    var out=document.getElementById('nbList');
+    var status=document.getElementById('nbStatus');
+    if(!list.length){
+      status.textContent='';
+      out.innerHTML='<div class="nbempty">No '+(_nbFilt==='all'?'notes':_nbFilt+'s')+' yet.<br>'+
+        (_nbFilt==='highlight'||_nbFilt==='all'?'Select text in the book to highlight it. ':'')+
+        (_nbFilt==='bookmark'||_nbFilt==='all'?'Tap the star to bookmark a page.':'')+'</div>';
+      return;
+    }
+    status.textContent=list.length+' '+(list.length===1?'item':'items');
+    out.innerHTML=list.map(function(r){
+      var isBm=(r.kind==='bookmark');
+      var dot = isBm
+        ? '<span class="nbkind">\u2605</span>'
+        : '<span class="nbdot" style="background:'+(r.color||'#e8b53a')+'"></span>';
+      var txt = isBm
+        ? 'Bookmarked page'
+        : (r.text||'(highlight)').replace(/</g,'&lt;');
+      var noteHtml = (!isBm && r.note)
+        ? '<span class="nbnote">'+r.note.replace(/</g,'&lt;')+'</span>' : '';
+      return '<div class="nbrow" data-id="'+r.id+'">'+
+               dot+
+               '<div class="nbmain" data-cfi="'+(r.cfi||'').replace(/"/g,'&quot;')+'">'+
+                 '<span class="nbtxt">'+txt+'</span>'+
+                 noteHtml+
+                 '<span class="nbmeta">'+(isBm?'bookmark':(r.note?'note':'highlight'))+'</span>'+
+               '</div>'+
+               (isBm?'':'<button class="nbshare" data-id="'+r.id+'" aria-label="Share">\u2197</button>')+
+               '<button class="nbdel" data-id="'+r.id+'" aria-label="Delete">\u00D7</button>'+
+             '</div>';
+    }).join('');
+    // share handlers (Web Share API on device; clipboard fallback)
+    Array.prototype.forEach.call(out.querySelectorAll('.nbshare'),function(b){
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var id=b.getAttribute('data-id');
+        var rec=annLoad().filter(function(x){return x.id===id;})[0]; if(!rec) return;
+        var bookTitle=(document.getElementById('ttl')&&document.getElementById('ttl').textContent)||'';
+        var share='\u201C'+(rec.text||'')+'\u201D'+(rec.note?('\n\nNote: '+rec.note):'')+
+                  (bookTitle?('\n\n\u2014 '+bookTitle):'');
+        try{
+          if(navigator.share){ navigator.share({text:share}); }
+          else if(navigator.clipboard){ navigator.clipboard.writeText(share); b.textContent='\u2713'; setTimeout(function(){b.textContent='\u2197';},1200); }
+        }catch(e){}
+      });
+    });
+    // jump-to handlers
+    Array.prototype.forEach.call(out.querySelectorAll('.nbmain'),function(m){
+      m.addEventListener('click',function(){
+        var cfi=m.getAttribute('data-cfi');
+        if(cfi&&rendition){ rendition.display(cfi); }
+        document.getElementById('notebook').classList.remove('on');
+      });
+    });
+    // one-tap delete (per the Kindle-complaint lesson: never bury delete)
+    Array.prototype.forEach.call(out.querySelectorAll('.nbdel'),function(b){
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var id=b.getAttribute('data-id');
+        var all=annLoad(); var rec=null;
+        all=all.filter(function(r){ if(r.id===id){ rec=r; return false; } return true; });
+        annSaveLocal(all);
+        if(rec){ if(rec.kind==='highlight') annUnpaint(rec); annDeleteCloud(id); }
+        refreshBookmarkBtn(); nbRender();
+      });
+    });
+  }
+
+  // One shared Supabase client for the whole reader (signed book URLs + sync).
+  var _sbPromise=null;
+  function getSb(){
+    if(_sbPromise) return _sbPromise;
+    _sbPromise=(window.SBVendor?Promise.resolve(window.SBVendor):Promise.reject(new Error("supabase vendor script missing"))).then(function(m){
+      _sb=m.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit"}});
+      return _sb;
+    });
+    return _sbPromise;
+  }
+
+  // Resolve the real, fetchable URL for this book.
+  //  - Free books shipped in the app: the local books/<file> path works as-is.
+  //  - Paid books: live in the private Supabase 'library' bucket; mint a signed
+  //    URL (requires a logged-in session). Falls back to the local path so the
+  //    14 bundled free books always work even offline / logged out.
+  // Mint a signed library URL (paid books that aren't in the bundle).
+  function signedLibraryUrl(){
+    var key=src.replace(/^\.?\//,'');                 // "books/07-hell.epub"
+    // Paid files are NOT readable straight from storage — the bucket has no
+    // blanket read policy, deliberately (any signed-in user could otherwise
+    // pull the whole catalogue). The library-url edge function verifies the
+    // caller actually purchased this file's bundle, then signs it server-side.
+    return getSb().then(function(sb){
+      return sb.auth.getSession().then(function(s){
+        var sess=s && s.data && s.data.session;
+        if(!sess) throw new Error('not-signed-in');
+        return fetch(SB_URL+'/functions/v1/library-url',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+sess.access_token},
+          body:JSON.stringify({ path:key })
+        });
+      });
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        if(r.status===401) throw new Error('not-signed-in');
+        if(r.status===403) throw new Error('not-owned');
+        if(!r.ok || !j.url) throw new Error((j && j.error) || 'no-signed-url');
+        return j.url;
+      });
+    });
+  }
+
+  // ===== DICTIONARY (real English + in-Weave terms) =====
+  // Lives in the 'library' bucket as thread_dictionary.json.gz. Fetched once,
+  // decompressed, and cached in IndexedDB so every later lookup is instant + offline.
+  var TW_DICT=null, TW_DICT_LOADING=null;
+  // Bump this whenever the dictionary content in the bucket changes. The device
+  // stores the version it cached; if it no longer matches, the cache is dropped
+  // and the new dictionary is fetched once. (Avoids re-downloading 12MB every open.)
+  var DICT_VERSION = '2026-07-02-paradise';
+  function _dictIDB(){
+    return new Promise(function(res,rej){
+      var r=indexedDB.open('tw_dict',1);
+      r.onupgradeneeded=function(){ r.result.createObjectStore('kv'); };
+      r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+    });
+  }
+  function _dictCacheGet(){
+    return _dictIDB().then(function(db){ return new Promise(function(res){
+      var t=db.transaction('kv','readonly').objectStore('kv').get('dict');
+      t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); };
+    });}).catch(function(){ return null; });
+  }
+  function _dictCachePut(obj){
+    return _dictIDB().then(function(db){ return new Promise(function(res){
+      var t=db.transaction('kv','readwrite').objectStore('kv').put(obj,'dict');
+      t.onsuccess=function(){ res(true); }; t.onerror=function(){ res(false); };
+    });}).catch(function(){ return false; });
+  }
+  function _gunzip(buf){
+    if(typeof DecompressionStream!=='undefined'){
+      var ds=new DecompressionStream('gzip');
+      var stream=new Response(buf).body.pipeThrough(ds);
+      return new Response(stream).text();
+    }
+    return Promise.reject(new Error('no-DecompressionStream'));
+  }
+  function loadDictionary(){
+    if(TW_DICT) return Promise.resolve(TW_DICT);
+    if(TW_DICT_LOADING) return TW_DICT_LOADING;
+    var haveDS=(typeof DecompressionStream!=='undefined');
+    TW_DICT_LOADING=_dictCacheGet().then(function(cached){
+      // Only use the cache if it matches the current dictionary version.
+      if(cached && cached.v===DICT_VERSION && cached.dict){ TW_DICT=cached.dict; return cached.dict; }
+      // Pick the right object: gzipped when the device can inflate it, else the raw JSON.
+      // (Both live in the bucket, so older WKWebView without DecompressionStream still works.)
+      var key = haveDS ? 'dictionary/thread_dictionary.json.gz' : 'dictionary/thread_dictionary.json';
+      return getSb().then(function(sb){
+        return sb.auth.getSession().then(function(s){
+          if(!(s&&s.data&&s.data.session)) throw new Error('not-signed-in');
+          return sb.storage.from('library').createSignedUrl(key,3600);
+        });
+      }).then(function(res){
+        var u=res&&res.data&&res.data.signedUrl; if(!u) throw new Error('no-url');
+        return fetch(u);
+      }).then(function(r){
+        if(haveDS) return r.arrayBuffer().then(_gunzip);
+        return r.text();
+      }).then(function(txt){ var d=JSON.parse(txt); TW_DICT=d; _dictCachePut({v:DICT_VERSION,dict:d}); return d; });
+    });
+    return TW_DICT_LOADING;
+  }
+  // Look up a word; returns {word, en, wv, t, c} or null.
+  function defineWord(raw){
+    if(!TW_DICT) return null;
+    var w=(raw||'').toLowerCase().replace(/[^a-z' -]/g,'').trim();
+    if(!w) return null;
+    var r=TW_DICT[w];
+    if(!r){ // try simple singular/base forms
+      var tries=[w.replace(/ies$/,'y'),w.replace(/es$/,''),w.replace(/s$/,''),w.replace(/ed$/,''),w.replace(/ing$/,'')];
+      for(var i=0;i<tries.length;i++){ if(TW_DICT[tries[i]]){ r=TW_DICT[tries[i]]; w=tries[i]; break; } }
+    }
+    if(!r) return null;
+    return {word:w, en:r.en||null, wv:r.wv||null, t:r.t||null, c:r.c||null};
+  }
+  window.loadDictionary=loadDictionary; window.defineWord=defineWord;
+  // ===== end dictionary =====
+
+  // The 14 books physically shipped in the app bundle. Anything NOT in this set
+  // is a paid book that lives only in the Supabase 'library' bucket, so we must
+  // sign it directly rather than attempting a local path that 404s and hangs.
+  var BUNDLED_BOOKS={
+    "01-white-rabbit-nohelty-bookfunnel-2023-10-13-generic.epub":1,
+    "02-black-jack-nohelty-bookfunnel-2023-10-13-generic.epub":1,
+    "anna-and-the-dark-place.epub":1,
+    "gumshoes-the-case-of-madisons-father.epub":1,
+    "invasion.epub":1,
+    "my-father-didnt-kill-himself.epub":1,
+    "quest-girls-01-fuck-fairy-edited.epub":1,
+    "skritchs-revenge.epub":1,
+    "sorry-for-existing.epub":1,
+    "the-marked-ones.epub":1,
+    "the-vessel.epub":1,
+    "the-void-calls-us-home-russell-nohelty.epub":1,
+    "time-is-a-flat-circle.epub":1,
+    "worst-thing-in-the-universe.epub":1,
+    "bulletins-at-the-end-of-the-world.epub":1,
+    "vengeance.epub":1
+  };
+  function isBundled(){
+    var f=src.replace(/^\.?\//,'').replace(/^books\//,'');
+    return !!BUNDLED_BOOKS[f];
+  }
+  // Resolve the real, fetchable URL for this book.
+  //  - Bundled book: the local books/<file> path works as-is (instant, offline).
+  //  - Paid book: sign a Supabase library URL directly (needs a session).
+  function resolveBookUrl(){
+    if(isBundled()) return Promise.resolve(src);
+    // paid: go straight to the signed URL; never attempt the local 404 path
+    return signedLibraryUrl();
+  }
+
+  // Background cloud sync — runs AFTER the book is already open and on screen.
+  // Only jumps the reader if the cloud position differs from where we opened.
+  function syncCloudPosition(openedAt){
+    getSb().then(function(sb){
+      return sb.auth.getSession().then(function(res){
+        var sess=res&&res.data&&res.data.session;
+        if(!sess) return;
+        _uid=sess.user.id;
+        try{ if(window.__annSyncFromCloud) window.__annSyncFromCloud(); }catch(e){}
+        try{ rtFlushCloud(); }catch(e){}
+        return sb.from('reading_progress').select('position,updated_at').eq('book_id',bookId).maybeSingle()
+          .then(function(r){
+            var cloud=r&&r.data&&r.data.position;
+            if(cloud && cloud!==openedAt){ try{ rendition.display(cloud); }catch(e){} }
+          });
+      });
+    }).catch(function(){ /* best-effort */ });
+  }
+
+  // Loading-state helper. Books stream from the server; epub.js fetches the
+  // EPUB directly. A timeout (below) surfaces a retry if a load stalls.
+  var _loadingEl=document.getElementById('loading');
+  function setLoading(msg){ if(_loadingEl) _loadingEl.innerHTML=msg; }
+
+  // Books stream from the server (relative books/* path). Hand the URL straight
+  // to epub.js — it fetches and renders. No pre-probe: a probe that guesses
+  // wrong about the path just blocks a book that would otherwise load fine.
+  // A timeout below covers genuinely slow/failed loads with a retry.
+
+  function openTheBook(bookUrl){
+  // epub.js, handed a URL, tries to GUESS whether it's a packaged .epub (a ZIP
+  // it should download+unzip) or an already-unpacked directory of files. A
+  // Supabase SIGNED url ends in "...07-hell.epub?token=..." — the query string
+  // hides the .epub extension, so epub.js wrongly treats it as a directory and
+  // fetches META-INF/container.xml etc. as separate bucket objects -> 400 ->
+  // hang. Fix: for any http(s) URL, download the bytes ourselves and hand
+  // epub.js the ArrayBuffer with {type:'binary'} so it unzips the archive.
+  var isRemote=/^https?:/i.test(bookUrl);
+  if(isRemote){
+    // DOWNLOAD ONCE, KEEP FOREVER. A purchased book is fetched from the server a
+    // single time, then its bytes are stored on the device (IndexedDB). Every later
+    // open loads from the device - instant, offline, and independent of the signed
+    // URL's 1-hour expiry. This is what makes a downloaded book STAY downloaded, in
+    // the installed app and on the website alike (until the browser evicts storage).
+    _bookCacheGet(bookId).then(function(cachedBuf){
+      if(cachedBuf){
+        _openWith(book=ePub(cachedBuf,{type:'binary'}));
+        return;
+      }
+      return fetch(bookUrl).then(function(r){
+        if(!r.ok) throw new Error('fetch '+r.status);
+        return r.arrayBuffer();
+      }).then(function(buf){
+        // open immediately, then persist in the background so a slow write never delays reading
+        _openWith(book=ePub(buf,{type:'binary'}));
+        try{ _bookCachePut(bookId, buf); }catch(e){}
+      });
+    }).catch(function(e){
+      console.error('remote epub load failed',e);
+      setLoading('Could not load this book.<br>'+
+        '<span style="font-size:13px;color:#9b91ac">'+((e&&e.message==='not-owned')?'This book isn\u2019t part of a bundle on your account yet.':'If this is a purchased book, make sure you are logged in.')+'</span><br>'+
+        '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+        'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+    });
+    return;
+  }
+  _openWith(book=ePub(bookUrl));
+  }
+
+  // ---- Persistent book cache (IndexedDB). Keeps downloaded EPUB bytes on the
+  //      device so a purchased book opens offline forever after the first fetch. ----
+  function _bookIDB(){
+    return new Promise(function(res,rej){
+      var r=indexedDB.open('tw_books',1);
+      r.onupgradeneeded=function(){ if(!r.result.objectStoreNames.contains('epubs')) r.result.createObjectStore('epubs'); };
+      r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+    });
+  }
+  function _bookCacheGet(id){
+    return _bookIDB().then(function(db){ return new Promise(function(res){
+      var t=db.transaction('epubs','readonly').objectStore('epubs').get(id);
+      t.onsuccess=function(){ res(t.result||null); }; t.onerror=function(){ res(null); };
+    });}).catch(function(){ return null; });
+  }
+  function _bookCachePut(id,buf){
+    return _bookIDB().then(function(db){ return new Promise(function(res){
+      var t=db.transaction('epubs','readwrite').objectStore('epubs').put(buf,id);
+      t.onsuccess=function(){ res(true); }; t.onerror=function(){ res(false); };
+    });}).catch(function(){ return false; });
+  }
+  function _openWith(_book){
+  try{ if(window.__initChapLabels) window.__initChapLabels(); }catch(e){}
+  var _flow=(localStorage.getItem('rdr_flow')==='scrolled')?'scrolled-doc':'paginated';
+  rendition=book.renderTo('viewer',{width:'100%',height:'100%',spread:'none',flow:_flow});
+  try{ if(window.__bindRenderHooks) window.__bindRenderHooks(); }catch(e){}
+  applyTheme();
+  var _rzT;
+  window.addEventListener('resize',function(){
+    clearTimeout(_rzT);
+    _rzT=setTimeout(function(){
+      try{ if(rendition&&rendition.resize) rendition.resize(); }catch(e){}
+    },150);
+  });
+
+  // Open INSTANTLY at the local saved position. Never wait on the network for
+  // anything: the EPUB renders the moment epub.js has it, and the loading
+  // screen is hidden the instant the first page paints.
+  var localPos=localStorage.getItem('rdr_pos_'+bookId)||undefined;
+  // Safety net: epub.js does NOT reliably reject display() when the EPUB path
+  // 404s (a missing/paid book served the SPA's index.html instead) — it just
+  // hangs at "Opening book…". If the first page hasn't painted in time, treat
+  // it the same as a failed open and fall through to the signed library URL.
+  var _opened=false;
+  var _stallTimer=setTimeout(function(){
+    if(_opened) return;
+    if(openTheBook.__triedCloud) return;
+    console.warn('local open stalled; falling back to library bucket');
+    openTheBook.__triedCloud=true;
+    signedLibraryUrl().then(function(url){
+      try{ if(rendition&&rendition.destroy) rendition.destroy(); }catch(_){}
+      try{ if(book&&book.destroy) book.destroy(); }catch(_){}
+      openTheBook(url);
+    }).catch(function(err){
+      console.error(err);
+      setLoading('Could not load this book.<br>'+
+        '<span style="font-size:13px;color:#9b91ac">'+((err&&err.message==='not-owned')?'This book isn\u2019t part of a bundle on your account yet.':'If this is a purchased book, make sure you are logged in.')+'</span><br>'+
+        '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+        'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+    });
+  }, 6000);
+  rendition.display(localPos).then(function(){
+    _opened=true; clearTimeout(_stallTimer);
+    document.getElementById('loading').style.display='none';
+    applyFont();
+    applyTypography();
+    applyDimmer();
+    applyMotion();
+    // Cross-device sync runs in the BACKGROUND, after the book is already open.
+    // If the cloud has a newer position than where we opened, quietly jump to it.
+    syncCloudPosition(localPos);
+    // Percentage page-map, also background; reading works without it.
+    book.ready.then(function(){
+      try{ loadDictionary().catch(function(){}); }catch(e){}   // warm the dictionary in the background
+      return book.locations.generate(1000);
+    }).then(function(){
+      var cur=rendition.currentLocation();
+      if(cur&&cur.start){
+        var pct=Math.round(book.locations.percentageFromCfi(cur.start.cfi)*100);
+        if(!isNaN(pct))document.getElementById('pct').textContent=pct+'%';
+      }
+    }).catch(function(){});
+  }).catch(function(e){
+    clearTimeout(_stallTimer);
+    if(_opened) return;
+    console.error('local open failed, trying library bucket',e);
+    // The local path didn't open (genuinely not bundled, e.g. a paid book).
+    // Try a signed library URL ONCE before surfacing an error.
+    if(!openTheBook.__triedCloud){
+      openTheBook.__triedCloud=true;
+      signedLibraryUrl().then(function(url){
+        try{ if(rendition&&rendition.destroy) rendition.destroy(); }catch(_){}
+        try{ if(book&&book.destroy) book.destroy(); }catch(_){}
+        openTheBook(url);
+      }).catch(function(err){
+        console.error(err);
+        setLoading('Could not load this book.<br>'+
+          '<span style="font-size:13px;color:#9b91ac">If this is a purchased book, make sure you are logged in.</span><br>'+
+          '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+          'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+      });
+      return;
+    }
+    setLoading('Could not open this book.<br>'+
+      '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+      'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+    console.error(e);
+  });
+
+  // Safety net: if display() never resolves/rejects (rare stalled fetch),
+  // offer a retry rather than hang forever.
+  setTimeout(function(){
+    var le=document.getElementById('loading');
+    if(le && le.style.display!=='none'){
+      setLoading('This book is taking a while to load.<br>'+
+        '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+        'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+    }
+  }, 20000);
+
+  book.loaded.metadata.then(function(m){
+    document.getElementById('ttl').textContent=m.title||'Book';
+    document.title=m.title||'Book';
+  });
+  buildTOC();
+
+  __wireRelocate=function(){
+  rendition.on('relocated',function(loc){
+    if(loc&&loc.start){
+      _curCfi=loc.start.cfi;
+      try{ refreshBookmarkBtn(); }catch(e){}
+      try{ localStorage.setItem('rdr_pos_'+bookId,loc.start.cfi); }catch(e){}
+      try{ if(window.__saveProgress) window.__saveProgress(bookId, loc.start.cfi); }catch(e){}
+      try{ if(window.__setChapLabel) window.__setChapLabel(loc.start.href); }catch(e){}
+      // chapter signal: spine index (and href) of where we are now
+      var chap=null;
+      try{
+        chap = (typeof loc.start.index==='number') ? loc.start.index : null;
+        if(chap===null && loc.start.href && book.spine){
+          var item=book.spine.get(loc.start.href); if(item&&typeof item.index==='number') chap=item.index;
+        }
+      }catch(e){}
+      try{
+        if(book.locations&&book.locations.length()){
+          var p=Math.round(book.locations.percentageFromCfi(loc.start.cfi)*100);
+          if(!isNaN(p)){
+            document.getElementById('pct').textContent=p+'%';
+            if(p>=95){ try{ localStorage.setItem('rdr_done_'+bookId, Date.now()); }catch(e){} }
+            checkUnlocks(p, chap, loc.start.href);
+          }
+        } else {
+          checkUnlocks(null, chap, loc.start.href);
+        }
+      }catch(e){}
+    }
+  });
+  };
+  __wireRelocate();
+  try{ rtStart(); }catch(e){}
+  } // ---- end openTheBook() ----
+
+  // WEB REQUIRES SIGN-IN TO READ. This is the un-bypassable chokepoint: every book,
+  // however it was opened (library tap, Resume, direct link), passes through here.
+  // Native apps (Cordova) must NOT be gated -- Apple/Google reject forced login -- so
+  // we skip the gate when running inside Cordova. On web, no session => show a sign-in
+  // prompt and DO NOT load the book.
+  function _isNativeReader(){
+    try{ return !!(window.cordova || (window.parent && window.parent.document && window.parent.document.body.classList.contains('is-native'))); }catch(e){ return false; }
+  }
+  function _readerRequireLogin(proceed){
+    if(_isNativeReader()){ proceed(); return; }
+    getSb().then(function(sb){
+      return sb.auth.getSession().then(function(s){
+        var sess = s && s.data && s.data.session;
+        if(sess){ proceed(); return; }
+        // signed OUT on web -> block reading, offer sign-in (bounce to app.html which owns the login UI)
+        setLoading('Please sign in to read.<br>'+
+          '<span style="font-size:13px;color:#9b91ac">Reading on thread.wannabepress.com requires a free account.</span><br>'+
+          '<button onclick="(window.parent&&window.parent!==window?window.parent:window).location.href=\'app.html\'" '+
+          'style="margin-top:14px;padding:10px 20px;background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Sign in</button>');
+      });
+    }).catch(function(){
+      // if auth can't be checked on web, fail CLOSED (block), since this is a paywall
+      if(_isNativeReader()){ proceed(); return; }
+      setLoading('Please sign in to read.<br>'+
+        '<button onclick="(window.parent&&window.parent!==window?window.parent:window).location.href=\'app.html\'" '+
+        'style="margin-top:14px;padding:10px 20px;background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Sign in</button>');
+    });
+  }
+
+  // Kick off: confirm the EPUB is fetchable (paid books may still be
+  // downloading), then open. Shows a real waiting/retry state instead of
+  // hanging silently on "Opening book…".
+  // Resolve where this book actually lives (bundle or library bucket), then open.
+  _readerRequireLogin(function(){
+  // 1.14.82: a bought book already saved on this device opens from the device
+  // FIRST - no server round trip, so it works offline. Previously the reader
+  // asked the server for a signed URL before looking at the saved copy, so a
+  // downloaded book failed to open with no connection.
+  var _cached = isBundled() ? Promise.resolve(null) : _bookCacheGet(bookId).catch(function(){ return null; });
+  _cached.then(function(buf){
+    if(buf){ _openWith(book=ePub(buf,{type:'binary'})); return; }
+    return resolveBookUrl().then(function(bookUrl){ openTheBook(bookUrl); });
+  }).catch(function(e){
+    console.error('book resolve failed',e);
+    setLoading('Could not load this book.<br>'+
+      '<span style="font-size:13px;color:#9b91ac">Make sure you are logged in, then try again.</span><br>'+
+      '<button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;'+
+      'background:#e8b53a;color:#16121f;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Retry</button>');
+  });
+  });
+
+  // ---- Weave codex unlocking ----
+  var WEAVE=null, reveals=[], maxChapter=-1, RELICS=[];
+  var UNLOCK_STORE='weave.unlocked';
+  var RELIC_STORE='weaver.relics';
+  fetch('books/weave.json').then(function(r){return r.ok?r.json():null;}).then(function(w){
+    WEAVE=w; reveals=(w&&w.book_reveals&&w.book_reveals[bookId])||[];
+  }).catch(function(){});
+  fetch('books/weaver.json').then(function(r){return r.ok?r.json():null;}).then(function(wv){
+    RELICS=(wv&&wv.relics)||[];
+  }).catch(function(){});
+  function getUnlocked(){ try{return JSON.parse(localStorage.getItem(UNLOCK_STORE)||'{}');}catch(e){return {};} }
+  function getRelics(){ try{return JSON.parse(localStorage.getItem(RELIC_STORE)||'{}');}catch(e){return {};} }
+  function checkUnlocks(pct, chap, href){
+    var owned=getUnlocked(), changed=false, fresh=[];
+    if(typeof chap==='number' && chap>maxChapter) maxChapter=chap;
+    // 1) percent-based reveals (legacy)
+    if(reveals.length && typeof pct==='number'){
+      reveals.forEach(function(m){
+        if(m.at!=null && pct>=m.at){
+          (m.unlock||[]).forEach(function(id){ if(!owned[id]){ owned[id]=Date.now(); changed=true; fresh.push(id); } });
+        }
+      });
+    }
+    // 2) chapter-anchor codex reveals
+    if(WEAVE && WEAVE.entries){
+      WEAVE.entries.forEach(function(e){
+        if(!e.anchors) return;
+        e.anchors.forEach(function(a){
+          if(a.book===bookId){
+            var hit=(typeof a.chapter==='number' && maxChapter>=a.chapter) || (a.href && href && href.indexOf(a.href)>=0);
+            if(hit && !owned[e.id]){ owned[e.id]=Date.now(); changed=true; fresh.push(e.id); }
+          }
+        });
+      });
+    }
+    if(changed){
+      try{ localStorage.setItem(UNLOCK_STORE,JSON.stringify(owned)); }catch(e){}
+      try{ parent.postMessage({type:'weave-unlock', ids:fresh}, '*'); }catch(e){}
+    }
+    // 3) relics found via chapter anchors -> inventory
+    var rel=getRelics(), rchanged=false, rfresh=[];
+    RELICS.forEach(function(r){
+      (r.anchors||[]).forEach(function(a){
+        if(a.book===bookId){
+          var hit=(typeof a.chapter==='number' && maxChapter>=a.chapter) || (a.href && href && href.indexOf(a.href)>=0);
+          if(hit && !rel[r.id]){ rel[r.id]=Date.now(); rchanged=true; rfresh.push(r); }
+        }
+      });
+    });
+    if(rchanged){
+      try{ localStorage.setItem(RELIC_STORE,JSON.stringify(rel)); }catch(e){}
+      try{ parent.postMessage({type:'weaver-relic', relics:rfresh}, '*'); }catch(e){}
+    }
+  }
+  window.__checkUnlocks=checkUnlocks;
+
+  // keyboard for desktop testing
+  document.addEventListener('keyup',function(e){
+    if(e.key==='ArrowLeft')prev();
+    if(e.key==='ArrowRight')next();
+  });
+
+  // ---- Touch swipe to turn pages (Kindle-style) ----
+  // epub.js renders the book inside an iframe, so we attach to the rendition's
+  // own document as each section loads, AND to the host as a fallback.
+  var SW_MIN=45;   // px horizontal travel to count as a swipe
+  var SW_VTOL=70;  // max vertical drift before we treat it as a scroll, not a turn
+  function attachSwipe(doc){
+    if(!doc||doc.__twSwipe) return; doc.__twSwipe=true;
+    var x0=0,y0=0,t0=0,tracking=false;
+    doc.addEventListener('touchstart',function(e){
+      if(!e.touches||e.touches.length!==1){tracking=false;return;}
+      tracking=true; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
+    },{passive:true});
+    doc.addEventListener('touchend',function(e){
+      if(!tracking) return; tracking=false;
+      var t=(e.changedTouches&&e.changedTouches[0]); if(!t) return;
+      var dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0;
+      if(Math.abs(dx)<SW_MIN || Math.abs(dy)>SW_VTOL) return; // not a clean horizontal swipe
+      if(dt>800) return;                                       // too slow = probably a drag/select
+      if(dx<0) next(); else prev();
+    },{passive:true});
+  }
+  // attach to the iframe doc on every section render
+  window.__bindRenderHooks=function(){
+    if(!rendition) return;
+    rendition.on('rendered',function(section,view){
+      try{ var d=(view&&view.document)|| (view&&view.iframe&&view.iframe.contentDocument); attachSwipe(d); injectReaderFont(d); forceInkInDoc(d);
+           var w=(view&&view.window)||(d&&d.defaultView); bindSelection(d,w);
+           setTimeout(function(){ try{ annPaintAll(); }catch(e){} },0);
+      }catch(e){}
+    });
+  };
+  // host-level fallback (covers the bars/zones outside the iframe)
+  attachSwipe(document);
+
+  window.next=function(){rendition&&rendition.next();};
+  window.prev=function(){rendition&&rendition.prev();};
+  window.setFont=function(d){
+    fontIdx=Math.max(0,Math.min(fontSteps.length-1,fontIdx+d));
+    localStorage.setItem('rdr_font',fontIdx);applyFont();
+  };
+  function applyFont(){
+    if(rendition)rendition.themes.fontSize(fontSteps[fontIdx]+'%');
+  }
+  window.cycleTheme=function(){
+    themeIdx=(themeIdx+1)%themes.length;
+    localStorage.setItem('rdr_theme',themeIdx);applyTheme();
+    // re-assert color on any already-rendered chapter docs so the change is visible now
+    try{
+      var views=rendition&&rendition.manager&&rendition.manager.views;
+      if(views&&views._views){ views._views.forEach(function(v){ if(v&&v.document) forceInkInDoc(v.document); }); }
+    }catch(e){}
+  };
+  function applyTheme(){
+    document.body.className=themes[themeIdx]+(document.body.classList.contains('chrome-off')?' chrome-off':'');
+    if(rendition){
+      var bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
+      var ink=getComputedStyle(document.body).getPropertyValue('--ink').trim();
+      // Force the book text color with !important so it beats the EPUB's own
+      // baked-in styles (many books hardcode black text for a white page, which
+      // is invisible on a dark background). Target the common text elements.
+      try{
+        rendition.themes.register('twtheme', {
+          'html, body': { 'background': bg+' !important', 'color': ink+' !important' },
+          'p, div, span, li, td, th, blockquote, h1, h2, h3, h4, h5, h6, a, em, strong, i, b': { 'color': ink+' !important' },
+          'a': { 'color': ink+' !important', 'text-decoration': 'underline' }
+        });
+        rendition.themes.select('twtheme');
+      }catch(e){}
+      // belt-and-suspenders: also push the simple overrides
+      try{ rendition.themes.override('color', ink); rendition.themes.override('background', bg); }catch(e){}
+    }
+  }
+  // re-assert theme color into a freshly rendered section's document directly,
+  // in case the book's own stylesheet still wins via specificity.
+  function forceInkInDoc(doc){
+    try{
+      if(!doc) return;
+      var ink=getComputedStyle(document.body).getPropertyValue('--ink').trim();
+      var bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
+      var st=doc.getElementById('tw-ink-style');
+      if(!st){ st=doc.createElement('style'); st.id='tw-ink-style'; (doc.head||doc.documentElement).appendChild(st); }
+      st.textContent='html,body{background:'+bg+' !important;color:'+ink+' !important}'+
+        'p,div,span,li,td,th,blockquote,h1,h2,h3,h4,h5,h6,a,em,strong,i,b{color:'+ink+' !important}';
+    }catch(e){}
+  }
+
+  // ---- Line spacing, margins, justify (persisted) ----
+  var leadSteps=[1.3,1.45,1.6,1.8,2.0];
+  var leadIdx=parseInt(localStorage.getItem('rdr_lead')||'2',10);
+  var marginSteps=[0,6,12,20,30];
+  var marginIdx=parseInt(localStorage.getItem('rdr_margin')||'2',10);
+  var justify=(localStorage.getItem('rdr_justify')||'1')==='1';
+  // font face: 0 serif (Georgia), 1 sans, 2 Atkinson Hyperlegible (dyslexia-friendly)
+  var fontFaces=[
+    {label:'Serif', css:'Georgia, "Times New Roman", serif'},
+    {label:'Sans',  css:'-apple-system, system-ui, "Helvetica Neue", Arial, sans-serif'},
+    {label:'Readable', css:'"Atkinson Hyperlegible", system-ui, sans-serif'}
+  ];
+  var faceIdx=parseInt(localStorage.getItem('rdr_face')||'0',10);
+  // build the absolute font URL so the @font-face works inside the epub.js iframe.
+  // resolve against pathname (NOT href) so the query string can't corrupt the path.
+  var FONT_BASE = (location.origin + location.pathname.replace(/[^\/]*$/, '')) + 'fonts/';
+  function applyTypography(){
+    if(!rendition) return;
+    rendition.themes.override('line-height', String(leadSteps[leadIdx]));
+    rendition.themes.override('text-align', justify?'justify':'left');
+    try{
+      var mPct=marginSteps[marginIdx];
+      rendition.themes.override('padding-left', mPct+'px');
+      rendition.themes.override('padding-right', mPct+'px');
+    }catch(e){}
+    // font-face: set the family; the Atkinson @font-face is injected per-section
+    // by injectReaderFont() on the rendition 'rendered' event.
+    try{ rendition.themes.font(fontFaces[faceIdx].css); }catch(e){}
+    var jb=document.getElementById('justBtn'); if(jb) jb.textContent=justify?'On':'Off';
+    try{ _setFlowBtn(); }catch(e){}
+    var fb=document.getElementById('fontBtn'); if(fb) fb.textContent=fontFaces[faceIdx].label;
+  }
+  // inject the Atkinson @font-face into every rendered section (iframe doc)
+  function injectReaderFont(doc){
+    try{
+      if(!doc || doc.__twFont) return; doc.__twFont=true;
+      var st=doc.createElement('style');
+      st.textContent =
+        "@font-face{font-family:'Atkinson Hyperlegible';src:url('"+FONT_BASE+"atkinson-400.woff2') format('woff2');font-weight:400;font-display:swap}"+
+        "@font-face{font-family:'Atkinson Hyperlegible';src:url('"+FONT_BASE+"atkinson-700.woff2') format('woff2');font-weight:700;font-display:swap}";
+      (doc.head||doc.documentElement).appendChild(st);
+    }catch(e){}
+  }
+  window.setLead=function(d){ leadIdx=Math.max(0,Math.min(leadSteps.length-1,leadIdx+d)); localStorage.setItem('rdr_lead',leadIdx); applyTypography(); };
+  window.setMargin=function(d){ marginIdx=Math.max(0,Math.min(marginSteps.length-1,marginIdx+d)); localStorage.setItem('rdr_margin',marginIdx); applyTypography(); };
+  window.toggleJustify=function(){ justify=!justify; localStorage.setItem('rdr_justify',justify?'1':'0'); applyTypography(); };
+  window.cycleFont=function(){ faceIdx=(faceIdx+1)%fontFaces.length; localStorage.setItem('rdr_face',faceIdx); applyTypography(); };
+
+  // ---- Reading light (brightness dimmer + warmth), persisted ----
+  // dim 0..5 = overlay opacity; warm 0..5 = amber tint of the overlay
+  var dimSteps=[0,0.12,0.24,0.38,0.52,0.66];
+  var dimIdx=parseInt(localStorage.getItem('rdr_dim')||'0',10);
+  var warmIdx=parseInt(localStorage.getItem('rdr_warm')||'0',10);
+  function applyDimmer(){
+    var d=document.getElementById('dimmer'); if(!d) return;
+    var op=dimSteps[Math.max(0,Math.min(dimSteps.length-1,dimIdx))];
+    d.style.opacity=op;
+    // warmth: shift the overlay toward amber so the screen reads warmer at night
+    var w=Math.max(0,Math.min(5,warmIdx));
+    if(w>0 && op>0){ d.style.background='rgb('+(40+w*8)+','+(20+w*3)+',0)'; }
+    else { d.style.background='#000'; }
+  }
+  window.setDim=function(dir){ dimIdx=Math.max(0,Math.min(dimSteps.length-1,dimIdx+dir)); localStorage.setItem('rdr_dim',dimIdx); applyDimmer(); };
+  window.setWarm=function(dir){ warmIdx=Math.max(0,Math.min(5,warmIdx+dir)); localStorage.setItem('rdr_warm',warmIdx); applyDimmer(); };
+
+  // ---- Reduce motion (manual toggle; also auto-on if the OS prefers it) ----
+  var reduceMotion = localStorage.getItem('rdr_motion');
+  if(reduceMotion===null){
+    try{ reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '1':'0'; }catch(e){ reduceMotion='0'; }
+  }
+  function applyMotion(){
+    document.documentElement.style.scrollBehavior = reduceMotion==='1' ? 'auto':'';
+    document.body.setAttribute('data-reduce-motion', reduceMotion==='1'?'1':'0');
+    var mb=document.getElementById('motionBtn'); if(mb) mb.textContent = reduceMotion==='1'?'On':'Off';
+    // tell the host (app shell / fun layer) so its celebrations honor the choice
+    try{ parent.postMessage({type:'reduce-motion', on: reduceMotion==='1'}, '*'); }catch(e){}
+  }
+  window.toggleMotion=function(){ reduceMotion = reduceMotion==='1'?'0':'1'; localStorage.setItem('rdr_motion',reduceMotion); applyMotion(); };
+
+  // ---- Table of contents ----
+  window.toggleTOC=function(){
+    var el=document.getElementById('toc');
+    document.getElementById('settings').classList.remove('on');
+    document.getElementById('search').classList.remove('on');
+    document.getElementById('notebook').classList.remove('on');
+    el.classList.toggle('on');
+  };
+  function buildTOC(){
+    if(!book||!book.loaded||!book.loaded.navigation) return;
+    book.loaded.navigation.then(function(nav){
+      var list=document.getElementById('toclist'); if(!nav||!nav.toc){return;}
+      var html='';
+      nav.toc.forEach(function(ch){
+        var label=(ch.label||'').trim().replace(/</g,'&lt;');
+        html+='<a href="#" data-href="'+(ch.href||'').replace(/"/g,'&quot;')+'">'+label+'</a>';
+      });
+      list.innerHTML=html;
+      Array.prototype.forEach.call(list.querySelectorAll('a'),function(a){
+        a.addEventListener('click',function(ev){
+          ev.preventDefault();
+          var h=a.getAttribute('data-href'); if(h&&rendition) rendition.display(h);
+          document.getElementById('toc').classList.remove('on');
+        });
+      });
+    }).catch(function(){});
+  }
+  // buildTOC() is invoked after the book opens (see openTheBook), not at init,
+  // because `book` does not exist until the async open resolves.
+
+  // ---- In-book search (walks the spine via epub.js Section.find) ----
+  var _searching=false;
+  window.toggleSearch=function(){
+    var el=document.getElementById('search');
+    document.getElementById('toc').classList.remove('on');
+    document.getElementById('settings').classList.remove('on');
+    document.getElementById('notebook').classList.remove('on');
+    var opening=!el.classList.contains('on');
+    el.classList.toggle('on');
+    if(opening){ setTimeout(function(){ var i=document.getElementById('searchInput'); if(i) i.focus(); }, 250); }
+  };
+  function highlight(excerpt, q){
+    try{
+      var i=excerpt.toLowerCase().indexOf(q.toLowerCase());
+      if(i<0) return excerpt.replace(/</g,'&lt;');
+      var pre=excerpt.slice(0,i).replace(/</g,'&lt;');
+      var hit=excerpt.slice(i,i+q.length).replace(/</g,'&lt;');
+      var post=excerpt.slice(i+q.length).replace(/</g,'&lt;');
+      return pre+'<b>'+hit+'</b>'+post;
+    }catch(e){ return excerpt.replace(/</g,'&lt;'); }
+  }
+  function chapLabelFor(href){
+    var label='';
+    try{ _tocFlat.forEach(function(it){ if(it.href && href.indexOf(it.href.split('#')[0])>=0) label=(it.label||'').trim(); }); }catch(e){}
+    return label;
+  }
+  window.runSearch=function(){
+    var q=(document.getElementById('searchInput').value||'').trim();
+    var status=document.getElementById('searchStatus');
+    var out=document.getElementById('searchResults');
+    if(q.length<3){ status.textContent='Type at least 3 characters.'; out.innerHTML=''; return; }
+    if(_searching){ return; }
+    if(!book||!book.spine){ status.textContent='Book still loading\u2026'; return; }
+    _searching=true; out.innerHTML=''; status.textContent='Searching\u2026';
+    var results=[], items=[];
+    book.spine.each(function(item){ items.push(item); });
+    var idx=0, MAX=200;
+    function step(){
+      if(idx>=items.length || results.length>=MAX){ finish(); return; }
+      var item=items[idx++];
+      var p;
+      try{ p=item.load(book.load.bind(book)); }catch(e){ p=Promise.reject(e); }
+      Promise.resolve(p).then(function(){
+        var found=[];
+        try{ found=item.find(q)||[]; }catch(e){ found=[]; }
+        found.forEach(function(r){
+          if(results.length<MAX) results.push({cfi:r.cfi, excerpt:r.excerpt||'', href:item.href});
+        });
+        try{ item.unload(); }catch(e){}
+        status.textContent='Searching\u2026 '+results.length+' found';
+        // yield to the UI so the reader never freezes on a big book
+        setTimeout(step, 0);
+      }).catch(function(){ try{ item.unload(); }catch(e){} setTimeout(step, 0); });
+    }
+    function finish(){
+      _searching=false;
+      if(!results.length){ status.textContent='No matches for \u201c'+q.replace(/</g,'&lt;')+'\u201d.'; return; }
+      status.textContent=results.length+(results.length===MAX?'+':'')+' match'+(results.length===1?'':'es');
+      out.innerHTML=results.map(function(r){
+        var lab=chapLabelFor(r.href||'');
+        return '<a href="#" data-cfi="'+(r.cfi||'').replace(/"/g,'&quot;')+'">'+highlight(r.excerpt,q)+
+               (lab?'<span class="rchap">'+lab.replace(/</g,'&lt;')+'</span>':'')+'</a>';
+      }).join('');
+      Array.prototype.forEach.call(out.querySelectorAll('a'),function(a){
+        a.addEventListener('click',function(ev){
+          ev.preventDefault();
+          var cfi=a.getAttribute('data-cfi');
+          if(cfi&&rendition){ rendition.display(cfi); }
+          document.getElementById('search').classList.remove('on');
+        });
+      });
+    }
+    step();
+  };
+  // Enter key runs the search
+  (function(){ var i=document.getElementById('searchInput'); if(i){ i.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); runSearch(); } }); } })();
+
+  // ---- Settings sheet + immersive chrome toggle ----
+  window.toggleSettings=function(){
+    var el=document.getElementById('settings');
+    document.getElementById('toc').classList.remove('on');
+    document.getElementById('search').classList.remove('on');
+    document.getElementById('notebook').classList.remove('on');
+    el.classList.toggle('on');
+  };
+  // Scroll vs page mode. Changing epub.js flow requires re-creating the
+  // rendition; we preserve the reader's exact spot via the current CFI.
+  window.toggleFlow=function(){
+    var cur=(localStorage.getItem('rdr_flow')==='scrolled')?'scrolled':'paged';
+    var next=(cur==='scrolled')?'paged':'scrolled';
+    localStorage.setItem('rdr_flow', next);
+    _setFlowBtn();
+    if(!book||!rendition) return;
+    var at=_curCfi || localStorage.getItem('rdr_pos_'+bookId) || undefined;
+    var flow=(next==='scrolled')?'scrolled-doc':'paginated';
+    try{ rendition.destroy(); }catch(e){}
+    try{
+      rendition=book.renderTo('viewer',{width:'100%',height:'100%',spread:'none',flow:flow});
+      try{ if(window.__bindRenderHooks) window.__bindRenderHooks(); }catch(e){}
+      applyTheme();
+      try{ applyFont(); }catch(e){}
+      __wireRelocate();           // re-attach the relocated handler to the new rendition
+      rendition.display(at);
+    }catch(e){}
+  };
+  function _setFlowBtn(){
+    var b=document.getElementById('flowBtn'); if(!b) return;
+    var scrolled=(localStorage.getItem('rdr_flow')==='scrolled');
+    b.textContent= scrolled ? 'Scroll' : 'Pages';
+  }
+  window.toggleChrome=function(){
+    // close any open panels first; if a panel was open, just close it
+    var toc=document.getElementById('toc'), set=document.getElementById('settings'), sch=document.getElementById('search'), nb=document.getElementById('notebook');
+    if(toc.classList.contains('on')||set.classList.contains('on')||sch.classList.contains('on')||nb.classList.contains('on')){ toc.classList.remove('on'); set.classList.remove('on'); sch.classList.remove('on'); nb.classList.remove('on'); return; }
+    document.body.classList.toggle('chrome-off');
+  };
+
+  // ---- Chapter label in footer (from current spine item's TOC entry) ----
+  var _tocFlat=[];
+  window.__initChapLabels=function(){
+    if(!book||!book.loaded||!book.loaded.navigation) return;
+    book.loaded.navigation.then(function(nav){
+      function flatten(items){ (items||[]).forEach(function(it){ _tocFlat.push(it); if(it.subitems) flatten(it.subitems); }); }
+      if(nav&&nav.toc) flatten(nav.toc);
+    }).catch(function(){});
+  };
+  window.__setChapLabel=function(href){
+    if(!href||!_tocFlat.length) return;
+    var match=null;
+    _tocFlat.forEach(function(it){ if(it.href && href.indexOf(it.href.split('#')[0])>=0) match=it; });
+    if(match){ var el=document.getElementById('chap'); if(el) el.textContent=(match.label||'').trim(); }
+  };
+})();
+</script>
+</body></html>

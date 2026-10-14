@@ -1,0 +1,691 @@
+[
+ {
+  "file": "00-change.epub",
+  "id": "00-change",
+  "title": "Change",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "01-magic.epub",
+  "id": "01-magic",
+  "title": "Magic",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "02-evil.epub",
+  "id": "02-evil",
+  "title": "Evil",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "03-time.epub",
+  "id": "03-time",
+  "title": "Time",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "04-heaven.epub",
+  "id": "04-heaven",
+  "title": "Heaven",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "05-death.epub",
+  "id": "05-death",
+  "title": "Death",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "06-doom.epub",
+  "id": "06-doom",
+  "title": "Doom",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "07-hell.epub",
+  "id": "07-hell",
+  "title": "Hell",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "08-ruin.epub",
+  "id": "08-ruin",
+  "title": "Ruin",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "09-conquest.epub",
+  "id": "09-conquest",
+  "title": "Conquest",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "10-darkness.epub",
+  "id": "10-darkness",
+  "title": "Darkness",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "11-chaos.epub",
+  "id": "11-chaos",
+  "title": "Chaos",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "bulletins-at-the-end-of-the-world.epub",
+  "id": "bulletins-at-the-end-of-the-world",
+  "title": "Bulletins at the End of the World",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "A short story collection set in the Godsverse. The world has ended; all that remains are stories.",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology",
+   "Short Stories"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "12-eternity.epub",
+  "id": "12-eternity",
+  "title": "Eternity",
+  "author": "Russell Nohelty",
+  "series": "Godsverse Chronicles",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Mythology"
+  ],
+  "free": false,
+  "bundle": "godsverse_series"
+ },
+ {
+  "file": "01-the-sleeping-beauty-generic.epub",
+  "id": "01-the-sleeping-beauty-generic",
+  "title": "The Sleeping Beauty",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "02-the-wicked-witch-generic.epub",
+  "id": "02-the-wicked-witch-generic",
+  "title": "The Wicked Witch",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "03-the-fairy-queen-generic.epub",
+  "id": "03-the-fairy-queen-generic",
+  "title": "The Fairy Queen",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "04-the-red-rider-generic.epub",
+  "id": "04-the-red-rider-generic",
+  "title": "The Red Rider",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "05-the-sword-wielder-generic.epub",
+  "id": "05-the-sword-wielder-generic",
+  "title": "The Sword Wielder",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "06-the-dark-prince-generic.epub",
+  "id": "06-the-dark-prince-generic",
+  "title": "The Dark Prince",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "07-the-dragon-warrior-generic.epub",
+  "id": "07-the-dragon-warrior-generic",
+  "title": "The Dragon Warrior",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "08-the-sunken-kingdom-generic.epub",
+  "id": "08-the-sunken-kingdom-generic",
+  "title": "The Sunken Kingdom",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "09-the-faceless-woman-generic.epub",
+  "id": "09-the-faceless-woman-generic",
+  "title": "The Faceless Woman",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "10-the-drowned-princess-generic.epub",
+  "id": "10-the-drowned-princess-generic",
+  "title": "The Drowned Princess",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "11-the-golden-locket.epub",
+  "id": "11-the-golden-locket",
+  "title": "The Golden Locket",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "12-the-dark-planet-generic.epub",
+  "id": "12-the-dark-planet-generic",
+  "title": "The Dark Planet",
+  "author": "Russell Nohelty",
+  "series": "Obsidian Spindle Saga",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Fairy Tale"
+  ],
+  "free": false,
+  "bundle": "obsidian_series"
+ },
+ {
+  "file": "01-the-dragon-scourge.epub",
+  "id": "01-the-dragon-scourge",
+  "title": "The Dragon Scourge",
+  "author": "Russell Nohelty",
+  "series": "Dragon Strife",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Adventure"
+  ],
+  "free": false,
+  "bundle": "dragonstrife_series"
+ },
+ {
+  "file": "02-the-dragon-champion.epub",
+  "id": "02-the-dragon-champion",
+  "title": "The Dragon Champion",
+  "author": "Russell Nohelty",
+  "series": "Dragon Strife",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Adventure"
+  ],
+  "free": false,
+  "bundle": "dragonstrife_series"
+ },
+ {
+  "file": "03-the-dragon-goddess.epub",
+  "id": "03-the-dragon-goddess",
+  "title": "The Dragon Goddess",
+  "author": "Russell Nohelty",
+  "series": "Dragon Strife",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Adventure"
+  ],
+  "free": false,
+  "bundle": "dragonstrife_series"
+ },
+ {
+  "file": "04-wicked-bodies.epub",
+  "id": "04-wicked-bodies",
+  "title": "Wicked Bodies",
+  "author": "Russell Nohelty",
+  "series": "Dragon Strife",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Adventure"
+  ],
+  "free": false,
+  "bundle": "dragonstrife_series"
+ },
+ {
+  "file": "05-wicked-minds.epub",
+  "id": "05-wicked-minds",
+  "title": "Wicked Minds",
+  "author": "Russell Nohelty",
+  "series": "Dragon Strife",
+  "blurb": "",
+  "genres": [
+   "Epic Fantasy",
+   "Adventure"
+  ],
+  "free": false,
+  "bundle": "dragonstrife_series"
+ },
+ {
+  "file": "01-white-rabbit-nohelty-bookfunnel-2023-10-13-generic.epub",
+  "id": "01-white-rabbit-nohelty-bookfunnel-2023-10-13-generic",
+  "title": "White Rabbit",
+  "author": "Russell Nohelty",
+  "series": "Wonderland",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Crime/Noir"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "02-black-jack-nohelty-bookfunnel-2023-10-13-generic.epub",
+  "id": "02-black-jack-nohelty-bookfunnel-2023-10-13-generic",
+  "title": "Black Jack",
+  "author": "Russell Nohelty",
+  "series": "Wonderland",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Crime/Noir"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "anna-and-the-dark-place.epub",
+  "id": "anna-and-the-dark-place",
+  "title": "Anna and the Dark Place",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Romance"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "gumshoes-the-case-of-madisons-father.epub",
+  "id": "gumshoes-the-case-of-madisons-father",
+  "title": "Gumshoes: The Case of Madison's Father",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Mystery",
+   "Middle Grade"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "invasion.epub",
+  "id": "invasion",
+  "title": "Invasion",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Sci-Fi",
+   "YA"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "my-father-didnt-kill-himself.epub",
+  "id": "my-father-didnt-kill-himself",
+  "title": "My Father Didn't Kill Himself",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Mystery",
+   "Metaphysical"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "skritchs-revenge.epub",
+  "id": "skritchs-revenge",
+  "title": "Skritch's Revenge",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Sci-Fi",
+   "Comedy"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "sorry-for-existing.epub",
+  "id": "sorry-for-existing",
+  "title": "Sorry for Existing",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Literary",
+   "YA"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "the-marked-ones.epub",
+  "id": "the-marked-ones",
+  "title": "The Marked Ones",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Dark Fantasy",
+   "Dystopian"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "the-vessel.epub",
+  "id": "the-vessel",
+  "title": "The Vessel",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Sci-Fi",
+   "Dystopian"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "the-void-calls-us-home-russell-nohelty.epub",
+  "id": "the-void-calls-us-home-russell-nohelty",
+  "title": "The Void Calls Us Home",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Horror",
+   "Sci-Fi"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "time-is-a-flat-circle.epub",
+  "id": "time-is-a-flat-circle",
+  "title": "Time is a Flat Circle",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Literary",
+   "Metaphysical"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "worst-thing-in-the-universe.epub",
+  "id": "worst-thing-in-the-universe",
+  "title": "Worst Thing in the Universe",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Comedy",
+   "Sci-Fi"
+  ],
+  "free": true,
+  "bundle": null
+ },
+ {
+  "file": "quest-girls-01-fuck-fairy-edited.epub",
+  "id": "quest-girls-01-fuck-fairy",
+  "title": "F*ck Fairy",
+  "author": "Russell Nohelty",
+  "series": "Quest Girls",
+  "blurb": "Book 1 of the Quest Girls saga.",
+  "genres": [
+   "Fantasy",
+   "Adventure",
+   "Comedy"
+  ],
+  "free": true
+ },
+ {
+  "file": "quest-girls-02-go-to-hell-edited.epub",
+  "id": "quest-girls-02-go-to-hell",
+  "title": "Go to Hell",
+  "author": "Russell Nohelty",
+  "series": "Quest Girls",
+  "blurb": "Book 2 of the Quest Girls saga.",
+  "genres": [
+   "Fantasy",
+   "Adventure",
+   "Comedy"
+  ],
+  "free": false,
+  "bundle": "quest_girls_series"
+ },
+ {
+  "file": "quest-girls-03-gods-damned-edited.epub",
+  "id": "quest-girls-03-gods-damned",
+  "title": "Gods Damned",
+  "author": "Russell Nohelty",
+  "series": "Quest Girls",
+  "blurb": "Book 3 of the Quest Girls saga.",
+  "genres": [
+   "Fantasy",
+   "Adventure",
+   "Comedy"
+  ],
+  "free": false,
+  "bundle": "quest_girls_series"
+ },
+ {
+  "file": "quest-girls-04-cosmic-bastards-edited.epub",
+  "id": "quest-girls-04-cosmic-bastards",
+  "title": "Cosmic Bastards",
+  "author": "Russell Nohelty",
+  "series": "Quest Girls",
+  "blurb": "Book 4 of the Quest Girls saga.",
+  "genres": [
+   "Fantasy",
+   "Adventure",
+   "Comedy"
+  ],
+  "free": false,
+  "bundle": "quest_girls_series"
+ },
+ {
+  "file": "vengeance.epub",
+  "id": "vengeance",
+  "title": "Vengeance",
+  "author": "Russell Nohelty",
+  "series": "Novel",
+  "blurb": "",
+  "genres": [
+   "Thriller"
+  ],
+  "free": true,
+  "bundle": null
+ }
+]

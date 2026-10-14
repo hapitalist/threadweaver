@@ -1,0 +1,1897 @@
+<!doctype html>
+<html lang="en"><head>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#161019">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Thread Weaver">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <script src="pwa.js" defer></script>
+  <script src="lib/supabase.js" defer></script>
+  <script src="store.js" defer></script>
+  <script src="discover.js" defer></script>
+  <script src="comstation.js" defer></script>
+  <script src="pods.js" defer></script>
+  <script src="fun.js" defer></script>
+  <script src="serials.js" defer></script>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-src 'self' blob: data:; child-src 'self' blob: data:; connect-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thread Weaver</title>
+<style>
+@font-face{font-family:'Cinzel';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/cinzel-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/cinzel-latin-700-normal.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/cormorant-garamond-latin-500-normal.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:500;font-display:swap;src:url('fonts/cormorant-garamond-latin-500-italic.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:600;font-display:swap;src:url('fonts/cormorant-garamond-latin-600-italic.woff2') format('woff2');}@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/dm-mono-latin-500-normal.woff2') format('woff2');}
+:root{--bg0:#0a0810;--edge:#2e2742;--gold:#e8b53a;--ink:#ece3d0;--dim:#9b91ac;--green:#7fd08a}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:radial-gradient(140% 90% at 50% -10%,#22163b,#0a0810 60%);color:var(--ink);font-family:'Cormorant Garamond',serif;min-height:100dvh}
+#shell{max-width:920px;margin:0 auto;padding:calc(30px + env(safe-area-inset-top)) 20px 60px}
+.brand{text-align:center;margin:18px 0 6px}
+.brand .kicker{font-family:'DM Mono';font-size:11px;letter-spacing:13px;word-spacing:14px;color:var(--dim);max-width:100%;overflow:hidden}
+@media(max-width:420px){.brand .kicker{letter-spacing:8px;word-spacing:8px}}
+.brand h1{font-family:'Cinzel';font-size:clamp(34px,8vw,56px);letter-spacing:5px;color:var(--gold);text-shadow:0 0 30px rgba(232,181,58,.25);margin:6px 0}
+.brand .s{font-family:'Cormorant Garamond';font-size:18px;color:var(--dim);font-style:italic}
+.progress{font-family:'DM Mono';font-size:11px;color:var(--dim);text-align:center;margin-top:14px;letter-spacing:1px}
+.progress b{color:var(--gold)}
+.shelf{margin-top:34px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+/* ---- Collapsed, color-coded library ---- */
+.lib{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+.ser{border:1px solid var(--edge);border-left-width:5px;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#191324,#120d1c)}
+.gamesbox{border-left-color:var(--gold)}
+.ser-head{display:flex;align-items:center;gap:13px;padding:15px 17px;cursor:pointer;user-select:none;transition:.14s}
+.ser-head:hover{background:rgba(255,255,255,.03)}
+.ser-dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 10px currentColor}
+.ser-name{font-family:'Cinzel';font-size:18px;letter-spacing:.5px;color:var(--ink);flex:1;min-width:0}
+.ser-meta{font-family:'DM Mono';font-size:10px;letter-spacing:1px;color:var(--dim);text-align:right;white-space:nowrap}
+.ser-meta .own{color:var(--green)}
+.ser-meta .lock{color:var(--gold)}
+.ser-chev{font-family:'DM Mono';font-size:13px;color:var(--dim);transition:transform .18s;flex:none}
+.ser.open .ser-chev{transform:rotate(90deg)}
+.ser-rows{display:none;border-top:1px solid var(--edge)}
+.ser.open .ser-rows{display:block}
+.row{display:flex;align-items:center;gap:12px;padding:11px 17px 11px 20px;cursor:pointer;border-top:1px solid rgba(46,39,66,.5);transition:.12s}
+.row:first-child{border-top:none}
+.row:hover{background:rgba(255,255,255,.035)}
+.row-num{font-family:'DM Mono';font-size:11px;color:#16121f;background:var(--gold);border-radius:6px;min-width:24px;text-align:center;padding:2px 0;font-weight:bold;flex:none}
+.row-num.std{background:var(--edge);color:var(--dim)}
+.row-title{font-family:'Cormorant Garamond';font-weight:600;font-size:18px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{font-family:'DM Mono';font-size:11px;font-weight:400;color:var(--dim);letter-spacing:.5px}
+.row-dot{width:10px;height:10px;border-radius:50%;flex:none;margin:0 5px;box-shadow:0 0 8px currentColor}
+.ser-blurb{font-family:'Cormorant Garamond';font-size:16px;line-height:1.4;color:var(--dim);padding:4px 16px 14px 52px}
+.row-stat{font-family:'DM Mono';font-size:9.5px;letter-spacing:.8px;white-space:nowrap;flex:none}
+.row-stat.read{color:var(--gold)}
+.row-stat.prog{color:var(--green)}
+.row-stat.free{color:var(--green)}
+.row-stat.lock{color:var(--dim)}
+.row.locked .row-title{color:var(--dim)}
+.row.dl-row{border-top:1px dashed var(--edge);opacity:.92}
+.row.dl-row:hover{opacity:1;background:rgba(255,255,255,.04)}
+.row.dl-row .dl-ic{font-size:13px;line-height:1}
+.card{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:18px;overflow:hidden;cursor:pointer;transition:.16s}
+.card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 14px 40px #0008}
+.card .banner{height:118px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-size:40px;color:#16121f;position:relative;overflow:hidden}
+/* base series gradient sits underneath; a second layer adds depth + vignette */
+.card .banner::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(80% 120% at 25% 18%,rgba(255,255,255,.22),transparent 55%),
+            radial-gradient(90% 90% at 85% 110%,rgba(0,0,0,.45),transparent 60%);}
+/* faint oversized ghost glyph as a texture behind the main emblem */
+.card .banner .ghost{position:absolute;right:-14px;bottom:-26px;font-size:128px;opacity:.13;
+  transform:rotate(-8deg);filter:blur(.4px);pointer-events:none;line-height:1}
+.card.g1 .banner{background:linear-gradient(150deg,#f0c24e,#a9781f)}
+.card.g2 .banner{background:linear-gradient(150deg,#8a6fe0,#332459)}
+.card.g3 .banner{background:linear-gradient(150deg,#56a0c4,#1f3a57)}
+.card.g4 .banner{background:linear-gradient(150deg,#37937c,#123a31)}
+.card.g5 .banner{background:linear-gradient(150deg,#d4475f,#561826)}
+.card.g6 .banner{background:linear-gradient(150deg,#e7995f,#6e3a1f)}
+.g7 .banner{background:linear-gradient(150deg,#5a8ca8,#1a2b3a)}
+.card .banner .em{position:relative;z-index:1;font-size:50px;
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,.45)) drop-shadow(0 0 1px rgba(255,255,255,.3))}
+/* seam: banner melts into card body */
+.card .banner::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;
+  background:linear-gradient(180deg,transparent,rgba(18,13,28,.0) 0,rgba(18,13,28,.85));}
+.card.g1,.card.g2,.card.g3,.card.g4,.card.g5,.card.g6,.card.g7{}
+.card .done-ribbon{position:absolute;top:10px;right:-30px;transform:rotate(38deg);background:var(--green);color:#0a2a14;font-family:'DM Mono';font-size:9px;letter-spacing:1px;padding:3px 34px;display:none;z-index:2}
+.card.done .done-ribbon{display:block}
+.card .body{padding:16px 18px 18px;flex:1;display:flex;flex-direction:column}
+.card .tag{font-family:'DM Mono';font-size:9px;letter-spacing:2px;color:var(--dim)}
+.card .nm{font-family:'Cinzel';font-size:19px;margin:5px 0 7px;line-height:1.2}
+.card .bd{font-size:15.5px;color:var(--dim);line-height:1.38;flex:1}
+.card .go{margin-top:14px;font-family:'DM Mono';font-size:10px;letter-spacing:1px;color:var(--gold)}
+.go.locked{color:#e8b53a}
+.card.islocked .banner{filter:saturate(.6) brightness(.82)}
+.lockbadge{position:absolute;top:8px;right:8px;font-family:'DM Mono';font-size:11px;letter-spacing:.5px;color:#16121f;background:rgba(232,181,58,.95);border-radius:8px;padding:3px 8px;font-weight:bold}
+.freebadge{position:absolute;top:8px;left:8px;font-family:'DM Mono';font-size:11px;letter-spacing:.5px;color:#0a2a14;background:rgba(74,201,122,.95);border-radius:8px;padding:3px 8px;font-weight:bold;z-index:2}
+.card .meta{margin-top:8px;font-family:'DM Mono';font-size:9px;color:#6a6080;letter-spacing:1px}
+.foot{text-align:center;font-family:'DM Mono';font-size:10px;color:#5a5470;margin-top:40px;line-height:1.9}
+.unlock{margin:34px auto 0;max-width:440px;background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:16px;padding:20px 22px;text-align:center}
+.unlock .ul-kicker{font-family:'DM Mono';font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.unlock h2{font-family:'Cinzel';font-size:20px;color:var(--ink);margin:8px 0 4px;letter-spacing:1px}
+.unlock p{font-size:15px;color:var(--dim);line-height:1.4;margin-bottom:14px}
+.unlock .ul-row{display:flex;gap:8px;justify-content:center}
+.unlock input{flex:1;min-width:0;font-family:'DM Mono';font-size:13px;letter-spacing:1px;background:#0e0b16;border:1px solid var(--edge);color:var(--ink);padding:11px 13px;border-radius:9px;text-align:center;text-transform:uppercase}
+.unlock input:focus{outline:none;border-color:var(--gold)}
+.unlock button{flex:none;font-family:'DM Mono';font-size:12px;letter-spacing:1px;background:linear-gradient(150deg,#e8b53a,#b8862a);border:none;color:#16121f;padding:11px 18px;border-radius:9px;cursor:pointer;font-weight:700}
+.unlock button:hover{filter:brightness(1.08)}
+.unlock .ul-msg{margin-top:10px;font-family:'DM Mono';font-size:11px;letter-spacing:1px;min-height:14px}
+.unlock .ul-msg.err{color:#e0708a}
+.unlock .ul-msg.ok{color:var(--green)}
+#host{position:fixed;inset:0;background:var(--bg0);display:none;flex-direction:column;z-index:60}
+#host.on{display:flex}
+#hostbar{flex:none;display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:#0e0b16;border-bottom:1px solid var(--edge)}
+#hostbar .t{font-family:'Cinzel';font-size:14px;color:var(--gold);letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hostbar .right{display:flex;gap:8px;flex:none}
+#hostbar button{font-family:'DM Mono';font-size:11px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:9px 14px;border-radius:9px;cursor:pointer;letter-spacing:1px}
+#hostbar button:hover{border-color:var(--gold);color:var(--gold)}
+#frame{flex:1;width:100%;border:none;background:var(--bg0)}
+/* find/filter controls */
+#find{max-width:920px;margin:18px auto 24px;padding:0 4px}
+#find .srow{display:flex;gap:8px;margin-bottom:10px}
+#find input.q{flex:1;min-width:0;font-family:'DM Mono';font-size:14px;background:#0e0b16;border:1px solid var(--edge);
+  color:var(--ink);padding:12px 14px;border-radius:11px}
+#find input.q::placeholder{color:#6a6080}
+#find input.q:focus{outline:none;border-color:var(--gold)}
+#find .clearbtn{flex:none;font-family:'DM Mono';font-size:12px;background:#1d1830;border:1px solid var(--edge);
+  color:var(--dim);padding:0 14px;border-radius:11px;cursor:pointer;letter-spacing:1px}
+#find .clearbtn:hover{border-color:var(--gold);color:var(--gold)}
+#find .frow{display:flex;gap:8px;flex-wrap:wrap}
+#find select{flex:1;min-width:120px;font-family:'DM Mono';font-size:12px;background:#0e0b16;border:1px solid var(--edge);
+  color:var(--ink);padding:10px 12px;border-radius:10px;letter-spacing:.5px;
+  -webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 16px,calc(100% - 11px) 16px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+#find select:focus{outline:none;border-color:var(--gold)}
+#find select.fseries-top{flex:1;width:100%;font-size:14px;border-color:var(--gold);color:var(--gold);background:#15101f;padding:11px 12px;font-weight:bold}
+#noresults{text-align:center;color:var(--dim);font-family:'DM Mono';font-size:13px;margin:30px 0;display:none}
+/* ===== Premium home polish ===== */
+/* Greeting line — warm, personal, not a mission statement */
+.welcome{font-family:'Cormorant Garamond';font-size:19px;font-style:italic;color:var(--dim);text-align:center;margin:2px 0 4px}
+.welcome b{color:var(--gold);font-style:normal;font-weight:600}
+/* Continue-reading hero: brings a returning reader straight back in */
+#continueHero{display:none;margin:20px 0 6px;border-radius:20px;overflow:hidden;cursor:pointer;
+  border:1px solid var(--edge);background:linear-gradient(100deg,#241640,#170f28 60%,#120d1c);transition:.18s;position:relative}
+#continueHero.show{display:block}
+#continueHero:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 16px 46px #0009}
+#continueHero .ci{display:flex;align-items:center;gap:20px;padding:22px 24px}
+#continueHero .cArt{flex:none;width:60px;height:60px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:30px;color:#16121f;box-shadow:0 6px 18px #0007}
+#continueHero .cTxt{flex:1;min-width:0}
+#continueHero .cKick{font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+#continueHero .cTitle{font-family:'Cinzel';font-size:clamp(19px,4.5vw,24px);color:var(--ink);margin:5px 0 2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#continueHero .cSub{font-family:'Cormorant Garamond';font-size:16px;color:var(--dim)}
+#continueHero .cGo{flex:none;font-family:'DM Mono';font-size:11px;letter-spacing:1px;font-weight:700;
+  background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f;padding:11px 18px;border-radius:10px}
+@media(max-width:520px){#continueHero .cGo{display:none}#continueHero .ci{gap:15px;padding:18px}}
+/* Left-aligned section headers — one library, clear chapters within it */
+.sec{display:flex;align-items:baseline;gap:11px;margin:44px 0 2px}
+.sec .st{font-family:'Cinzel';font-size:21px;letter-spacing:1.5px;color:var(--gold);text-shadow:0 0 22px rgba(232,181,58,.18)}
+.sec .sc{font-family:'DM Mono';font-size:10px;letter-spacing:1px;color:var(--dim)}
+.sec .ss{font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:var(--dim);margin:1px 0 0}
+.secwrap{margin-bottom:2px}
+/* locked cards + store sheet */
+.card.locked{opacity:.92}
+.card .lockbadge{position:absolute;top:10px;left:10px;background:rgba(10,8,16,.82);border:1px solid var(--gold);
+  color:var(--gold);font-family:'DM Mono';font-size:9px;letter-spacing:1px;padding:4px 9px;border-radius:20px;display:flex;gap:4px;align-items:center}
+.card .go.buy{color:var(--gold)}
+#sheet{position:fixed;inset:0;background:rgba(6,4,12,.72);display:none;align-items:flex-end;justify-content:center;z-index:80}
+#sheet.on{display:flex}
+#sheet .panel{width:100%;max-width:520px;background:linear-gradient(180deg,#1a1426,#120d1c);border:1px solid var(--edge);
+  border-bottom:none;border-radius:20px 20px 0 0;padding:24px 22px calc(26px + env(safe-area-inset-bottom));animation:rise .22s ease}
+@keyframes rise{from{transform:translateY(40px);opacity:.4}to{transform:translateY(0);opacity:1}}
+#sheet .sk{font-family:'DM Mono';font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+#sheet h2{font-family:'Cinzel';font-size:21px;color:var(--ink);margin:8px 0 4px}
+#sheet .sub{font-size:15px;color:var(--dim);line-height:1.4;margin-bottom:16px}
+#sheet .opt{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0e0b16;border:1px solid var(--edge);
+  border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+#sheet .opt:hover{border-color:var(--gold)}
+#sheet .opt .l{font-family:'Cinzel';font-size:15px;color:var(--ink)}
+#sheet .opt .l small{display:block;font-family:'DM Mono';font-size:10px;color:var(--dim);letter-spacing:.5px;margin-top:3px}
+#sheet .opt .p{font-family:'DM Mono';font-size:14px;color:var(--gold);white-space:nowrap}
+  color:var(--ink);padding:11px 13px;border-radius:9px;text-transform:uppercase;text-align:center}
+  border:none;color:#16121f;padding:11px 16px;border-radius:9px;cursor:pointer;font-weight:700}
+#sheet .smsg{font-family:'DM Mono';font-size:11px;min-height:14px;margin-top:8px;text-align:center}
+#sheet .smsg.err{color:#e0708a}#sheet .smsg.ok{color:var(--green)}
+#sheet .closex{font-family:'DM Mono';font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;width:100%;margin-top:14px;padding:8px}
+.umx,.sheetx{position:absolute;top:10px;right:12px;font-size:24px;line-height:1;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 8px;z-index:2}
+.umx:hover,.sheetx:hover{color:var(--gold)}
+#sheet .panel{position:relative}
+#unlockModal .um{position:relative}
+/* Weave codex */
+/* ===== Bottom dock: one primary action + a More menu (no 5-button pile) ===== */
+#weaveBtn,#weaverBtn{position:static;z-index:auto;box-shadow:none}
+#dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));
+  z-index:55;display:flex;gap:8px;align-items:center}
+#dock>button{position:static!important;margin:0!important;box-shadow:0 8px 24px #0009!important;white-space:nowrap}
+#weaveBtn{background:linear-gradient(150deg,#7b5fd0,#3a2a6e);border:1px solid var(--gold);color:var(--ink);
+  font-family:'Cinzel';font-size:13px;letter-spacing:1px;padding:13px 18px;border-radius:30px;cursor:pointer;display:flex;gap:7px;align-items:center}
+#weaveBtn .cnt{font-family:'DM Mono';font-size:11px;color:var(--gold)}
+#weaveBtn .dockmascot{width:20px;height:20px;border-radius:5px;vertical-align:middle}
+#dockMore{background:rgba(20,15,28,.92);border:1px solid var(--edge);color:var(--ink);backdrop-filter:blur(8px);
+  font-family:'DM Mono';font-size:18px;line-height:1;letter-spacing:1px;padding:0;width:46px;height:46px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#dockMore:hover{border-color:var(--gold);color:var(--gold)}
+/* the popout menu of secondary actions */
+#dockMenu{position:fixed;right:calc(50% - 118px);bottom:calc(70px + env(safe-area-inset-bottom));z-index:56;
+  display:none;flex-direction:column;gap:8px;width:208px}
+#dockMenu.open{display:flex}
+#dockMenu button,#dockMenu #weaverBtn,#dockMenu #csBtn,#dockMenu #podsBtn,#dockMenu #discoverBtn{
+  position:static!important;left:auto!important;bottom:auto!important;right:auto!important;margin:0!important;width:100%;text-align:left;
+  background:rgba(20,15,28,.96)!important;border:1px solid var(--edge)!important;border-radius:13px!important;
+  color:var(--ink)!important;font-family:'Cinzel'!important;font-size:13px!important;letter-spacing:.5px!important;
+  padding:13px 16px!important;cursor:pointer;box-shadow:0 8px 24px #0009!important;backdrop-filter:blur(8px)}
+#dockMenu button:hover{border-color:var(--gold)!important;color:var(--gold)!important}
+#shell{padding-bottom:96px}
+/* Weaver profile screen */
+#weaver{position:fixed;inset:0;background:radial-gradient(140% 90% at 50% -10%,#2a2010,#0a0810 60%);z-index:72;display:none;flex-direction:column}
+#weaver.on{display:flex}
+#weaver .wbar{flex:none;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--edge)}
+#weaver .wbar h2{font-family:'Cinzel';font-size:18px;color:var(--gold);letter-spacing:2px}
+#weaver .wbar button{font-family:'DM Mono';font-size:11px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:9px 13px;border-radius:9px;cursor:pointer}
+#weaver .wscroll{flex:1;overflow-y:auto;padding:18px 16px calc(30px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto;width:100%}
+#weaver .rankcard{background:linear-gradient(150deg,#3a2e10,#1a1206);border:1px solid var(--gold);border-radius:18px;padding:22px 20px;text-align:center;margin-bottom:8px}
+#weaver .rankcard .rmasc{width:96px;height:96px;border-radius:16px;margin-bottom:10px}
+#weaver .rankcard .rtitle{font-family:'Cinzel';font-size:24px;color:var(--gold);letter-spacing:1px}
+#weaver .rankcard .rblurb{font-size:14px;color:var(--dim);margin-top:5px;font-style:italic}
+#weaver .xpbar{height:10px;background:#221a0c;border-radius:6px;margin:14px 0 6px;overflow:hidden;border:1px solid var(--edge)}
+#weaver .xpbar .fill{height:100%;background:linear-gradient(90deg,#caa23a,#f0d060);border-radius:6px;transition:width .6s ease}
+#weaver .rstats{background:linear-gradient(150deg,#241c2e,#15101e);border:1px solid var(--edge);border-radius:16px;padding:16px 16px 14px;margin-bottom:14px}
+#weaver .rstat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+#weaver .rstat-streak{display:flex;align-items:baseline;gap:7px}
+#weaver .rflame{font-size:22px}
+#weaver .rsnum{font-family:'Cinzel',serif;font-size:30px;color:var(--gold);line-height:1}
+#weaver .rslbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:1px}
+#weaver .rgoal{font-family:'DM Mono',monospace;font-size:11px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:7px 11px;border-radius:9px;cursor:pointer}
+#weaver .rgoal:active{border-color:var(--gold);color:var(--gold)}
+#weaver .rgoalbar{height:7px;background:#0e0b16;border-radius:5px;overflow:hidden;border:1px solid var(--edge);margin-bottom:13px}
+#weaver .rgoalbar .f{height:100%;background:linear-gradient(90deg,#caa23a,#f0d060);transition:width .6s ease}
+#weaver .rsgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#weaver .rscell{text-align:center;background:#0e0b16;border:1px solid var(--edge);border-radius:10px;padding:9px 4px}
+#weaver .rsv{font-family:'Cinzel',serif;font-size:16px;color:var(--gold);line-height:1.1}
+#weaver .rsk{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:1px;margin-top:3px;text-transform:uppercase}
+#weaver .xpnum{font-family:'DM Mono';font-size:11px;color:var(--dim)}
+#weaver .wsec{font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin:24px 0 12px}
+#weaver .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:10px}
+#weaver .bdg{background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:14px;padding:12px 8px;text-align:center}
+#weaver .bdg.locked{opacity:.4;filter:grayscale(1)}
+#weaver .bdg .bi{font-size:30px;line-height:1}
+#weaver .bdg .bn{font-family:'DM Mono';font-size:9.5px;color:var(--ink);margin-top:6px;line-height:1.25}
+#weaver .bdg .bd{font-size:9px;color:var(--dim);margin-top:3px;line-height:1.2}
+#weaver .relic{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+#weaver .relic.locked{opacity:.4;filter:grayscale(1)}
+#weaver .relic .ri{font-size:26px;flex:none}
+#weaver .relic .rt{font-family:'Cinzel';font-size:15px;color:var(--ink)}
+#weaver .relic .rb{font-size:12.5px;color:var(--dim);margin-top:2px}
+#weaver .tprog{background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+#weaver .tprog .tpn{font-family:'Cinzel';font-size:14px;color:var(--gold);display:flex;justify-content:space-between}
+#weaver .tprog .tpbar{height:7px;background:#221a0c;border-radius:5px;margin-top:8px;overflow:hidden}
+#weaver .tprog .tpbar .f{height:100%;background:linear-gradient(90deg,#7b5fd0,#caa23a)}
+#weave{position:fixed;inset:0;background:radial-gradient(140% 90% at 50% -10%,#241640,#0a0810 60%);z-index:70;display:none;flex-direction:column}
+#weave.on{display:flex}
+#weave .wbar{flex:none;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--edge)}
+#weave .wbar h2{font-family:'Cinzel';font-size:18px;color:var(--gold);letter-spacing:2px}
+#weave .wbar button{font-family:'DM Mono';font-size:11px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:9px 13px;border-radius:9px;cursor:pointer}
+#weave .wscroll{flex:1;overflow-y:auto;padding:18px 16px calc(30px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto;width:100%}
+#weave .wprog{font-family:'DM Mono';font-size:11px;color:var(--dim);text-align:center;margin-bottom:18px;letter-spacing:1px}
+#weave .wprog b{color:var(--gold)}
+#weave .wcat{font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin:22px 0 10px}
+#weave .went{background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:14px;padding:15px 17px;margin-bottom:10px}
+#weave .went.lock{opacity:.6;border-style:dashed}
+#weave .went .et{font-family:'Cinzel';font-size:16px;color:var(--ink);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+#weave .went .eb{font-size:15.5px;color:var(--dim);line-height:1.42}
+#weave .went.lock .eb{font-style:italic;color:#6a6080}
+#weave .went .elinks{margin-top:9px;padding-top:9px;border-top:1px solid var(--edge);font-family:'DM Mono';font-size:10.5px;color:var(--dim);letter-spacing:.5px}
+#weave .went .elink{display:inline-block;background:#241640;border:1px solid var(--edge);color:var(--gold);padding:3px 8px;border-radius:7px;margin:3px 5px 0 0;font-size:11px}
+#weave .went .elink.dim{color:#6a6080;border-style:dashed}
+/* --- codex source / cross-tradition / per-series layers --- */
+#weave .went .wlayer{margin-top:11px;padding-top:11px;border-top:1px solid var(--edge)}
+#weave .went .wlh{font-family:'DM Mono';font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);opacity:.85;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+#weave .went .wlbody{font-size:14.5px;color:var(--dim);line-height:1.4}
+#weave .went .wlbody.real{color:#b9aee0}
+#weave .went .wlmeta{font-family:'DM Mono';font-size:10px;color:#6a6080;margin-top:4px}
+#weave .went .wlsrc{display:inline-block;margin-top:7px;background:#241640;border:1px solid var(--gold);color:var(--gold);padding:5px 11px;border-radius:8px;font-family:'DM Mono';font-size:11px;letter-spacing:.4px;cursor:pointer}
+#weave .went .wlsrc:active{background:#2e1c52}
+#weave .went .wlface{margin:6px 0 0;padding-left:10px;border-left:2px solid var(--edge)}
+#weave .went .wlface .ff{font-family:'Cinzel';font-size:13px;color:var(--ink)}
+#weave .went .wlface .ft{font-family:'DM Mono';font-size:9.5px;color:var(--gold);opacity:.7;letter-spacing:.5px}
+#weave .went .wlface .fn{font-size:13.5px;color:var(--dim);line-height:1.36;margin-top:2px}
+#weave .went .wlx{margin:5px 0 0;font-size:13.5px;color:var(--dim);line-height:1.36}
+#weave .went .wlx b{color:#b9aee0;font-weight:600}
+#weave .went .wlconf{font-family:'DM Mono';font-size:9px;color:#6a6080;letter-spacing:.5px;float:right;opacity:.7}
+/* --- codex search --- */
+#weave .wsearch{position:relative;margin:0 0 12px}
+#weave .wsearch .wq{width:100%;box-sizing:border-box;background:#120d1c;border:1px solid var(--gold);border-radius:12px;color:var(--ink);font-family:'DM Mono';font-size:14px;padding:13px 38px 13px 15px;outline:none}
+#weave .wsearch .wq::placeholder{color:#6a6080;font-size:12.5px}
+#weave .wsearch .wqx{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gold);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1}
+#weave .wsr-head{font-family:'DM Mono';font-size:11px;letter-spacing:1px;color:var(--gold);opacity:.85;margin:2px 0 10px;text-transform:uppercase}
+#weave .wsr-cat{font-family:'DM Mono';font-size:10px;letter-spacing:1px;color:#6a6080;margin:14px 0 6px;text-transform:uppercase}
+/* --- source reader modal --- */
+#srcModal{position:fixed;inset:0;background:rgba(8,5,14,.86);z-index:120;display:none;align-items:center;justify-content:center;padding:18px}
+#srcModal.on{display:flex}
+#srcModal .srcm{background:linear-gradient(180deg,#181226,#0f0a18);border:1px solid var(--gold);border-radius:18px;max-width:620px;width:100%;max-height:86vh;overflow:auto;padding:26px 24px 22px;position:relative}
+#srcModal .uk{font-family:'DM Mono';font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:.8}
+#srcModal h3{font-family:'Cinzel';color:var(--ink);font-size:21px;margin:4px 0 2px;line-height:1.2}
+#srcModal .srctr{font-family:'DM Mono';font-size:11px;color:#6a6080;margin-bottom:14px}
+#srcModal .srcex{font-size:17px;line-height:1.6;color:#cfc4ec;font-style:italic;border-left:3px solid var(--gold);padding:4px 0 4px 16px;white-space:pre-wrap}
+#srcModal .srcref{font-family:'DM Mono';font-size:11px;color:var(--gold);opacity:.75;margin-top:10px;letter-spacing:.4px}
+#srcModal #srcFullBtn{margin-top:18px;width:100%;background:#241640;border:1px solid var(--gold);color:var(--gold);padding:12px;border-radius:11px;font-family:'DM Mono';font-size:13px;letter-spacing:.5px;cursor:pointer}
+#srcModal .srcfull{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--edge);font-size:15px;line-height:1.6;color:var(--dim);white-space:pre-wrap;max-height:50vh;overflow:auto}
+#srcModal .srcfull.on{display:block}
+/* --- full-text in-app reading overlay --- */
+#ftOverlay{position:fixed;inset:0;background:#0f0a18;z-index:160;display:none;flex-direction:column}
+#ftOverlay.on{display:flex}
+#ftOverlay .ftbar{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--edge);background:#120d1c}
+#ftOverlay .ftx{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:9px;padding:7px 13px;font-family:'DM Mono';font-size:12px;cursor:pointer;white-space:nowrap}
+#ftOverlay .ftt{min-width:0}
+#ftOverlay .ftname{font-family:'Cinzel';color:var(--ink);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ftOverlay .fttr{font-family:'DM Mono';font-size:10px;color:#6a6080;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ftOverlay .ftstatus{padding:14px 18px;color:var(--gold);font-family:'DM Mono';font-size:12px}
+#ftOverlay .ftstatus:empty{display:none}
+#ftOverlay .ftbody{flex:1;overflow:auto;padding:20px 22px 60px;white-space:pre-wrap;font-size:16px;line-height:1.62;color:#cfc4ec;font-family:Georgia,'Times New Roman',serif;-webkit-overflow-scrolling:touch}
+#weave .wthread{background:linear-gradient(150deg,#1a1330,#120d1c);border:1px solid var(--edge);border-radius:14px;padding:15px 17px;margin-bottom:10px}
+#weave .wthread .tn{font-family:'Cinzel';font-size:16px;color:var(--gold)}
+#weave .wthread .td{font-size:15px;color:var(--dim);line-height:1.4;margin-top:5px}
+#weave .wthread .tm{font-family:'DM Mono';font-size:10px;color:#6a6080;margin-top:7px;letter-spacing:1px}
+#weave .wthread .tbooks{margin-top:9px;padding-top:9px;border-top:1px solid var(--edge)}
+#weave .wthread .tbk{font-size:13.5px;color:var(--ink);line-height:1.5;padding:2px 0;opacity:.9}
+#weave .wtabs{flex:none;display:flex;gap:7px;padding:12px 16px 0;max-width:760px;margin:0 auto;width:100%}
+#weave .wtab{flex:1;font-family:'DM Mono';font-size:11px;letter-spacing:1px;text-align:center;background:#181226;border:1px solid var(--edge);color:var(--dim);padding:10px 6px;border-radius:9px 9px 0 0;cursor:pointer}
+#weave .wtab.on{background:linear-gradient(180deg,#241640,#191324);color:var(--gold);border-bottom-color:transparent}
+#weave .tlimg{width:100%;border-radius:12px;border:1px solid var(--edge);margin-bottom:18px;display:block}
+#weave .tlnote{font-size:13.5px;color:var(--dim);line-height:1.5;margin-bottom:16px;font-style:italic}
+#weave .tlev{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+#weave .tlev .tld{flex:none;width:112px;font-family:'DM Mono';font-size:11.5px;color:var(--gold);line-height:1.4;padding-top:2px}
+#weave .tlev .tls{flex:1}
+#weave .tlev .tlst{font-family:'Cinzel';font-size:15px;color:var(--ink)}
+#weave .tlev .tlin{font-size:12.5px;color:var(--dim);margin-top:2px}
+#weave .tlev .tlgo{font-family:'DM Mono';font-size:10px;color:var(--gold);margin-top:4px;cursor:pointer}
+#weave .tlepoch{font-family:'DM Mono';font-size:10px;letter-spacing:2px;color:#8a7fd0;text-transform:uppercase;margin:10px 0 4px}
+/* boot splash */
+#boot{position:fixed;inset:0;z-index:200;background:radial-gradient(130% 90% at 50% 40%,#2a1b14,#0a0810 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s ease}
+#boot.gone{opacity:0;pointer-events:none}
+#boot img{width:190px;height:auto;animation:bob 2s ease-in-out infinite}
+#boot .bt{font-family:'Cinzel';font-size:20px;color:var(--gold);letter-spacing:3px}
+#boot .bs{font-family:'DM Mono';font-size:11px;color:var(--dim);letter-spacing:2px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* unlock celebration modal */
+#unlockModal{position:fixed;inset:0;background:rgba(6,4,12,.82);z-index:90;display:none;align-items:center;justify-content:center;padding:24px}
+#unlockModal.on{display:flex}
+#unlockModal .um{max-width:380px;width:100%;background:linear-gradient(180deg,#241640,#140d22);border:1px solid var(--gold);
+  border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 0 50px rgba(123,95,208,.4);animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#unlockModal .star{font-size:40px;color:var(--gold);margin-bottom:8px}
+#unlockModal .uk{font-family:'DM Mono';font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+#unlockModal h3{font-family:'Cinzel';font-size:21px;color:var(--ink);margin:8px 0}
+#unlockModal .ulist{font-family:'Cormorant Garamond';font-size:17px;color:var(--gold);line-height:1.5;margin:12px 0 18px}
+#unlockModal button{font-family:'DM Mono';font-size:12px;background:linear-gradient(150deg,#7b5fd0,#3a2a6e);border:1px solid var(--gold);
+  color:var(--ink);padding:12px 20px;border-radius:10px;cursor:pointer;letter-spacing:1px;width:100%}
+body.is-native #storeLinks{display:none !important}
+body.pre-auth #shell{display:none !important}
+body.pre-auth #storeLinks{display:none !important}
+body.is-native.pre-auth #shell{display:block !important}
+</style></head>
+<body class="pre-auth">
+<style>
+/* Account required: keep the app hidden until store.js confirms a session.
+   Only the boot splash shows underneath the login wall. */
+/* Apple 5.1.1(v): free content must be usable WITHOUT an account. The shell is
+   always visible; only paid actions require sign-in (see promptSignin in store.js). */
+</style>
+<div id="boot"><img src="img/mascot.png" alt="loading"><div class="bt">WEAVE THREADER</div><div class="bs">pulling the threads…</div></div>
+<div id="shell">
+  <div class="brand" style="position:relative;z-index:52">
+    <div class="kicker">WEAVE THREADER</div>
+    <h1>WEAVE THREADER</h1>
+    <div class="welcome" id="welcome">Your library of worlds — read them, play them, weave them together.</div>
+    <!-- Apple 2.1(b): App Review could not LOCATE the in-app purchases because the only
+         route to them was tapping a locked item. This is an always-visible, obvious
+         entry point to the store listing every purchasable bundle. -->
+    <!-- Store download links: shown on the WEB (thread.wannabepress.com) to send
+         visitors to the app stores. HIDDEN inside the installed native app, where a
+         user already has the app and Apple/Google 2.3.10 discourages cross-store links.
+         fun.js/store.js add body.is-native on Cordova; this block hides in that case. -->
+    <div id="storeLinks" style="text-align:center;margin:10px 0 2px;position:relative;z-index:52;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="https://apps.apple.com/us/app/wannabe-press-thread-weaver/id6785677915" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:8px;background:#000;color:#fff;text-decoration:none;padding:9px 16px;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;border:1px solid #333">
+        <span style="font-size:17px"></span>&nbsp;Download on the App Store</a>
+      <a href="https://play.google.com/store/apps/details?id=com.russellnohelty.threadweaver" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:8px;background:#000;color:#fff;text-decoration:none;padding:9px 16px;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;border:1px solid #333">
+        <span style="font-size:16px">&#9654;</span>&nbsp;Get it on Google Play</a>
+    </div>
+    <div style="text-align:center;margin:14px 0 4px;position:relative;z-index:52">
+      <button id="btnStore" onclick="openStore()" style="font-family:inherit;font-size:14px;background:linear-gradient(150deg,#e8b53a,#b8862a);border:none;color:#16121f;padding:11px 26px;border-radius:10px;cursor:pointer;font-weight:800;letter-spacing:.02em">Store — Unlock Series &amp; Games</button>
+    </div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div id="find">
+    <div class="srow">
+      <input class="q" id="q" type="text" placeholder="Search your library…" autocomplete="off" spellcheck="false" oninput="applyFilters()">
+      <button class="clearbtn" onclick="clearFind()">Clear</button>
+    </div>
+    <div class="srow">
+      <select id="fSeries" class="fseries-top" onchange="applyFilters()"><option value="">All series</option></select>
+    </div>
+    <div class="frow">
+      <select id="fType" onchange="applyFilters()"><option value="">All types</option><option value="game">Games</option><option value="book">Books</option><option value="comic">Comics</option></select>
+      <select id="fGenre" onchange="applyFilters()"><option value="">All genres</option></select>
+      <select id="fAccess" onchange="applyFilters()"><option value="">Free &amp; paid</option><option value="free">Free only</option><option value="paid">Paid only</option></select>
+    </div>
+  </div>
+
+  <div id="continueHero" onclick="resumeLast()">
+    <div class="ci">
+      <div class="cArt" id="chArt">&#128214;</div>
+      <div class="cTxt">
+        <div class="cKick">Continue</div>
+        <div class="cTitle" id="chTitle"></div>
+        <div class="cSub" id="chSub"></div>
+      </div>
+      <div class="cGo">&#9656; Resume</div>
+    </div>
+  </div>
+
+  <div class="secwrap">
+    <div class="sec"><span class="st">GAMES</span><span class="sc" id="gamesCount"></span></div>
+    <div class="ss">Step inside the story. Choices, threads, and consequences.</div>
+  </div>
+  <div class="lib" id="shelf"></div>
+  <div id="noresults">Nothing matches that. Try clearing a filter.</div>
+
+  <div class="secwrap" id="libhead" style="display:none">
+    <div class="sec"><span class="st">BOOKS</span><span class="sc" id="booksCount"></span></div>
+    <div class="ss">The novels. Pick up exactly where you left off.</div>
+  </div>
+  <div class="lib" id="bookshelf"></div>
+
+  <div class="secwrap" id="comichead" style="display:none">
+    <div class="sec"><span class="st">COMICS</span><span class="sc" id="comicsCount"></span></div>
+    <div class="ss">Tap in and scroll. The whole page, panel by panel.</div>
+  </div>
+  <div class="lib" id="comicshelf"></div>
+
+  <div class="foot">Thread Weaver &middot; the worlds of Russell Nohelty &middot; your progress syncs across your devices</div>
+</div>
+<div id="dock">
+<button id="weaveBtn" onclick="openWeave()"><img src="img/mascot_icon.png" alt="" class="dockmascot"> The Weave <span class="cnt" id="weaveCnt"></span></button>
+<button id="dockMore" onclick="toggleDockMenu()" aria-label="More">&#8943;</button>
+</div>
+<div id="dockMenu">
+<button id="discoverBtn" onclick="toggleDockMenu(false);openDiscover()">&#10022; Find Your Thread</button>
+<button id="weaverBtn" onclick="toggleDockMenu(false);openWeaver()">&#9733; <span id="weaverRankLabel">Weaver</span></button>
+</div>
+
+<div id="weave">
+  <div class="wbar">
+    <h2>&#10038; THE WEAVE</h2>
+    <button onclick="closeWeave()">&larr; Back</button>
+  </div>
+  <div class="wscroll">
+    <div class="wprog" id="weaveProg"></div>
+    <div class="wsearch">
+      <input class="wq" id="weaveQ" type="text" placeholder="&#9906; Search all 864 entries — gods, monsters, places, items…" autocomplete="off" spellcheck="false" oninput="weaveSearch(this.value)">
+      <button class="wqx" id="weaveQx" onclick="weaveSearchClear()" aria-label="Clear" style="display:none">&#215;</button>
+    </div>
+    <div class="wtabs" id="weaveTabs">
+      <div class="wtab on" id="tab-timeline" onclick="weaveTab('timeline')">✶ TIMELINE</div>
+      <div class="wtab" id="tab-threads" onclick="weaveTab('threads')">❋ THREADS</div>
+      <div class="wtab" id="tab-codex" onclick="weaveTab('codex')">☉ CODEX</div>
+      <div class="wtab" id="tab-places" onclick="weaveTab('places')">⌖ PLACES</div>
+    </div>
+    <div id="weaveBody"></div>
+  </div>
+</div>
+
+<div id="weaver">
+  <div class="wbar">
+    <h2>&#9733; YOUR WEAVER</h2>
+    <button onclick="closeWeaver()">&larr; Back</button>
+  </div>
+  <div class="wscroll" id="weaverBody"></div>
+</div>
+
+<div id="unlockModal" onclick="if(event.target===this)closeUnlockModal()">
+  <div class="um">
+    <button class="umx" onclick="closeUnlockModal()" aria-label="Close">&#215;</button>
+    <div class="star">&#10038;</div>
+    <div class="uk">New Entry in the Weave</div>
+    <h3 id="umTitle">You've unlocked a discovery!</h3>
+    <div class="ulist" id="umList"></div>
+    <button onclick="closeUnlockModal()">View in the Weave</button>
+  </div>
+</div>
+
+<div id="srcModal" onclick="if(event.target===this)closeSourceWork()">
+  <div class="srcm">
+    <button class="umx" onclick="closeSourceWork()" aria-label="Close">&#215;</button>
+    <div class="uk">Read the Source</div>
+    <h3 id="srcTitle">&nbsp;</h3>
+    <div class="srctr" id="srcTr"></div>
+    <div class="srcex" id="srcEx"></div>
+    <div class="srcref" id="srcRef"></div>
+    <button id="srcFullBtn" style="display:none" onclick="openSourceFull()">&#128214; Read the full work</button>
+    <div class="srcfull" id="srcFull"></div>
+  </div>
+</div>
+
+<div id="ftOverlay">
+  <div class="ftbar">
+    <button class="ftx" onclick="closeFullText()" aria-label="Close">&larr; Done</button>
+    <div class="ftt"><div class="ftname" id="ftTitle"></div><div class="fttr" id="ftTr"></div></div>
+  </div>
+  <div class="ftstatus" id="ftStatus"></div>
+  <div class="ftbody" id="ftBody"></div>
+</div>
+
+<div id="sheet" onclick="if(event.target===this)closeSheet()">
+  <div class="panel">
+    <button class="sheetx" onclick="closeSheet()" aria-label="Close">&#215;</button>
+    <div class="sk" id="sheetKicker">Locked Series</div>
+    <h2 id="sheetTitle">Unlock this series</h2>
+    <div class="sub" id="sheetSub"></div>
+    <div id="sheetOpts"></div>
+    <div class="smsg" id="sheetMsg" role="status" aria-live="polite"></div>
+    <!-- 1.14.82: Apple requires a visible Restore for non-consumable purchases -->
+    <button id="btnRestore" class="closex" onclick="doRestore()" style="margin-top:10px">Restore purchases</button>
+<button class="closex" onclick="closeSheet()">Close</button>
+  </div>
+</div>
+<div id="host">
+  <div id="hostbar">
+    <span class="t" id="hosttitle"></span>
+    <div class="right">
+      <button id="btnFinished" onclick="markFinished()">&#10003; Finished</button>
+      <button onclick="closeHost()">&larr; Back</button>
+    </div>
+  </div>
+  <iframe id="frame" title="game" allow="fullscreen"></iframe>
+</div>
+<script>
+var GAMES = [
+  { id:'questgirls', cls:'g1', icon:'♛', tag:'4-BOOK SERIES', title:'Quest Girls', blurb:'A cursed quest-guide and a runaway princess across four books — fairy courts, the Abyssal Auction, Hell’s bureaucracy, and a remade Heaven.', meta:'Choose-your-path RPG · 4 books', genres:['Dark Fantasy','Adventure'], locked:true, price:'$5' },
+  { id:'godsverse', cls:'g2', icon:'✦', tag:'AGENT MISSIONS', title:'Agents of the Godschurch', blurb:'You’re a Godschurch operative dropped into the worlds of the Godsverse Chronicles — one mission per book, the gods as your backdrop.', meta:'Mission-based RPG · first mission free', genres:['Epic Fantasy','Mythology'], locked:true, price:'$5', preview:true },
+  { id:'ichabod', cls:'g3', icon:'☽', tag:'PSYCHOLOGICAL', title:'Ichabod Jones: The Asylum', blurb:'“A little better today.” A descent through an asylum where the walls and the mind don’t agree on what’s real.', meta:'Narrative horror', genres:['Horror'], locked:true, price:'$5' },
+  { id:'obsidian', cls:'g4', icon:'◈', tag:'EPIC SAGA', title:'The Obsidian Spindle Saga', blurb:'The sprawling saga the whole engine grew out of — a deep branching world of risk, reckoning, and hard-won endings.', meta:'Branching epic · largest world', genres:['Dark Fantasy','Fairy Tale'], locked:true, price:'$5' },
+  { id:'dragonstrife', cls:'g5', icon:'⚔', tag:'HEIST / REVENGE', title:'Dragon Strife: A Thief’s Reckoning', blurb:'A thief’s reckoning among dragons — steal, scheme, and survive a world that wants its due back.', meta:'Thief’s tale', genres:['Epic Fantasy','Adventure'], locked:true, price:'$5' },
+  { id:'eastwillow', cls:'g6', icon:'❀', tag:'12-PART SERIES', title:'East Willow', blurb:'A small town across a year of seasons. Twelve cozy, self-contained choose-your-path stories — start anywhere, return any time.', meta:'Choose-your-path · 12 chapters', genres:['Cozy','Slice of Life'], locked:true, price:'$5' },
+  { id:'paradise', cls:'g7', icon:'✦', tag:'SCI-FI EPIC', title:'Paradise: Rise Above', blurb:'A drunk nobody wakes a thousand years too late into a walled city that runs on the poor. No powers, no chosen one — just a man who can\u2019t die, and everyone who pays for it.', meta:'Branching sci-fi · one long descent', genres:['Sci-Fi','Dystopia'], locked:true, price:'$5' }
+];
+var STORE = window.STORE || null;   /* games load lazily from games.js on first open */
+var _gamesLoading = null;
+function ensureGames(){
+  if(window.STORE){ STORE = window.STORE; return Promise.resolve(); }
+  if(_gamesLoading) return _gamesLoading;
+  _gamesLoading = new Promise(function(resolve,reject){
+    var s=document.createElement('script'); s.src='games.js';
+    s.onload=function(){ STORE = window.STORE || {}; resolve(); };
+    s.onerror=function(){ reject(new Error('Could not load games.js')); };
+    document.head.appendChild(s);
+  });
+  return _gamesLoading;
+}
+var blobCache = {};
+function gameURL(id){
+  if(blobCache[id]) return blobCache[id];
+  var bin = atob(STORE[id]); var bytes = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  var url = URL.createObjectURL(new Blob([bytes], {type:"text/html"}));
+  blobCache[id]=url; return url;
+}
+var DONE_KEY="wannabe.finished";
+function loadDone(){ try{return JSON.parse(localStorage.getItem(DONE_KEY)||"{}");}catch(e){return {};} }
+function saveDone(d){ try{localStorage.setItem(DONE_KEY,JSON.stringify(d));}catch(e){} }
+
+/* ---- Entitlements / unlocks ---- */
+var UNLOCK_KEY = "wannabe.unlocked";   // stores both game ids and bundle ids
+/* Some entitlement ids are spelled two ways across the store/data (e.g. the
+   Quest Girls purchase grants "questgirls", but the novels carry
+   bundle:"quest_girls_series"). These aliases must imply each other so a paid
+   bundle actually unlocks its content. Each id maps to every equivalent id. */
+var ENT_ALIASES={
+  // ONE DIRECTION ONLY. Owning the book bundle unlocks the game, but owning
+  // the game id must NOT unlock the novels -- "All Games" ($5) writes
+  // u.questgirls=true for every game, and the reverse alias turned that into
+  // the $20 Quest Girls series for free.
+  "questgirls":"quest_girls_series"
+};
+function entIds(id){ var a=ENT_ALIASES[id]; return a?[id,a]:[id]; }
+function ent(){ try{ return JSON.parse(localStorage.getItem(UNLOCK_KEY)||"{}"); }catch(e){ return {}; } }
+function isUnlocked(id){ var u=ent(); return entIds(id).some(function(x){return u[x]===true;}); }
+function setUnlocked(id){ try{ var u=ent(); entIds(id).forEach(function(x){u[x]=true;});
+  /* All Games bought in the app store while signed out: the server never expands it, so do it here */
+  if(id==="all_games"&&typeof GAMES!=="undefined") GAMES.forEach(function(g){ u[g.id]=true; });
+  localStorage.setItem(UNLOCK_KEY,JSON.stringify(u)); }catch(e){} }
+function ownsAll(){ return isUnlocked("unlock_all"); }
+window.setUnlocked=setUnlocked; window.isUnlocked=isUnlocked; window.ownsAll=ownsAll;
+
+/* Bundle catalog — prices are display-only here; real charges happen via the
+   store's in-app purchase (iOS/Android) or Stripe on the website. */
+var BUNDLES={
+  all_games:           { name:"All Games",                  price:"$5",  count:7  },
+  godsverse_series:    { name:"The Godsverse Chronicles", price:"$50", count:13 },
+  obsidian_series:     { name:"The Obsidian Spindle Saga", price:"$50", count:12 },
+  dragonstrife_series: { name:"Dragon Strife",             price:"$20", count:5  },
+  ichabod_series:      { name:"Ichabod Jones: Monster Hunter", price:"$20", count:4 },
+  quest_girls_series:  { name:"Quest Girls",                price:"$20", count:4  }
+};
+function UNLOCK_ALL_PRICE(){
+  /* "Everything" costs more on the app stores because Apple/Google take a cut.
+     Web (Stripe) stays $99.99. These MUST match the real store products:
+     App Store Connect + Play Console "Everything" = $114.99.
+     This MUST be a function, not a value computed at parse time:
+     window.cordova.platformId is not populated until deviceready, so the old
+     IIFE always returned $99.99 inside the packaged app while Apple actually
+     charged $114.99. */
+  try{
+    var p = (window.cordova && window.cordova.platformId) || "";
+    if (p === "ios" || p === "android") return "$114.99";
+    if (location.protocol === "file:" || location.protocol === "capacitor:") return "$114.99";
+  }catch(e){}
+  return "$99.99";
+}
+
+/* Game prices. Each story-game unlocks on its own; Quest Girls (four books)
+   is $20, every other game is $5. The whole app is $99.99 (unlock_all). */
+function gamePrice(id){
+  var g=GAMES.find(function(x){return x.id===id;});
+  return (g&&g.price)||"$5";
+}
+
+
+/* All games are shown; locked ones display a price badge and open the store. */
+function visibleGames(){ return GAMES.slice(); }
+function gameUnlocked(g){ return !g.locked || isUnlocked(g.id) || ownsAll(); }
+
+/* A comic is readable if it's free, its bundle is owned, or 'unlock all'. */
+function comicUnlocked(c){
+  if(c.free) return true;
+  if(ownsAll()) return true;
+  if(c.bundle && isUnlocked(c.bundle)) return true;
+  return false;
+}
+/* A book is readable if it's free, its series bundle is owned, or 'unlock all'. */
+function bookUnlocked(b){
+  if(b.free) return true;
+  if(ownsAll()) return true;
+  if(b.bundle && isUnlocked(b.bundle)) return true;
+  return false;
+}
+
+/* ---- Buy / unlock sheet (for locked books) ---- */
+var sheetBundle=null;
+/* Canonical purchase order for the buy sheet: Quest Girls first, then the rest. */
+var BUNDLE_ORDER=["quest_girls_series","all_games","ichabod_series","godsverse_series","dragonstrife_series","obsidian_series"];
+function bundleOptsHTML(highlightId){
+  var html="";
+  BUNDLE_ORDER.forEach(function(bid){
+    var bd=BUNDLES[bid]; if(!bd) return;
+    var unit = (bid==="all_games") ? "games" : "books";
+    var hl = (bid===highlightId) ? ' style="border-color:var(--gold)"' : "";
+    html+='<div class="opt"'+hl+' onclick="buy(\''+bid+'\')"><div class="l">'+bd.name+'<small>'+bd.count+' '+unit+'</small></div><div class="p">'+bd.price+'</div></div>';
+  });
+  html+='<div class="opt" onclick="buy(\'unlock_all\')"><div class="l">Unlock Everything<small>Every series, every game, all books</small></div><div class="p">'+UNLOCK_ALL_PRICE()+'</div></div>';
+  return html;
+}
+function openSheet(bundleId){
+  sheetBundle=bundleId;
+  var bd=BUNDLES[bundleId];
+  document.getElementById("sheetKicker").textContent="Unlock a Series";
+  document.getElementById("sheetTitle").textContent=bd?("Unlock "+bd.name):"Unlock a series";
+  document.getElementById("sheetSub").textContent="Pick a series or bundle below — one purchase, yours on every device.";
+  document.getElementById("sheetOpts").innerHTML=bundleOptsHTML(bundleId);
+  var _m=document.getElementById("sheetMsg"); if(_m) _m.textContent="";
+  document.getElementById("sheet").classList.add("on");
+}
+/* Buy sheet for a locked story-game. Shows the full bundle lineup with
+   All Games highlighted. */
+function openGameSheet(gameId){
+  sheetBundle=gameId;
+  document.getElementById("sheetKicker").textContent="Unlock Games";
+  document.getElementById("sheetTitle").textContent="Unlock the games";
+  document.getElementById("sheetSub").textContent="All games unlock together for $5 — or grab a series or the whole app below.";
+  document.getElementById("sheetOpts").innerHTML=bundleOptsHTML("all_games");
+  var _m=document.getElementById("sheetMsg"); if(_m) _m.textContent="";
+  document.getElementById("sheet").classList.add("on");
+}
+/* Apple 2.1(b): an explicit, always-reachable store. Lists EVERY purchasable bundle
+   so App Review (and users) can locate the in-app purchases without hunting for a
+   locked item. Opened by the "Store" button in the header. */
+function openStore(){
+  sheetBundle=null;
+  document.getElementById("sheetKicker").textContent="Store";
+  document.getElementById("sheetTitle").textContent="Unlock series & games";
+  document.getElementById("sheetSub").textContent="One purchase, yours on every device. No account needed to buy.";
+  document.getElementById("sheetOpts").innerHTML=bundleOptsHTML(null);
+  var _m=document.getElementById("sheetMsg"); if(_m) _m.textContent="";
+  document.getElementById("sheet").classList.add("on");
+}
+window.openStore=openStore;
+function doRestore(){
+  var msg=document.getElementById("sheetMsg");
+  if(msg){ msg.className="smsg"; msg.textContent="Restoring your purchases…"; }
+  try{ if(window.restorePurchases) window.restorePurchases(); }catch(e){}
+  setTimeout(function(){
+    if(msg){ msg.className="smsg ok"; msg.textContent="Done. Anything you've bought is unlocked. Sign in to sync it to your other devices."; }
+    if(window.renderAll) try{ window.renderAll(); }catch(e){}
+  },2500);
+}
+window.doRestore=doRestore;
+function closeSheet(){ document.getElementById("sheet").classList.remove("on"); sheetBundle=null; }
+/* Escape closes whichever modal is open — no trapping the user. */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  var um=document.getElementById('unlockModal');
+  var sh=document.getElementById('sheet');
+  if(um&&um.classList.contains('on')){ closeUnlockModal(); return; }
+  if(sh&&sh.classList.contains('on')){ closeSheet(); return; }
+});
+
+/* buy() is where the real purchase happens. For now (codes-only build) it
+   explains how to buy. When in-app purchase / Stripe are wired in, this
+   function calls the store and, on success, calls setUnlocked(id). */
+function buy(id){
+  var msg=document.getElementById("sheetMsg");
+  if(window.buyBundle){
+    if(msg){ msg.className="smsg"; msg.textContent="Opening secure checkout…"; }
+    window.buyBundle(id);
+  } else {
+    if(msg){ msg.className="smsg"; msg.textContent="Store is still loading — try again in a moment."; }
+    else { alert("Store is still loading — try again in a moment."); }
+  }
+}
+
+/* ---------------- FIND / FILTER ---------------- */
+var FILT={q:'',type:'',series:'',genre:'',access:''};
+function readFilters(){
+  FILT.q=(document.getElementById('q').value||'').trim().toLowerCase();
+  FILT.type=document.getElementById('fType').value;
+  FILT.series=document.getElementById('fSeries').value;
+  FILT.genre=document.getElementById('fGenre').value;
+  var fa=document.getElementById('fAccess'); FILT.access=fa?fa.value:'';
+}
+function gameMatches(g){
+  if(FILT.type && FILT.type!=='game') return false;
+  if(FILT.series) return false;
+  if(FILT.access) return false;
+  if(FILT.q && (g.title||'').toLowerCase().indexOf(FILT.q)<0 && (g.blurb||'').toLowerCase().indexOf(FILT.q)<0) return false;
+  if(FILT.genre && (g.genres||[]).indexOf(FILT.genre)<0) return false;
+  return true;
+}
+function bookMatches(b){
+  if(FILT.type && FILT.type!=='book') return false;
+  if(FILT.series && b.series!==FILT.series) return false;
+  if(FILT.access==='free' && !b.free) return false;
+  if(FILT.access==='paid' && b.free) return false;
+  if(FILT.genre && (b.genres||[]).indexOf(FILT.genre)<0) return false;
+  if(FILT.q && (b.title||'').toLowerCase().indexOf(FILT.q)<0 && (b.author||'').toLowerCase().indexOf(FILT.q)<0) return false;
+  return true;
+}
+function populateDropdowns(){
+  var sSel=document.getElementById('fSeries'), gSel=document.getElementById('fGenre');
+  var genres=[];
+  BOOKS.forEach(function(b){
+    (b.genres||[]).forEach(function(x){ if(genres.indexOf(x)<0) genres.push(x); });
+  });
+  GAMES.forEach(function(g){ (g.genres||[]).forEach(function(x){ if(genres.indexOf(x)<0) genres.push(x); }); });
+  genres.sort();
+  // Series in canonical reading order (not alphabetical). 'Novel' bucket excluded
+  // from the series picker because those are standalone, not a series.
+  // Counts span BOTH books and comics so comic-only series (e.g. Ichabod Jones) show up.
+  var ORDER=["Wonderland","Godsverse Chronicles","Quest Girls","Ichabod Jones","Dragon Strife","Obsidian Spindle Saga","In-World Comics"];
+  var COMICS_LIST = (typeof COMICS!=='undefined' && COMICS) ? COMICS : [];
+  var present=[];
+  ORDER.forEach(function(s){
+    var bitems=BOOKS.filter(function(b){return b.series===s;});
+    var citems=COMICS_LIST.filter(function(c){return c.series===s;});
+    var total=bitems.length+citems.length;
+    if(!total) return;
+    var free=bitems.filter(function(b){return b.free;}).length + citems.filter(function(c){return c.free;}).length;
+    var tag = free===total ? 'all free' : (free===0 ? 'all paid' : free+' free');
+    present.push({value:s,label:s+' \u00b7 '+total+' \u00b7 '+tag});
+  });
+  sSel.innerHTML='<option value="">All series</option>'+present.map(function(o){return '<option value="'+o.value+'">'+o.label+'</option>';}).join('');
+  gSel.innerHTML='<option value="">All genres</option>'+genres.map(function(g){return '<option value="'+g+'">'+g+'</option>';}).join('');
+}
+function applyFilters(){ readFilters(); renderShelf(); renderBooks(); renderComics(); checkEmpty(); }
+function clearFind(){
+  document.getElementById('q').value=''; document.getElementById('fType').value='';
+  document.getElementById('fSeries').value=''; document.getElementById('fGenre').value='';
+  var fa=document.getElementById('fAccess'); if(fa) fa.value='';
+  applyFilters();
+}
+function checkEmpty(){
+  var n=document.querySelectorAll('#shelf .card').length+document.querySelectorAll('#bookshelf .card').length+document.querySelectorAll('#comicshelf .card').length;
+  document.getElementById('noresults').style.display=(n===0)?'block':'none';
+}
+
+/* Series accent color for the continue-hero art tile */
+function seriesColorForBook(b){ return serColor((b&&b.series)||"Novel"); }
+/* Find the single most-recently-opened readable item and surface it up top. */
+function refreshContinue(){
+  var hero=document.getElementById("continueHero"); if(!hero) return;
+  var best=null;
+  try{
+    (BOOKS||[]).forEach(function(b){
+      var key="rdr_seen_"+(b.id||b.file);
+      var t=parseInt(localStorage.getItem(key)||"0",10);
+      var hasPos=!!localStorage.getItem("rdr_pos_"+(b.id||b.file));
+      if(t && hasPos && bookUnlocked(b) && (!best||t>best.t)){
+        best={t:t,kind:"book",item:b};
+      }
+    });
+    (COMICS||[]).forEach(function(c){
+      var t=parseInt(localStorage.getItem("comic_seen_"+c.id)||"0",10);
+      var hasPos=!!localStorage.getItem("comic_panel_"+c.id);
+      if(t && hasPos && comicUnlocked(c) && (!best||t>best.t)){
+        best={t:t,kind:"comic",item:c};
+      }
+    });
+  }catch(e){}
+  if(!best){ hero.classList.remove("show"); window.__continue=null; return; }
+  window.__continue=best;
+  var art=document.getElementById("chArt");
+  var title=document.getElementById("chTitle");
+  var sub=document.getElementById("chSub");
+  if(best.kind==="book"){
+    var col=seriesColorForBook(best.item);
+    art.style.background="linear-gradient(150deg,"+col+",#16121f)";
+    art.innerHTML="&#128214;";
+    title.textContent=best.item.title||best.item.file;
+    sub.textContent=(best.item.series&&best.item.series!=="Novel")?best.item.series:"Novel";
+  }else{
+    art.style.background="linear-gradient(150deg,#c23a52,#641d2c)";
+    art.innerHTML="&#128214;";
+    title.textContent=best.item.title||best.item.id;
+    sub.textContent="Comic";
+  }
+  hero.classList.add("show");
+}
+function resumeLast(){
+  var c=window.__continue; if(!c) return;
+  if(c.kind==="book"){ openBook(c.item.file,c.item.title,c.item.id||c.item.file); }
+  else{ openComic(c.item.id,c.item.title); }
+}
+/* Live counts beside each section header. */
+function refreshCounts(){
+  function set(id,txt){ var e=document.getElementById(id); if(e) e.textContent=txt; }
+  try{
+    var gOwned=(typeof visibleGames==="function"?visibleGames():GAMES).filter(gameUnlocked).length;
+    var gTot=(typeof visibleGames==="function"?visibleGames():GAMES).length;
+    set("gamesCount", gOwned+" of "+gTot+" unlocked");
+    var bOwned=(BOOKS||[]).filter(bookUnlocked).length;
+    set("booksCount", bOwned+" of "+(BOOKS||[]).length+" in your library");
+    var cOwned=(COMICS||[]).filter(comicUnlocked).length;
+    set("comicsCount", cOwned+" of "+(COMICS||[]).length+" in your library");
+  }catch(e){}
+}
+function refreshHome(){ try{refreshContinue();}catch(e){} try{refreshCounts();}catch(e){} }
+window.refreshHome=refreshHome;
+/* store.js calls window.renderShelves()/renderAll() after a purchase or
+   entitlement refresh. Without these, a completed purchase would not update
+   the UI until a manual reload. Wire them to the real render functions. */
+function renderAll(){
+  try{ upgradeOpenPreview(); }catch(e){}
+  try{renderShelf();}catch(e){}
+  try{renderBooks();}catch(e){}
+  try{renderComics();}catch(e){}
+  try{refreshHome();}catch(e){}
+}
+window.renderAll=renderAll;
+/* The free version of a game was open (signed in on a new device before the purchases
+   arrived, or bought from inside the game): reopen it as the full game. */
+function upgradeOpenPreview(){
+  if(!currentGame) return;
+  var fr=document.getElementById('frame'); if(!fr||String(fr.src).indexOf('#preview')<0) return;
+  var g=GAMES.find(function(x){return x.id===currentGame;});
+  if(!g||!gameUnlocked(g)) return;
+  fr.src="about:blank";
+  var u=gameURL(currentGame), id=currentGame;
+  setTimeout(function(){ if(currentGame===id) fr.src=u; },60);
+}
+window.renderShelves=renderAll;
+
+function renderShelf(){
+  var done=loadDone();
+  var allVisible=visibleGames();
+  var games=allVisible.filter(gameMatches);
+  var unlockedGames=allVisible.filter(gameUnlocked);
+  var nDone=unlockedGames.filter(function(g){return done[g.id];}).length;
+  document.getElementById("progress").innerHTML="<b>"+nDone+"</b> of <b>"+unlockedGames.length+"</b> worlds marked finished";
+  var GCOL={g1:"#e8b53a",g2:"#7b5fd0",g3:"#56a0c4",g4:"#37937c",g5:"#d4475f",g6:"#e7995f"};
+  var html="";
+  games.forEach(function(g){
+    var unlocked=gameUnlocked(g);
+    var fin=(done[g.id]&&unlocked);
+    var col=GCOL[g.cls]||"#e8b53a";
+    var stat,statcls;
+    if(unlocked){
+      if(fin){ stat='&#10003; FINISHED'; statcls="row-stat free"; }
+      else{ stat='&#9654; PLAY'; statcls="row-stat read"; }
+    }else if(g.preview){
+      stat='&#9654; FREE MISSION'; statcls="row-stat read";
+    }else{
+      stat='&#128274; '+(g.price||"$5"); statcls="row-stat lock";
+    }
+    html+='<div class="row'+(unlocked||g.preview?"":" locked")+'" onclick="openGame(\''+g.id+'\')">'+
+      '<span class="row-num" style="background:'+col+';color:#16121f">'+g.icon+'</span>'+
+      '<span class="row-title">'+g.title+'<span class="row-sub"> · '+(g.meta||g.tag)+'</span></span>'+
+      '<span class="'+statcls+'">'+stat+'</span></div>';
+  });
+  document.getElementById("shelf").innerHTML='<div class="ser open gamesbox"><div class="ser-rows">'+html+'</div></div>';
+}
+var currentGame=null, _gameOpenSeq=0;
+function openGame(id){
+  var g=GAMES.find(function(x){return x.id===id;}); if(!g) return;
+  var preview = g.locked && !isUnlocked(id) && !ownsAll();
+  if(preview && !g.preview){ openGameSheet(id); return; }
+  currentGame=id;
+  markGamePlayed(id);
+  document.getElementById("hosttitle").textContent=g.title;
+  var fr=document.getElementById("frame");
+  document.getElementById("host").classList.add("on");
+  /* Opening a game a second time showed a blank screen: about:blank and the game's
+     address were set back to back and the blank page could land last. Set the game's
+     address once, and only if the reader hasn't backed out while games.js loaded. */
+  var openedAt=++_gameOpenSeq;
+  if(!window.STORE) fr.src="about:blank";
+  ensureGames().then(function(){
+    if(openedAt!==_gameOpenSeq||currentGame!==id) return;
+    fr.src=gameURL(id)+(preview?"#preview":"");
+  }).catch(function(){
+    document.getElementById("hosttitle").textContent="Could not load game";
+  });
+}
+function closeHost(){
+  _gameOpenSeq++;
+  document.getElementById("host").classList.remove("on");
+  document.getElementById("frame").src="";
+  document.getElementById("btnFinished").style.display="";
+  document.getElementById("weaveBtn").style.display="";
+  var _cs=document.getElementById("csBtn"); if(_cs) _cs.style.display="";
+  if(window.__podsBtnVisible) window.__podsBtnVisible(true);
+  if(window.__weaverBarVisible) window.__weaverBarVisible(true);
+  currentGame=null; renderShelf(); refreshHome();
+}
+function markFinished(){
+  if(!currentGame) return;
+  var d=loadDone(); d[currentGame]=Date.now(); saveDone(d);
+  var btn=event.target; btn.textContent="\u2713 Marked";
+  setTimeout(function(){ if(btn) btn.textContent="\u2713 Finished"; },1400);
+}
+
+/* ---------------- BOOKSHELF ---------------- */
+var BOOKS=[];
+function openBook(file,title,id){
+  // WEB requires sign-in to read (Russell's call for thread.wannabepress.com).
+  // NATIVE (iOS/Android) must NOT gate reading -- Apple/Google reject forced login --
+  // so this branch is skipped when body.is-native is set.
+  try{
+    var isNative = document.body.classList.contains("is-native");
+    var signedIn = false;
+    try{ signedIn = !!(window.getSession && window.getSession()); }catch(e){}
+    if(!isNative && !signedIn){
+      if(window.promptSignin){ window.promptSignin(); }
+      else if(window.showLoginWall){ window.showLoginWall("Sign in to read."); }
+      return;
+    }
+  }catch(e){}
+  document.getElementById("hosttitle").textContent=title||"Reading";
+  try{ localStorage.setItem("rdr_seen_"+(id||file), Date.now()); }catch(e){}
+  if(window.__weaverBarVisible) window.__weaverBarVisible(false);
+  document.getElementById("btnFinished").style.display="none"; // no "finished" for books
+  var url="reader.html?src=books/"+encodeURIComponent(file)+"&id="+encodeURIComponent(id||file)
+          +"&title="+encodeURIComponent(title||"");
+  document.getElementById("frame").src=url;
+  document.getElementById("host").classList.add("on");
+  document.getElementById("weaveBtn").style.display="none";
+  var _csb=document.getElementById("csBtn"); if(_csb) _csb.style.display="none";
+  if(window.__podsBtnVisible) window.__podsBtnVisible(false);
+  if(window.__weaverBarVisible) window.__weaverBarVisible(false);
+}
+/* Series → accent color + canonical reading order. */
+var SERIES_META={
+  "Wonderland":            {color:"#4a8fb0",order:7},
+  "Quest Girls":           {color:"#e8b53a",order:2},
+  "Godsverse Chronicles":  {color:"#7b5fd0",order:3},
+  "Dragon Strife":         {color:"#c23a52",order:4},
+  "Obsidian Spindle Saga": {color:"#2f7d6a",order:5},
+  "Ichabod Jones":         {color:"#d98a5a",order:6},
+  "In-World Comics":       {color:"#5a8a6a",order:60},
+  "Novel":                 {color:"#9b91ac",order:99}
+};
+function serColor(s){ return (SERIES_META[s]||SERIES_META["Novel"]).color; }
+/* Comics have their own flagship priority (Ichabod leads), independent of the
+   book series order. Lower number = higher in the comics list. */
+var COMIC_ORDER={ "Ichabod Jones":1, "Godsverse Chronicles":2, "In-World Comics":60 };
+function comicSerOrder(s){ return (s in COMIC_ORDER)?COMIC_ORDER[s]:serOrder(s); }
+function serOrder(s){ var m=SERIES_META[s]; return m?m.order:50; }
+function renderBooks(){
+  var sh=document.getElementById("bookshelf");
+  var head=document.getElementById("libhead");
+  if(!BOOKS.length){ sh.innerHTML=""; head.style.display="none"; return; }
+  var books=BOOKS.filter(bookMatches);
+  head.style.display = books.length ? "" : "none";
+  // group by series
+  var groups={}, gorder=[];
+  books.forEach(function(b){
+    var s=b.series||"Novel";
+    if(!groups[s]){ groups[s]=[]; gorder.push(s); }
+    groups[s].push(b);
+  });
+  gorder.sort(function(a,c){ return serOrder(a)-serOrder(c) || a.localeCompare(c); });
+  var html="";
+  gorder.forEach(function(s){
+    var items=groups[s];
+    var col=serColor(s);
+    var isStd=(s==="Novel");
+    var label=isStd?"Standalone Novels":s;
+    var owned=0, anyLocked=false, anyFree=false;
+    items.forEach(function(b){
+      var u=bookUnlocked(b); if(u)owned++; else anyLocked=true;
+      if(b.free)anyFree=true;
+    });
+    var meta;
+    if(isStd){ meta='<span class="own">'+items.length+' books</span>'; }
+    else if(!anyLocked){ meta='<span class="own">'+items.length+' books · owned</span>'; }
+    else if(owned>0){ meta='<span class="own">'+owned+'</span> / '+items.length+' owned'; }
+    else { meta=items.length+' books · <span class="lock">tap to unlock</span>'; }
+    var openCls=(owned>0||isStd||anyFree)?" open":"";
+    var rows="";
+    items.forEach(function(b,idx){
+      var u=bookUnlocked(b);
+      var num='<span class="row-num'+(isStd?" std":"")+'" style="'+(isStd?'':'background:'+col+';color:#16121f')+'">'+(isStd?"•":(idx+1))+'</span>';
+      var inprog=false;
+      try{ inprog=!!(u && localStorage.getItem("rdr_pos_"+(b.id||b.file))); }catch(e){}
+      var stat,cls,action;
+      if(u){
+        action='onclick="openBook(\''+(b.file).replace(/'/g,"\\'")+'\',\''+(b.title||"").replace(/'/g,"\\'")+'\',\''+(b.id||b.file).replace(/'/g,"\\'")+'\')"';
+        if(inprog){ stat='&#9656; CONTINUE'; cls="row-stat prog"; }
+        else if(b.free){ stat='&#10022; FREE · READ'; cls="row-stat free"; }
+        else { stat='&#9656; READ'; cls="row-stat read"; }
+      } else {
+        action='onclick="openSheet(\''+(b.bundle||"").replace(/'/g,"\\'")+'\')"';
+        stat='&#128274; UNLOCK'; cls="row-stat lock";
+      }
+      rows+='<div class="row'+(u?"":" locked")+'" '+action+'>'+num+
+        '<span class="row-title">'+(b.title||b.file)+'</span>'+
+        '<span class="'+cls+'">'+stat+'</span></div>';
+    });
+    var bundleId=null;
+    items.forEach(function(b){ if(!bundleId && b.bundle) bundleId=b.bundle; });
+    var dlRow="";
+    if(!isStd && bundleId && owned>0){
+      dlRow='<div class="row dl-row" onclick="event.stopPropagation();downloadSeriesOffline(\''+bundleId+'\',this)">'+
+        '<span class="row-num dl-ic" style="background:'+col+';color:#16121f">&#8675;</span>'+
+        '<span class="row-title" style="color:'+col+'">Download all for offline</span>'+
+        '<span class="row-stat" style="color:'+col+'">GET</span></div>';
+    }
+    // 1.15.0: every series (and any standalone novel) can be followed as a weekly serial
+    var _sid=isStd?"pick-novel":({"Godsverse Chronicles":"godsverse","Obsidian Spindle Saga":"obsidian-spindle","Dragon Strife":"dragon-strife","Quest Girls":"quest-girls","Wonderland":"wonderland"})[s]||null;
+    if(_sid){
+      dlRow+='<div class="row dl-row serial-row" onclick="event.stopPropagation();if(window.twSerialOpen)twSerialOpen(\''+_sid+'\')">'+
+        '<span class="row-num dl-ic" style="background:'+col+';color:#16121f">&#10227;</span>'+
+        '<span class="row-title" style="color:'+col+'">'+(isStd?"Follow a novel as a weekly serial":"Follow as a weekly serial")+'</span>'+
+        '<span class="row-stat" style="color:'+col+'">FREE</span></div>';
+    }
+    html+='<div class="ser'+openCls+'" style="border-left-color:'+col+'">'+
+      '<div class="ser-head" onclick="toggleSeries(this)">'+
+        '<span class="ser-dot" style="background:'+col+';color:'+col+'"></span>'+
+        '<span class="ser-name">'+label+'</span>'+
+        '<span class="ser-meta">'+meta+'</span>'+
+        '<span class="ser-chev">&#9656;</span>'+
+      '</div>'+
+      '<div class="ser-rows">'+rows+dlRow+'</div>'+
+    '</div>';
+  });
+  sh.innerHTML=html;
+}
+/* 1.14.82: paid books aren't public files, so the old service-worker download
+   always 404'd and the row sat on "DOWNLOADING…". Now each owned book in the
+   series is signed by library-url and saved into the same on-device store the
+   reader opens first (IndexedDB tw_books/epubs, keyed by book id) - so the
+   whole series opens offline. Tapping again retries anything that failed. */
+function _twBookIDB(){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open('tw_books',1);
+    r.onupgradeneeded=function(){ if(!r.result.objectStoreNames.contains('epubs')) r.result.createObjectStore('epubs'); };
+    r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+  });
+}
+function _twIdb(mode,fn){
+  return _twBookIDB().then(function(db){ return new Promise(function(res){
+    var st=db.transaction('epubs',mode).objectStore('epubs'); var q=fn(st);
+    q.onsuccess=function(){ res(q.result); }; q.onerror=function(){ res(null); };
+  });}).catch(function(){ return null; });
+}
+function downloadSeriesOffline(bundleId, rowEl){
+  var stat=rowEl&&rowEl.querySelector('.row-stat');
+  function say(t){ if(stat) stat.textContent=t; }
+  if(rowEl&&rowEl.dataset.busy==='1') return;
+  var token=window.twAccessToken&&window.twAccessToken();
+  if(!token){ say('SIGN IN FIRST'); if(window.promptSignin) try{ window.promptSignin(); }catch(e){} return; }
+  var books=BOOKS.filter(function(b){ return b.bundle===bundleId && !b.free && bookUnlocked(b); });
+  if(!books.length){ say('NOTHING TO SAVE'); return; }
+  if(rowEl) rowEl.dataset.busy='1';
+  say('CHECKING…');
+  Promise.all(books.map(function(b){ return _twIdb('readonly',function(st){ return st.get(b.id||b.file); }).then(function(v){ return v?null:b; }); }))
+  .then(function(left){
+    var todo=left.filter(Boolean), done=books.length-todo.length;
+    if(!todo.length){ say('SAVED ✓ '+books.length+'/'+books.length); return; }
+    say('SAVING '+done+'/'+books.length);
+    return fetch((window.twFnBase||'')+'/library-url',{
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({paths:todo.map(function(b){ return 'books/'+b.file; })})
+    }).then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ return {ok:r.ok,status:r.status,j:j}; }); })
+    .then(function(res){
+      if(res.status===401){ say('SIGN IN FIRST'); return; }
+      var urls=(res.j&&res.j.urls)||{};
+      // one at a time: keeps memory low on phones and gives a live count
+      var p=Promise.resolve(), failed=0;
+      todo.forEach(function(b){
+        p=p.then(function(){
+          var u=urls['books/'+b.file];
+          if(!u){ failed++; return; }
+          return fetch(u).then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); })
+            .then(function(buf){ return _twIdb('readwrite',function(st){ return st.put(buf,b.id||b.file); }); })
+            .then(function(){ done++; say('SAVING '+done+'/'+books.length); })
+            .catch(function(){ failed++; });
+        });
+      });
+      return p.then(function(){
+        say(failed ? ('SAVED '+done+'/'+books.length+' · TAP TO RETRY') : ('SAVED ✓ '+done+'/'+books.length));
+      });
+    });
+  }).catch(function(){ say('OFFLINE? TAP TO RETRY'); })
+  .then(function(){ if(rowEl) rowEl.dataset.busy=''; });
+}
+function toggleSeries(headEl){ headEl.parentNode.classList.toggle("open"); }
+function loadBooks(){
+  function canonSort(arr){
+    function rank(b){ return serOrder(b.series||"Novel"); }
+    return arr.map(function(b,i){return {b:b,i:i};})
+              .sort(function(a,c){ return (rank(a.b)-rank(c.b)) || (a.i-c.i); })
+              .map(function(o){return o.b;});
+  }
+  fetch("books/library.json").then(function(r){return r.ok?r.json():[];})
+    .then(function(list){ BOOKS=canonSort(Array.isArray(list)?list:(list.books||[])); populateDropdowns(); renderBooks(); refreshHome(); })
+    .catch(function(){ BOOKS=[]; renderBooks(); });
+}
+
+/* ---------------- COMICS (THE LONGBOX) ---------------- */
+var COMICS=[];
+var THREAD_LABEL={ thread1:"Thread 1", thread27:"Thread 27", ichabod:"Ichabod Jones", outside:"Outside the Weave", unassigned:"" };
+function comicMatches(c){
+  if(FILT.type && FILT.type!=='comic') return false;
+  if(FILT.series) return false;          // comics use thread, not the book-series buckets
+  if(FILT.genre) return false;           // comics aren't genre-tagged yet
+  if(FILT.access==='free' && !c.free) return false;
+  if(FILT.access==='paid' && c.free) return false;
+  if(FILT.q && (c.title||'').toLowerCase().indexOf(FILT.q)<0 && (c.series||'').toLowerCase().indexOf(FILT.q)<0) return false;
+  return true;
+}
+function openComic(id,title){
+  document.getElementById("hosttitle").textContent=title||"Comic";
+  try{ localStorage.setItem("comic_seen_"+id, Date.now()); }catch(e){}
+  document.getElementById("btnFinished").style.display="none";
+  document.getElementById("frame").src="comic.html?id="+encodeURIComponent(id);
+  document.getElementById("host").classList.add("on");
+  document.getElementById("weaveBtn").style.display="none";
+  var _csc=document.getElementById("csBtn"); if(_csc) _csc.style.display="none";
+  if(window.__podsBtnVisible) window.__podsBtnVisible(false);
+  if(window.__weaverBarVisible) window.__weaverBarVisible(false);
+}
+function renderComics(){
+  var sh=document.getElementById("comicshelf");
+  var head=document.getElementById("comichead");
+  if(!COMICS.length){ sh.innerHTML=""; head.style.display="none"; return; }
+  var comics=COMICS.filter(comicMatches);
+  head.style.display = comics.length ? "" : "none";
+  var groups={}, gorder=[];
+  comics.forEach(function(c){
+    var s=c.series||"Comics";
+    if(!groups[s]){ groups[s]=[]; gorder.push(s); }
+    groups[s].push(c);
+  });
+  gorder.sort(function(a,b){ return comicSerOrder(a)-comicSerOrder(b) || a.localeCompare(b); });
+  var html="";
+  gorder.forEach(function(s){
+    var items=groups[s];
+    var col=serColor(s);
+    var owned=0, anyLocked=false, anyFree=false;
+    items.forEach(function(c){
+      if(comicUnlocked(c))owned++; else anyLocked=true;
+      if(c.free)anyFree=true;
+    });
+    var meta;
+    if(anyFree && !anyLocked){ meta='<span class="own">'+items.length+' · free to read</span>'; }
+    else if(!anyLocked){ meta='<span class="own">'+items.length+' issues · owned</span>'; }
+    else if(owned>0){ meta='<span class="own">'+owned+'</span> / '+items.length+' owned'; }
+    else { meta=items.length+' issues · <span class="lock">tap to unlock</span>'; }
+    var openCls=(owned>0||anyFree)?" open":"";
+    var rows="";
+    items.forEach(function(c,idx){
+      var u=comicUnlocked(c);
+      var num='<span class="row-num" style="background:'+col+';color:#16121f">'+(idx+1)+'</span>';
+      var inprog=false;
+      try{ inprog=!!(u && localStorage.getItem("comic_panel_"+c.id)); }catch(e){}
+      var stat,cls,action;
+      if(u){
+        action='onclick="openComic(\''+c.id.replace(/'/g,"\\'")+'\',\''+(c.title||"").replace(/'/g,"\\'")+'\')"';
+        if(inprog){ stat='&#9656; CONTINUE'; cls="row-stat prog"; }
+        else if(c.free){ stat='&#10022; FREE · READ'; cls="row-stat free"; }
+        else { stat='&#9656; READ'; cls="row-stat read"; }
+      } else {
+        action='onclick="openSheet(\''+(c.bundle||"").replace(/'/g,"\\'")+'\')"';
+        stat='&#128274; UNLOCK'; cls="row-stat lock";
+      }
+      rows+='<div class="row'+(u?"":" locked")+'" '+action+'>'+num+
+        '<span class="row-title">'+(c.title||c.id)+'<span class="row-sub"> · '+c.pages.length+'pp</span></span>'+
+        '<span class="'+cls+'">'+stat+'</span></div>';
+    });
+    html+='<div class="ser'+openCls+'" style="border-left-color:'+col+'">'+
+      '<div class="ser-head" onclick="toggleSeries(this)">'+
+        '<span class="ser-dot" style="background:'+col+';color:'+col+'"></span>'+
+        '<span class="ser-name">'+s+'</span>'+
+        '<span class="ser-meta">'+meta+'</span>'+
+        '<span class="ser-chev">&#9656;</span>'+
+      '</div>'+
+      '<div class="ser-rows">'+rows+'</div>'+
+    '</div>';
+  });
+  sh.innerHTML=html;
+}
+function loadComics(){
+  fetch("comics/comics.json").then(function(r){return r.ok?r.json():[];})
+    .then(function(list){ COMICS=Array.isArray(list)?list:[]; renderComics(); populateDropdowns(); refreshHome(); })
+    .catch(function(){ COMICS=[]; renderComics(); });
+}
+
+populateDropdowns();
+renderShelf(); refreshHome();
+loadBooks();
+loadComics();
+
+/* Dock "More" menu: holds secondary actions so the dock isn't a 5-button pile. */
+function toggleDockMenu(force){
+  var m=document.getElementById("dockMenu"); if(!m) return;
+  var open = (typeof force==="boolean") ? force : !m.classList.contains("open");
+  m.classList.toggle("open", open);
+}
+document.addEventListener("click",function(e){
+  var m=document.getElementById("dockMenu"); if(!m||!m.classList.contains("open")) return;
+  if(!m.contains(e.target) && e.target.id!=="dockMore"){ m.classList.remove("open"); }
+});
+/* Move the deferred-script buttons (Com Station, Weave Pods) into the More menu. */
+(function dockInjected(){
+  var tries=0;
+  var iv=setInterval(function(){
+    tries++;
+    var menu=document.getElementById("dockMenu");
+    var cs=document.getElementById("csBtn");
+    var pods=document.getElementById("podsBtn");
+    if(menu){
+      if(cs && cs.parentNode!==menu) menu.appendChild(cs);
+      if(pods && pods.parentNode!==menu) menu.appendChild(pods);
+    }
+    if((cs&&pods)||tries>40) clearInterval(iv);
+  },150);
+})();
+
+/* ---------------- THE WEAVE CODEX ---------------- */
+var WEAVE=null;
+var WEAVE_UNLOCK_KEY='weave.unlocked';
+function weaveUnlocked(){ try{return JSON.parse(localStorage.getItem(WEAVE_UNLOCK_KEY)||'{}');}catch(e){return {};} }
+function loadWeave(){
+  fetch('books/weave.json').then(function(r){return r.ok?r.json():null;}).then(function(w){
+    WEAVE=w; updateWeaveCount();
+  }).catch(function(){});
+}
+function totalSpoilerEntries(){ return WEAVE?WEAVE.entries.length:0; }
+function updateWeaveCount(){
+  if(!WEAVE) return;
+  var owned=weaveUnlocked();
+  var n=WEAVE.entries.filter(function(e){return owned[e.id];}).length;
+  document.getElementById('weaveCnt').textContent=n+'/'+WEAVE.entries.length;
+}
+function entryById(id){ return WEAVE?WEAVE.entries.find(function(e){return e.id===id;}):null; }
+function openWeave(){
+  if(!WEAVE){ loadWeave(); }
+  renderWeave();
+  document.getElementById('weave').classList.add('on');
+}
+function closeWeave(){ document.getElementById('weave').classList.remove('on'); }
+/* ===================== WEAVE THREADER — WEAVER PROFILE ===================== */
+var WEAVER=null;
+var GAMES_PLAYED_KEY="weaver.gamesplayed";
+var RELIC_KEY="weaver.relics";
+function loadWeaver(cb){ fetch("books/weaver.json").then(function(r){return r.ok?r.json():null;}).then(function(w){ WEAVER=w; updateRankLabel(); if(cb)cb(); }).catch(function(){}); }
+function gamesPlayed(){ try{return JSON.parse(localStorage.getItem(GAMES_PLAYED_KEY)||"{}");}catch(e){return {};} }
+function markGamePlayed(id){ try{ var g=gamesPlayed(); if(!g[id]){ g[id]=Date.now(); localStorage.setItem(GAMES_PLAYED_KEY,JSON.stringify(g)); } }catch(e){} }
+function relicsFound(){ try{return JSON.parse(localStorage.getItem(RELIC_KEY)||"{}");}catch(e){return {};} }
+
+/* gather every progress signal across the whole app */
+function readingStats(){
+  // Derived from the reader's per-day localStorage writes (rdr_stat_<YYYY-MM-DD>).
+  var days=[];
+  try{ days=JSON.parse(localStorage.getItem('rdr_stat_days')||'[]'); }catch(e){ days=[]; }
+  var totalMin=0, todayMin=0;
+  var today=new Date().toISOString().slice(0,10);
+  var daySet={};
+  days.forEach(function(d){
+    daySet[d]=true;
+    try{
+      var rec=JSON.parse(localStorage.getItem('rdr_stat_'+d)||'{"m":0}');
+      totalMin+=(rec.m||0);
+      if(d===today) todayMin=(rec.m||0);
+    }catch(e){}
+  });
+  // streak: count back from today (or yesterday) over consecutive days with reading
+  function dstr(offset){ var dt=new Date(); dt.setDate(dt.getDate()-offset); return dt.toISOString().slice(0,10); }
+  var streak=0;
+  // allow the streak to be "alive" if they read today OR yesterday
+  var start = daySet[dstr(0)] ? 0 : (daySet[dstr(1)] ? 1 : -1);
+  if(start>=0){ var i=start; while(daySet[dstr(i)]){ streak++; i++; } }
+  // daily goal (minutes); default 15, user-settable
+  var goal=parseInt(localStorage.getItem('rdr_goal_min')||'15',10);
+  return {streak:streak, todayMin:Math.round(todayMin), totalMin:Math.round(totalMin),
+          goal:goal, goalPct:Math.min(100,Math.round(todayMin/goal*100)), daysRead:days.length};
+}
+function setReadingGoal(){
+  var cur=parseInt(localStorage.getItem('rdr_goal_min')||'15',10);
+  var v=window.prompt('Daily reading goal (minutes):', cur);
+  if(v===null) return;
+  var n=Math.max(1,Math.min(600,parseInt(v,10)||cur));
+  localStorage.setItem('rdr_goal_min', n);
+  try{ renderWeaver(); }catch(e){}
+}
+function fmtMin(m){
+  m=Math.round(m); if(m<60) return m+' min';
+  var h=Math.floor(m/60), r=m%60; return h+'h'+(r?' '+r+'m':'');
+}
+function weaverStats(){
+  var st={gamesPlayed:0, booksStarted:0, booksFinished:0, comicsStarted:0, comicsFinished:0,
+          codex:0, relics:0, threadsRead:{}, threadsComplete:0, ownsGodsverse:isUnlocked("godsverse_series")||ownsAll(),
+          ownsIchabod:isUnlocked("ichabod_series")||ownsAll()};
+  try{
+    st.gamesPlayed=Object.keys(gamesPlayed()).length;
+    st.relics=Object.keys(relicsFound()).length;
+    st.codex=Object.keys(weaveUnlocked()).length;
+    // books: started = has rdr_pos; finished ~ has finished flag (we approximate finished via a stored flag)
+    BOOKS.forEach(function(b){
+      var id=b.id||b.file;
+      if(localStorage.getItem("rdr_pos_"+id)) st.booksStarted++;
+      if(localStorage.getItem("rdr_done_"+id)) st.booksFinished++;
+    });
+    COMICS.forEach(function(c){
+      if(localStorage.getItem("comic_panel_"+c.id)) st.comicsStarted++;
+      if(localStorage.getItem("comic_done_"+c.id)) st.comicsFinished++;
+    });
+    // threads read: map any started book/comic to its thread
+    (WEAVE&&WEAVE.threads?WEAVE.threads:[]).forEach(function(){});
+  }catch(e){}
+  return st;
+}
+function weaverXP(st){
+  if(!WEAVER) return 0;
+  var x=WEAVER.xp;
+  return st.gamesPlayed*x.game_played + st.booksStarted*x.book_started + st.booksFinished*x.book_finished +
+         st.comicsStarted*x.comic_started + st.comicsFinished*x.comic_finished +
+         st.codex*x.codex_entry + st.relics*x.relic_found + st.threadsComplete*x.thread_completed;
+}
+function rankFor(xp){
+  if(!WEAVER) return {title:"Weaver",blurb:"",min:0};
+  var r=WEAVER.ranks[0];
+  WEAVER.ranks.forEach(function(rk){ if(xp>=rk.min) r=rk; });
+  return r;
+}
+function nextRank(xp){
+  if(!WEAVER) return null;
+  var nx=null; WEAVER.ranks.forEach(function(rk){ if(rk.min>xp && (!nx||rk.min<nx.min)) nx=rk; });
+  return nx;
+}
+function updateRankLabel(){
+  try{ var st=weaverStats(); var r=rankFor(weaverXP(st)); var el=document.getElementById("weaverRankLabel"); if(el) el.textContent=r.title; }catch(e){}
+}
+function badgeEarned(b,st){
+  switch(b.check){
+    case "any_started": return (st.booksStarted+st.comicsStarted+st.gamesPlayed)>0;
+    case "any_finished": return (st.booksFinished+st.comicsFinished)>0;
+    case "game_played": return st.gamesPlayed>0;
+    case "owns_godsverse": return st.ownsGodsverse;
+    case "owns_ichabod": return st.ownsIchabod;
+    case "codex>=10": return st.codex>=10;
+    case "codex_all": return WEAVE&&WEAVE.entries&&st.codex>=WEAVE.entries.length&&st.codex>0;
+    case "relics>=5": return st.relics>=5;
+    case "any_thread_complete": return st.threadsComplete>0;
+    case "threads>=3": return Object.keys(st.threadsRead).length>=3;
+  }
+  return false;
+}
+function openWeaver(){ document.getElementById("weaver").classList.add("on"); if(!WEAVER){ loadWeaver(renderWeaver); } renderWeaver(); }
+function closeWeaver(){ document.getElementById("weaver").classList.remove("on"); }
+function renderWeaver(){
+  var body=document.getElementById("weaverBody");
+  if(!WEAVER){ body.innerHTML='<div class="wprog">Loading your Weaver…</div>'; return; }
+  var st=weaverStats(), xp=weaverXP(st), r=rankFor(xp), nx=nextRank(xp);
+  var pct = nx ? Math.round(((xp-r.min)/(nx.min-r.min))*100) : 100;
+  var html='<div class="rankcard"><img class="rmasc" src="img/mascot_icon.png" alt="">'+
+    '<div class="rtitle">'+r.title+'</div><div class="rblurb">'+(r.blurb||'')+'</div>'+
+    '<div class="xpbar"><div class="fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="xpnum">'+xp+' XP'+(nx?' · '+(nx.min-xp)+' to '+nx.title:' · max rank')+'</div></div>';
+  // reading stats card — streak, today, total, goal
+  var rs=readingStats();
+  var flame = rs.streak>0 ? '\uD83D\uDD25' : '\u2022';
+  html+='<div class="rstats">'+
+    '<div class="rstat-top">'+
+      '<div class="rstat-streak"><span class="rflame">'+flame+'</span><span class="rsnum">'+rs.streak+'</span>'+
+        '<span class="rslbl">day streak</span></div>'+
+      '<button class="rgoal" onclick="setReadingGoal()" aria-label="Set daily goal">Goal: '+rs.goal+'m</button>'+
+    '</div>'+
+    '<div class="rgoalbar"><div class="f" style="width:'+rs.goalPct+'%"></div></div>'+
+    '<div class="rsgrid">'+
+      '<div class="rscell"><div class="rsv">'+fmtMin(rs.todayMin)+'</div><div class="rsk">today</div></div>'+
+      '<div class="rscell"><div class="rsv">'+fmtMin(rs.totalMin)+'</div><div class="rsk">all time</div></div>'+
+      '<div class="rscell"><div class="rsv">'+st.booksFinished+'</div><div class="rsk">finished</div></div>'+
+      '<div class="rscell"><div class="rsv">'+rs.daysRead+'</div><div class="rsk">days read</div></div>'+
+    '</div></div>';
+  // badges
+  html+='<div class="wsec">Badges</div><div class="grid">';
+  WEAVER.badges.forEach(function(b){
+    var got=badgeEarned(b,st);
+    html+='<div class="bdg'+(got?'':' locked')+'"><div class="bi">'+b.icon+'</div><div class="bn">'+b.name+'</div><div class="bd">'+b.desc+'</div></div>';
+  });
+  html+='</div>';
+  // inventory
+  var rel=relicsFound();
+  html+='<div class="wsec">Inventory — Relics ('+st.relics+'/'+WEAVER.relics.length+')</div>';
+  WEAVER.relics.forEach(function(rc){
+    var got=rel[rc.id];
+    html+='<div class="relic'+(got?'':' locked')+'"><div class="ri">'+rc.icon+'</div><div><div class="rt">'+(got?rc.name:'??? Undiscovered Relic')+'</div><div class="rb">'+(got?rc.blurb:'Found by reading the threads.')+'</div></div></div>';
+  });
+  // thread progress (books/comics started per thread, simple count)
+  html+='<div class="wsec">Threads Explored</div>';
+  html+='<div class="tprog"><div class="tpn"><span>Codex of the Weave</span><span>'+st.codex+(WEAVE&&WEAVE.entries?'/'+WEAVE.entries.length:'')+'</span></div>'+
+    '<div class="tpbar"><div class="f" style="width:'+(WEAVE&&WEAVE.entries?Math.round(st.codex/WEAVE.entries.length*100):0)+'%"></div></div></div>';
+  html+='<div class="tprog"><div class="tpn"><span>Books opened</span><span>'+st.booksStarted+'/'+BOOKS.length+'</span></div>'+
+    '<div class="tpbar"><div class="f" style="width:'+(BOOKS.length?Math.round(st.booksStarted/BOOKS.length*100):0)+'%"></div></div></div>';
+  html+='<div class="tprog"><div class="tpn"><span>Comics opened</span><span>'+st.comicsStarted+'/'+COMICS.length+'</span></div>'+
+    '<div class="tpbar"><div class="f" style="width:'+(COMICS.length?Math.round(st.comicsStarted/COMICS.length*100):0)+'%"></div></div></div>';
+  html+='<div class="tprog"><div class="tpn"><span>Games played</span><span>'+st.gamesPlayed+'/'+GAMES.length+'</span></div>'+
+    '<div class="tpbar"><div class="f" style="width:'+(GAMES.length?Math.round(st.gamesPlayed/GAMES.length*100):0)+'%"></div></div></div>';
+  body.innerHTML=html;
+}
+window.addEventListener("message",function(ev){
+  if(ev.data&&ev.data.type==="weaver-relic"){ updateRankLabel(); /* relic toast handled by existing unlock modal style if open */ }
+});
+
+var WEAVE_TAB='timeline';
+function weaveTab(t){
+  WEAVE_TAB=t;
+  ['timeline','threads','codex','places'].forEach(function(k){
+    document.getElementById('tab-'+k).classList.toggle('on',k===t);
+  });
+  renderWeave();
+}
+var WEAVE_Q='';
+function weaveSearch(v){
+  WEAVE_Q=(v||'').trim();
+  document.getElementById('weaveQx').style.display = WEAVE_Q ? 'block' : 'none';
+  renderWeave();
+}
+function weaveSearchClear(){
+  WEAVE_Q='';
+  var i=document.getElementById('weaveQ'); if(i) i.value='';
+  document.getElementById('weaveQx').style.display='none';
+  renderWeave();
+}
+function jumpFromWeave(kind,id){
+  closeWeave();
+  if(kind==='comic'){
+    var c=(typeof COMICS!=='undefined'?COMICS:[]).find(function(x){return x.id===id;});
+    if(c && !comicUnlocked(c)){ openSheet(c.bundle||''); return; }
+    openComic(id, (c&&c.title)||id);
+  }
+  else {
+    var b=BOOKS.find(function(x){return (x.id||x.file)===id || x.file===id;});
+    if(b && bookUnlocked(b)){ openBook(b.file,b.title,b.id||b.file); }
+    else { /* locked: open shelf so they can unlock */ }
+  }
+}
+function wEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// Build the real-myth / cross-tradition / per-series layers for a discovered codex entry.
+function weaveLayers(e, owned){
+  var h='';
+  // 1) SOURCE: the real-world root, how the Weave reweaves it, and a read-the-source button
+  var s=e.source;
+  if(s && s.real){
+    var conf = s.confidence==='review' ? '<span class="wlconf">needs review</span>' : '';
+    h+='<div class="wlayer"><div class="wlh">&#9670; The real myth'+(s.tradition?' &middot; '+wEsc(s.tradition):'')+conf+'</div>'+
+       '<div class="wlbody real">'+wEsc(s.real)+'</div>';
+    if(s.weave) h+='<div class="wlbody" style="margin-top:7px"><b style="color:var(--gold);font-family:\'DM Mono\';font-size:10px;letter-spacing:1.2px;text-transform:uppercase;display:block;margin-bottom:3px">How the Weave reweaves it</b>'+wEsc(s.weave)+'</div>';
+    if(s.work){
+      var wid = s.work_id ? ' onclick="openSourceWork(\''+wEsc(s.work_id)+'\',\''+wEsc(e.id)+'\')"' : '';
+      h+='<div class="wlsrc"'+wid+'>&#128214; Read the source: '+wEsc(s.work)+(s.excerpt_ref?' &mdash; '+wEsc(s.excerpt_ref):'')+'</div>';
+    }
+    h+='</div>';
+  }
+  // 2) CROSSLINKS: how this figure relates across traditions
+  var x=e.crosslinks;
+  if(x && x.summary){
+    h+='<div class="wlayer"><div class="wlh">&#10547; Across traditions</div>'+
+       '<div class="wlbody">'+wEsc(x.summary)+'</div>';
+    (x.interactions||[]).forEach(function(it){
+      var te=WEAVE.entries.find(function(z){return z.id===it.with;});
+      var nm=te?te.title:it.with;
+      h+='<div class="wlx"><b>'+wEsc(nm)+'</b> &middot; '+wEsc(it.note)+'</div>';
+    });
+    h+='</div>';
+  }
+  // 3) VARIANTS: how the same figure differs across the series/threads
+  var v=e.variants;
+  if(v && v.faces && v.faces.length){
+    h+='<div class="wlayer"><div class="wlh">&#9788; Across the series</div>'+
+       '<div class="wlbody">'+wEsc(v.summary||'')+'</div>';
+    v.faces.forEach(function(f){
+      h+='<div class="wlface"><span class="ff">'+wEsc(f.label)+'</span>'+(f.thread?' <span class="ft">'+wEsc(f.thread)+'</span>':'')+
+         '<div class="fn">'+wEsc(f.note)+'</div></div>';
+    });
+    h+='</div>';
+  }
+  return h;
+}
+// --- Source reader: loads the curated excerpt (always) + full text (when bundled) ---
+var TW_SOURCES=null, TW_SRC_CUR=null;
+function loadSources(cb){
+  if(TW_SOURCES){ if(cb)cb(); return; }
+  fetch('books/sources/manifest.json').then(function(r){return r.ok?r.json():null;}).then(function(m){
+    TW_SOURCES=m||{}; if(cb)cb();
+  }).catch(function(){ TW_SOURCES={}; if(cb)cb(); });
+}
+function openSourceWork(workId, fromEntry){
+  loadSources(function(){
+    var s=TW_SOURCES[workId];
+    if(!s){ alert('The full source text is being bundled into the app and will open here soon.'); return; }
+    TW_SRC_CUR=s;
+    document.getElementById('srcTitle').innerHTML=wEsc(s.title);
+    document.getElementById('srcTr').innerHTML=wEsc(s.tr||'');
+    document.getElementById('srcEx').textContent=s.excerpt||'';
+    document.getElementById('srcRef').innerHTML=s.ref?('&mdash; '+wEsc(s.ref)):'';
+    var fb=document.getElementById('srcFullBtn'), ff=document.getElementById('srcFull');
+    ff.classList.remove('on'); ff.textContent='';
+    fb.style.display = s.full_url ? 'block' : 'none';
+    fb.innerHTML='\uD83D\uDCD6 Read the full work <span style="opacity:.6;font-size:11px">(opens online)</span>';
+    document.getElementById('srcModal').classList.add('on');
+  });
+}
+function openSourceFull(){
+  var s=TW_SRC_CUR; if(!s) return;
+  // Prefer the bucket-hosted full text rendered in a native in-app overlay.
+  if(s.full_text){ openFullTextOverlay(s); return; }
+  // Otherwise open the original public-domain page in the in-app browser overlay.
+  if(s.full_url){
+    var opts='location=yes,toolbar=yes,closebuttoncaption=Done,toolbarcolor=#120d1c,closebuttoncolor=#e8b53a';
+    try{
+      var iab=(window.cordova&&window.cordova.InAppBrowser)?window.cordova.InAppBrowser:null;
+      if(iab&&iab.open){ iab.open(s.full_url,'_blank',opts); return; }
+      window.open(s.full_url,'_blank','noopener');
+    }catch(e){ try{ window.open(s.full_url,'_blank'); }catch(_){} }
+  }
+}
+var TW_FT_CACHE={};
+function openFullTextOverlay(s){
+  var ov=document.getElementById('ftOverlay');
+  document.getElementById('ftTitle').textContent=s.title||'Full work';
+  document.getElementById('ftTr').textContent=s.tr||'';
+  var body=document.getElementById('ftBody');
+  body.textContent=''; document.getElementById('ftStatus').textContent='Loading the full text…';
+  ov.classList.add('on');
+  var key=s.full_text;
+  if(TW_FT_CACHE[key]){ renderFullText(TW_FT_CACHE[key]); return; }
+  var haveDS=(typeof DecompressionStream!=='undefined');
+  // bucket path: strip the .gz when the device can't inflate (raw .txt also uploaded? we only ship .gz,
+  // so require DS; if absent, fall back to the external page).
+  if(!haveDS){ document.getElementById('ftStatus').textContent=''; if(s.full_url){ openSourceFull(); } return; }
+  loadSb_FT().then(function(sb){
+    return sb.auth.getSession().then(function(se){
+      if(!(se&&se.data&&se.data.session)) throw new Error('not-signed-in');
+      return sb.storage.from('library').createSignedUrl(key,3600);
+    });
+  }).then(function(res){
+    var u=res&&res.data&&res.data.signedUrl; if(!u) throw new Error('no-url');
+    return fetch(u);
+  }).then(function(r){ return r.arrayBuffer(); })
+    .then(function(buf){
+      var ds=new DecompressionStream('gzip');
+      return new Response(new Response(buf).body.pipeThrough(ds)).text();
+    })
+    .then(function(txt){ TW_FT_CACHE[key]=txt; renderFullText(txt); })
+    .catch(function(){ document.getElementById('ftStatus').textContent='Could not load the full text. '+(s.full_url?'Opening the original page…':''); if(s.full_url) setTimeout(function(){ var iab=(window.cordova&&window.cordova.InAppBrowser); if(iab){iab.open(s.full_url,'_blank');} else {window.open(s.full_url,'_blank');} },800); });
+}
+function renderFullText(txt){
+  document.getElementById('ftStatus').textContent='';
+  document.getElementById('ftBody').textContent=txt;   // textContent = safe, no injection
+  document.getElementById('ftBody').scrollTop=0;
+}
+function loadSb_FT(){
+  // reuse the app's supabase client loader
+  if(window.getSb) return window.getSb();
+  if(window.sb) return Promise.resolve(window.sb);
+  return Promise.reject(new Error('no-supabase'));
+}
+function closeFullText(){ document.getElementById('ftOverlay').classList.remove('on'); }
+function closeSourceWork(){ document.getElementById('srcModal').classList.remove('on'); }
+function renderWeave(){
+  if(!WEAVE){ document.getElementById('weaveBody').innerHTML='<div class="wprog">The Weave is still forming…</div>'; return; }
+  var owned=weaveUnlocked();
+  var nOwned=WEAVE.entries.filter(function(e){return owned[e.id];}).length;
+  document.getElementById('weaveProg').innerHTML='<b>'+nOwned+'</b> of <b>'+WEAVE.entries.length+'</b> entries discovered — keep reading to reveal more';
+  var html='';
+
+  // --- SEARCH: a query overrides the tab view and searches ALL entries ---
+  if(WEAVE_Q){
+    var q=WEAVE_Q.toLowerCase();
+    var catName={}; (WEAVE.categories||[]).forEach(function(c){catName[c.id]={name:c.name,icon:c.icon};});
+    catName.places=catName.places||{name:'Places',icon:'\u2316'};
+    var hits=WEAVE.entries.filter(function(e){
+      var hay=((e.title||'')+' '+(e.body||'')+' '+(e.teaser||'')+' '+
+        (e.source?(e.source.real||'')+' '+(e.source.tradition||''):'')).toLowerCase();
+      return hay.indexOf(q)>-1;
+    });
+    if(!hits.length){
+      html='<div class="wsr-head">No entries match &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;</div>';
+    }else{
+      html='<div class="wsr-head">'+hits.length+' entr'+(hits.length===1?'y':'ies')+' match &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;</div>';
+      var byCat={};
+      hits.forEach(function(e){ (byCat[e.cat]=byCat[e.cat]||[]).push(e); });
+      Object.keys(byCat).forEach(function(cid){
+        var cm=catName[cid]||{name:cid,icon:'\u2738'};
+        html+='<div class="wsr-cat">'+(cm.icon||'')+' '+cm.name+'</div>';
+        byCat[cid].forEach(function(e){
+          var got=owned[e.id];
+          if(got){
+            html+='<div class="went"><div class="et">'+(cm.icon||'')+' '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+'</div>';
+          }else{
+            html+='<div class="went lock"><div class="et">&#128274; '+e.title+'</div><div class="eb">'+(e.teaser||'A discovery waits to be found.')+'</div></div>';
+          }
+        });
+      });
+    }
+    document.getElementById('weaveBody').innerHTML=html;
+    return;
+  }
+
+  if(WEAVE_TAB==='timeline'){
+    var tl=WEAVE.timeline;
+    if(tl){
+      if(tl.note) html+='<div class="tlnote">'+tl.note+'</div>';
+      if(tl.image) html+='<img class="tlimg" src="'+tl.image+'" alt="The Godsverse Timeline">';
+      var lastEpoch=null;
+      tl.events.forEach(function(ev){
+        if(ev.epoch && ev.epoch!==lastEpoch){ html+='<div class="tlepoch">The Deep Past</div>'; lastEpoch=ev.epoch; }
+        else if(!ev.epoch && lastEpoch!=='main'){ html+='<div class="tlepoch">The Main Span</div>'; lastEpoch='main'; }
+        var go='';
+        if(ev.comic) go+='<div class="tlgo" onclick="jumpFromWeave(\''+'comic\',\''+ev.comic+'\')">▸ Read the comic</div>';
+        if(ev.book)  go+='<div class="tlgo" onclick="jumpFromWeave(\''+'book\',\''+ev.book+'\')">▸ Read '+(ev.in||'')+'</div>';
+        html+='<div class="tlev"><div class="tld">'+ev.date+'</div><div class="tls">'+
+          '<div class="tlst">'+ev.story+'</div><div class="tlin">'+(ev['in']||'')+'</div>'+go+'</div></div>';
+      });
+    } else html+='<div class="wprog">No timeline entries yet \u2014 keep reading to reveal this thread.</div>';
+  }
+  else if(WEAVE_TAB==='threads'){
+    html+='<div class="tlnote">Reality is a tapestry of reincarnating universes — threads. Here is which story lives in which thread.</div>';
+    (WEAVE.threads||[]).forEach(function(t){
+      var bks=(t.books||[]).map(function(b){return '<div class="tbk">• '+b+'</div>';}).join('');
+      html+='<div class="wthread"><div class="tn">'+t.name+'</div><div class="td">'+t.blurb+'</div>'+
+        (t.dreamer&&t.dreamer!=='unknown'?'<div class="tm">Dreamer: '+t.dreamer+(t.number?' · Thread '+t.number:'')+'</div>':(t.number?'<div class="tm">Thread '+t.number+'</div>':''))+
+        (bks?'<div class="tbooks">'+bks+'</div>':'')+'</div>';
+    });
+  }
+  else if(WEAVE_TAB==='places'){
+    var pents=WEAVE.entries.filter(function(e){return e.cat==='places';});
+    var pOwned=pents.filter(function(e){return owned[e.id];}).length;
+    html+='<div class="tlnote">&#9046; Every world, realm, and waypoint of the Weave you have discovered. <b>'+pOwned+'</b> of <b>'+pents.length+'</b> locations charted — keep reading to find more.</div>';
+    pents.forEach(function(e){
+      var got=owned[e.id];
+      if(got){
+        var linkhtml='';
+        if(e.links&&e.links.length){
+          var ls=e.links.map(function(lid){
+            var le=WEAVE.entries.find(function(x){return x.id===lid;});
+            if(!le) return '';
+            var lon=owned[lid];
+            return '<span class="elink'+(lon?'':' dim')+'">'+(le.title)+'</span>';
+          }).filter(Boolean).join('');
+          if(ls) linkhtml='<div class="elinks">Connects to: '+ls+'</div>';
+        }
+        html+='<div class="went"><div class="et">&#9046; '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+linkhtml+'</div>';
+      }else{
+        html+='<div class="went lock"><div class="et">&#9046; ???</div><div class="eb">'+(e.teaser||'A place waits to be charted.')+'</div></div>';
+      }
+    });
+    if(!pents.length) html='<div class="wprog">No locations yet.</div>';
+  }
+  else { // codex
+    WEAVE.categories.forEach(function(cat){
+      var ents=WEAVE.entries.filter(function(e){return e.cat===cat.id;});
+      if(!ents.length) return;
+      html+='<div class="wcat">'+cat.icon+' '+cat.name+'</div>';
+      ents.forEach(function(e){
+        var got=owned[e.id];
+        if(got){
+          var linkhtml='';
+          if(e.links&&e.links.length){
+            var ls=e.links.map(function(lid){
+              var le=WEAVE.entries.find(function(x){return x.id===lid;});
+              if(!le) return '';
+              var lon=owned[lid];
+              return '<span class="elink'+(lon?'':' dim')+'">'+(le.title)+'</span>';
+            }).filter(Boolean).join('');
+            if(ls) linkhtml='<div class="elinks">Connects to: '+ls+'</div>';
+          }
+          html+='<div class="went"><div class="et">'+cat.icon+' '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+linkhtml+'</div>';
+        }else{
+          html+='<div class="went lock"><div class="et">&#128274; ???</div><div class="eb">'+(e.teaser||'A discovery waits to be found.')+'</div></div>';
+        }
+      });
+    });
+    if(!html) html='<div class="wprog">No codex entries yet.</div>';
+  }
+  document.getElementById('weaveBody').innerHTML=html;
+}
+var pendingUnlocks=[];
+function showUnlockModal(ids){
+  if(!WEAVE) { loadWeave(); }
+  var ents=ids.map(function(id){return entryById(id);}).filter(Boolean);
+  if(!ents.length) return;
+  var places=ents.filter(function(e){return e.cat==='places';});
+  var others=ents.filter(function(e){return e.cat!=='places';});
+  var title;
+  if(places.length && !others.length){
+    title = places.length===1 ? "You've discovered a new location!" : "You've discovered "+places.length+" new locations!";
+  } else if(places.length && others.length){
+    title = "You've unlocked "+ents.length+" new entries — including a new location!";
+  } else {
+    title = ents.length===1 ? "You've unlocked a new entry!" : "You've unlocked "+ents.length+" new entries!";
+  }
+  document.getElementById('umTitle').textContent = title;
+  document.getElementById('umList').innerHTML = ents.map(function(e){
+    var glyph = e.cat==='places' ? '&#9046;' : '&#10038;';
+    return glyph+' '+e.title;
+  }).join('<br>');
+  document.getElementById('unlockModal').classList.add('on');
+  updateWeaveCount();
+}
+function closeUnlockModal(){ document.getElementById('unlockModal').classList.remove('on'); }
+
+/* A story game asks the app for something (13 Oct 2026): the unlock sheet, the book a
+   contract came from, or the free ebook. Only the game in the host frame is listened to. */
+function twOpenExternal(url){
+  var iab=(window.cordova&&window.cordova.InAppBrowser);
+  if(iab){ iab.open(url,'_system'); } else { window.open(url,'_blank','noopener'); }
+}
+function twSerialMine(sid){
+  var t=window.twAccessToken&&window.twAccessToken(); if(!t) return Promise.resolve(null);
+  return fetch((window.twFnBase||"https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1")+"/serial",{method:"POST",
+      headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify({action:"mine",tz:new Date().getTimezoneOffset()})})
+    .then(function(r){return r.json();}).then(function(j){ return ((j&&j.serials)||[]).filter(function(x){return x.serial===sid;})[0]||null; })
+    .catch(function(){ return null; });
+}
+var _twAddrIv=null;
+function twGameToBook(bookId){
+  var b=(BOOKS||[]).filter(function(x){return x.id===bookId;})[0];
+  if(!b) return;
+  closeHost();
+  if(bookUnlocked(b)){ openBook(b.file,b.title,b.id); return; }
+  var sid=window.twSerialIdFor?window.twSerialIdFor(b.series):null;
+  if(!sid||!window.twSerialOpen){ openSheet(b.bundle); return; }
+  var from=String(b.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'')+'-1';
+  var signedIn=!!(window.twAccessToken&&window.twAccessToken());
+  if(signedIn){
+    /* already following the series: the sheet shows their own next chapter, so a book
+       they haven't reached yet goes to the unlock sheet with a line saying why */
+    window.twSerialOpen(sid,from);   /* something on screen at once; corrected below for a follower */
+    twSerialMine(sid).then(function(f){
+      if(!f) return;
+      var series=(BOOKS||[]).filter(function(x){return x.series===b.series;});
+      var at=-1, want=series.indexOf(b);
+      if(f.next_chapter&&f.next_chapter.book){ series.forEach(function(x,i){ if(x.title===f.next_chapter.book||x.id===f.next_chapter.book) at=i; }); }
+      if(f.next_chapter && at>=0 && want>at && b.bundle){
+        /* the serial sheet is still loading its own copy of this; let it finish, then swap */
+        var t1=Date.now(), sw=setInterval(function(){
+          var s=document.getElementById('serialSheet'), loaded=!!(s&&s.querySelector('.sbtn,#srDay'));
+          if(!loaded && Date.now()-t1<8000) return;
+          clearInterval(sw);
+          if(window.twSerialClose) window.twSerialClose();
+          openSheet(b.bundle);
+          var sub=document.getElementById("sheetSub");
+          if(sub) sub.textContent="You\u2019re reading the series a chapter a week and haven\u2019t reached "+b.title+" yet. Unlock the series to read "+b.title+" now.";
+        },100);
+      }
+    });
+    return;
+  }
+  /* signed out (only possible in the phone app): serials.js re-reads the address when a
+     session arrives, so the serial goes in it until they sign in or close the sheet */
+  var before=location.search;
+  try{ var q=new URLSearchParams(before); q.set('serial',sid); q.set('from',from); history.replaceState(null,'',location.pathname+'?'+q.toString()); }catch(e){}
+  if(_twAddrIv) clearInterval(_twAddrIv);
+  var put=function(){ try{ history.replaceState(null,'',location.pathname+before); }catch(e){} };
+  var t0=Date.now(), seenSheet=false;
+  _twAddrIv=setInterval(function(){
+    var s=document.getElementById('serialSheet'), open=!!(s&&s.classList.contains('on'));
+    var lw=document.getElementById('loginWall'), wall=!!(lw&&lw.style.display!=='none');
+    if(open) seenSheet=true;
+    if(window.twAccessToken&&window.twAccessToken()){ clearInterval(_twAddrIv); _twAddrIv=null; setTimeout(put,4000); }
+    else if((seenSheet&&!open&&!wall)||Date.now()-t0>1800000){ clearInterval(_twAddrIv); _twAddrIv=null; put(); }
+  },700);
+  window.twSerialOpen(sid,from);
+}
+window.addEventListener('message',function(ev){
+  var d=ev.data; if(!d||d.type!=='tw-game') return;
+  var fr=document.getElementById('frame'); if(!fr||ev.source!==fr.contentWindow) return;
+  if(d.action==='unlock'){ openGameSheet(currentGame||d.game); }
+  else if(d.action==='book'&&typeof d.book==='string'){ twGameToBook(d.book); }
+  else if(d.action==='link'&&typeof d.url==='string'&&/^https:\/\/dl\.bookfunnel\.com\/[A-Za-z0-9]+$/.test(d.url)){ twOpenExternal(d.url); }
+});
+
+/* /app?play=<game id> opens that game (an ad or a post can link straight to the free
+   Godschurch mission). On the web the reader signs in first; the link waits for that. */
+(function(){
+  var want=null; try{ want=new URLSearchParams(location.search).get('play'); }catch(e){}
+  /* a new reader who confirms their email lands on a fresh /app tab: remember the game for a day */
+  try{
+    if(want) localStorage.setItem('tw_pending_play', JSON.stringify({id:want,at:Date.now()}));
+    else { var pp=JSON.parse(localStorage.getItem('tw_pending_play')||'null'); if(pp&&pp.id&&Date.now()-pp.at<86400000) want=pp.id; else localStorage.removeItem('tw_pending_play'); }
+  }catch(e){}
+  if(!want) return;
+  var t0=Date.now(), iv=setInterval(function(){
+    if(Date.now()-t0>1800000){ clearInterval(iv); return; }
+    if(document.body.classList.contains('pre-auth')) return;
+    var lw=document.getElementById('loginWall'); if(lw&&lw.style.display!=='none'&&!document.body.classList.contains('is-native')) return;
+    if(!GAMES.some(function(g){return g.id===want;})){ clearInterval(iv); return; }
+    clearInterval(iv);
+    try{ localStorage.removeItem('tw_pending_play'); }catch(e){}
+    try{ var q=new URLSearchParams(location.search); q.delete('play'); history.replaceState(null,'',location.pathname+(q.toString()?'?'+q.toString():'')); }catch(e){}
+    openGame(want);
+  },500);
+})();
+
+// reader (inside the host iframe) posts unlock events up to here
+window.addEventListener('message',function(ev){
+  var d=ev.data;
+  if(d&&d.type==='weave-unlock'&&d.ids&&d.ids.length){
+    // persist here too, so the codex reflects it even if storage timing differs
+    try{
+      var owned=weaveUnlocked();
+      d.ids.forEach(function(id){ if(!owned[id]) owned[id]=Date.now(); });
+      localStorage.setItem(WEAVE_UNLOCK_KEY,JSON.stringify(owned));
+    }catch(e){}
+    if(!WEAVE){ loadWeave(); setTimeout(function(){showUnlockModal(d.ids);},300); }
+    else showUnlockModal(d.ids);
+  }
+});
+
+loadWeave();
+</script>
+<script>
+window.addEventListener('load',function(){
+  try{ loadWeaver(); }catch(e){}
+  setTimeout(function(){ var b=document.getElementById('boot'); if(b){ b.classList.add('gone'); setTimeout(function(){ b.style.display='none'; },600); } }, 900);
+  // in-app version stamp (confirms which build is live after a deploy)
+  try{
+    var TW_APP_VERSION="1.16.0";
+    if(!document.getElementById('twVer')){
+      var v=document.createElement('div'); v.id='twVer';
+      v.textContent='v'+TW_APP_VERSION;
+      v.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6px + env(safe-area-inset-bottom));z-index:40;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:#5d5470;opacity:.6;pointer-events:none";
+      document.body.appendChild(v);
+    }
+  }catch(e){}
+});
+</script>
+
+<div style="text-align:center;margin:34px 0 10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:#6a6080">
+  <a href='privacy.html' style='color:#9b91ac;text-decoration:underline'>Privacy Policy</a>
+  &nbsp;·&nbsp;
+  <a href='delete-account.html' style='color:#9b91ac;text-decoration:underline'>Delete Account</a>
+  &nbsp;·&nbsp;
+  <a href="mailto:help@wannabepress.com" style="color:#9b91ac;text-decoration:underline">Contact Support</a>
+</div>
+</body></html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; font-src 'self' data:; img-src 'self' data: blob:;">
+<title>Signing you in — Thread Weaver</title>
+<style>
+  html,body{height:100%;margin:0;background:#16121f;color:#e8e2f0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  h1{font-family:Georgia,serif;color:#e8b53a;font-size:26px;margin:0 0 10px;letter-spacing:.06em}
+  p{color:#9b91ac;font-size:15px;max-width:320px;line-height:1.5}
+  .spin{width:34px;height:34px;border:3px solid #2a2340;border-top-color:#e8b53a;border-radius:50%;animation:s .9s linear infinite;margin:0 0 22px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  a.btn{margin-top:18px;display:inline-block;background:#e8b53a;color:#16121f;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="spin" id="spin"></div>
+  <h1 id="ttl">Signing you in&hellip;</h1>
+  <p id="msg">One moment while we finish signing you in.</p>
+  <a class="btn" id="goapp" href="/app" style="display:none">Continue</a>
+</div>
+
+<script src="/lib/supabase.js"></script>
+<script>
+/* Magic-link / email-confirm handler.
+   The email template points here: /auth/confirm?token_hash=...&type=...&next=/app
+   We verify the token to establish a session, then send the user into the app.
+   Works no matter which app's Site URL Supabase used, because the app passes
+   RedirectTo = this page's origin. */
+(function () {
+  var SB_URL = "https://nzkgurdmvgkizvzisqxt.supabase.co";
+  var SB_KEY = "sb_publishable_XhncOLTTqr5qTs_G9O3Ecw_m6m5fU0f";
+  function q(name){ try{ return new URLSearchParams(location.search).get(name); }catch(e){ return null; } }
+  function fail(text){
+    document.getElementById("spin").style.display="none";
+    document.getElementById("ttl").textContent="Sign-in link expired";
+    document.getElementById("msg").textContent = text || "This link is invalid or has expired. Head back and request a new one.";
+    var b=document.getElementById("goapp"); b.style.display="inline-block"; b.textContent="Back to sign in";
+  }
+  function done(sess, type){
+    document.getElementById("spin").style.display="none";
+    document.getElementById("ttl").textContent="You're in";
+    document.getElementById("msg").textContent="Taking you to your library\u2026";
+    var next = q("next") || "/app";
+    if (next.indexOf("/auth/confirm") >= 0) next = next.split("/auth/confirm")[0] || "/app";
+    // Must be a single-slash, same-site path. "//evil.com" and "/\\evil.com"
+    // both start with "/" but navigate OFF-SITE, which would let someone send
+    // a victim through our real domain onto a harvest page.
+    if (!/^\/[^\/\\]/.test(next)) next = "/app";
+    // 1.14.82: browsers strip tabs/newlines from URLs, so "/%09/evil.com" passed the
+    // check above and became "//evil.com". Resolve it for real and require our origin.
+    try {
+      var _u = new URL(next, location.origin);
+      next = (_u.origin === location.origin) ? (_u.pathname + _u.search + _u.hash) : "/app";
+      if (!/^\/[^\/\\]/.test(next)) next = "/app";
+    } catch (e) { next = "/app"; }
+    // A recovery link means "I forgot my password" \u2014 hand the app the tokens in
+    // the hash shape store.js already recognises so it shows the set-new-password
+    // form instead of silently dropping them into the library.
+    if (type === "recovery") {
+      // Do NOT re-serialise the tokens into the hash: supabase-js requires
+      // expires_in and token_type too and throws without them. The session is
+      // already persisted for this origin, so just flag the intent.
+      next = "/app?recovery=1";
+    }
+    location.replace(next);
+  }
+  try {
+    // The vendored bundle exposes exactly one global: SBVendor. (It is NOT
+    // named `supabase` \u2014 calling that threw a ReferenceError that the catch
+    // below swallowed, so every link reported "expired".)
+    var m = window.SBVendor;
+    if (!m) { fail("Couldn't load the sign-in service. Check your connection and reload this page."); return; }
+    var sb = m.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: "implicit" } });
+    var token_hash = q("token_hash");
+    var type = q("type");
+    // 1.15.2: the shared Supabase email template appends "/auth/confirm?token_hash=..."
+    // to RedirectTo, and Thread Weaver's RedirectTo already ends in
+    // "/auth/confirm?next=/app". The result is
+    //   /auth/confirm?next=/app/auth/confirm?token_hash=X&type=Y
+    // which buries token_hash inside `next`, so every link showed "expired".
+    // Dig it back out.
+    if (!token_hash) {
+      var raw = q("next") || "";
+      var qi = raw.indexOf("?");
+      if (qi >= 0) {
+        try {
+          var inner = new URLSearchParams(raw.slice(qi + 1));
+          token_hash = inner.get("token_hash");
+          if (!type) type = inner.get("type");
+        } catch (e) {}
+      }
+    }
+    type = type || "magiclink";
+    // Existing users' magic links are stored as recovery tokens; GoTrue accepts either
+    // type for them, but try the alternate type once if the first is refused.
+    var altType = (type === "recovery") ? "magiclink" : (type === "magiclink" ? "recovery" : null);
+    // Some links arrive with the session already in the URL hash (implicit flow).
+    if (!token_hash && location.hash && location.hash.indexOf("access_token") >= 0) {
+      var hashType = /type=recovery/.test(location.hash) ? "recovery" : type;
+      sb.auth.getSession().then(function (r) {
+        var s = (r && r.data && r.data.session) ? r.data.session : null;
+        s ? done(s, hashType) : fail();
+      }).catch(function () { fail(); });
+      return;
+    }
+    if (!token_hash) { fail(); return; }
+    sb.auth.verifyOtp({ token_hash: token_hash, type: type }).then(function (res) {
+      if (!res.error) { done((res.data && res.data.session) ? res.data.session : null, type); return; }
+      if (!altType) { fail(res.error.message); return; }
+      return sb.auth.verifyOtp({ token_hash: token_hash, type: altType }).then(function (r2) {
+        if (r2.error) { fail(res.error.message); return; }
+        done((r2.data && r2.data.session) ? r2.data.session : null, altType);
+      });
+    }).catch(function () { fail(); });
+  } catch (e) { fail(); }
+})();
+</script>
+</body>
+</html>

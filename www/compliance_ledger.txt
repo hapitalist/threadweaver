@@ -1,0 +1,159 @@
+================================================================================
+APPLE APP REVIEW GUIDELINES - COMPLETE CLAUSE LEDGER (95 clauses)
+================================================================================
+1.1.1      Defamatory/mean-spirited content               COMPLIANT        Fiction; no targeting of protected groups. Obsidian adult content is fantasy, age-gated.
+1.1.2      Realistic violence/abuse                       COMPLIANT        Stylized fiction, no realistic gore; enemies are fictional.
+1.1.3      Weapons/dangerous objects                      N/A              No weapon sale/instruction content.
+1.1.4      Pornographic material                          COMPLIANT        No pornography; Obsidian mature themes are text fiction, not explicit sexual depiction, age-gated.
+1.1.5      Inflammatory religious content                 COMPLIANT        Godsverse is fictional cosmology, not commentary on real religions.
+1.1.6      False info / trick functionality               N/A              No location/utility trickery.
+1.1.7      Profiting on recent tragedies                  N/A              Fiction unrelated to real events.
+1.2        User-generated content                         N/A              No UGC, no social networking, no user posting.
+1.2.1      Creator content                                N/A              No third-party creator platform.
+1.3        Kids Category                                  N/A              Not submitted to Kids Category; contains mature content.
+1.4.1      Medical apps accuracy                          N/A              Not a medical/health app.
+1.4.2      Drug dosage calculators                        N/A              N/A.
+1.4.3      Tobacco/drugs/alcohol                          N/A              No such content promoted.
+1.4.4      DUI checkpoints                                N/A              N/A.
+1.4.5      Physical-harm challenges                       N/A              N/A.
+1.5        Developer contact info                         COMPLIANT(checked) Visible mailto in footer; qa-behavior.mjs asserts a rendered visible contact link.
+1.6        Data security                                  COMPLIANT        HTTPS only; Supabase RLS isolates user rows; no plaintext secrets in www.
+1.7        Reporting criminal activity                    N/A              N/A.
+2.1(a)     App completeness / demo account                COMPLIANT(checked) Demo password verified LIVE vs auth.users via crypt(); qa-behavior.mjs scans rendered UI for placeholders.
+2.1(b)     IAPs complete, visible, functional             COMPLIANT(checked) qa-behavior.mjs: visible Store opens sheet with all 7 products; tapping a product does not force sign-in.
+2.2        Beta testing (no betas on store)               COMPLIANT(checked) No beta/demo naming. [no_beta_name]
+2.3.1(a)   No hidden/undocumented features                COMPLIANT(checked) No dev/cheat unlocks; redeem-code removed. [no hidden features]
+2.3.2      IAP clearly indicated                          COMPLIANT(checked) qa-behavior.mjs: 7/7 store products show a price; library renders visible lock affordances.
+2.3.3      Screenshots show app in use                    ACTION-IN-ASC    App Store Connect metadata (Russell): screenshots must show gameplay/reading, not splash.
+2.3.4      Previews                                       N/A              No app preview video used (optional).
+2.3.5      Correct category                               ACTION-IN-ASC    ASC: category = Books or Games (Russell confirms in ASC).
+2.3.6      Honest age rating                              COMPLIANT(checked) Adult content age-gated; ASC age rating must be set 17+. [adult_gate] + ASC.
+2.3.7      Unique name/keywords, name<=30 chars           COMPLIANT        'Thread Weaver' unique, under 30 chars.
+2.3.8      Metadata 4+ appropriate                        ACTION-IN-ASC    ASC: icons/screenshots must be 4+ safe even though app is 17+.
+2.3.9      Rights to materials + fictional data           COMPLIANT        Russell owns all content; demo account is fictional.
+2.3.10     No other-platform references                   COMPLIANT        No Android/other-store references in iOS metadata.
+2.3.11     Pre-order                                      N/A              Not a pre-order.
+2.3.12     What's New text                                ACTION-IN-ASC    ASC: fill release notes for the version.
+2.3.13     In-app events                                  N/A              No in-app events.
+2.4.1      iPhone apps run on iPad                        COMPLIANT        Universal WKWebView app; responsive; safe-area handled.
+2.4.2      Power/thermal efficiency                       COMPLIANT        No mining/background abuse.
+2.4.3      tvOS remote                                    N/A              Not a tvOS app.
+2.4.4      No forced restart/system-setting changes       COMPLIANT        None.
+2.4.5      Mac App Store extras                           N/A              Not Mac App Store.
+2.5.1      Public APIs, current OS                        COMPLIANT        Cordova/WKWebView public APIs only.
+2.5.2      Self-contained; no external code exec          COMPLIANT(checked) No dynamic import; supabase-js vendored; no remote code. [native checks]
+2.5.3      No malware                                     COMPLIANT        None.
+2.5.4      Background services                            N/A              No background modes used.
+2.5.5      IPv6-only networks                             COMPLIANT        HTTPS to Supabase works on IPv6.
+2.5.6      WebKit for web browsing                        COMPLIANT        WKWebView; no alternative-engine entitlement claimed. [webkit_only]
+2.5.8      No alternate home screen                       N/A              N/A.
+2.5.9      No altering standard switches                  COMPLIANT        None.
+2.5.11     SiriKit/Shortcuts                              N/A              None used.
+2.5.12     CallKit/SMS filter                             N/A              None.
+2.5.13     Facial recognition auth                        N/A              None.
+2.5.14     Recording consent                              N/A              No recording of user.
+2.5.15     Files app integration                          N/A              No file browser.
+2.5.16     Widgets/extensions relevance                   N/A              No widgets/extensions.
+2.5.17     Matter                                         N/A              N/A.
+2.5.18     Advertising in main binary only                N/A              No ads.
+3.1.1      In-App Purchase required for unlocks           COMPLIANT(checked) No redeem-code path; qa-behavior.mjs confirms purchases route through the store sheet only.
+3.1.1(a)   External purchase link entitlement             N/A              No external purchase links used.
+3.1.2      Subscriptions                                  N/A              All products are non-consumable one-time; no subscriptions.
+3.1.3      Other purchase methods                         N/A              No reader/multiplatform external-purchase claims in-app; web Stripe is outside the app.
+3.1.3(b)   Multiplatform access                           COMPLIANT        Web/Stripe purchases sync via account; all items also available as IAP.
+3.1.4      Hardware-specific unlocks                      N/A              N/A.
+3.1.5      Cryptocurrency                                 N/A              None.
+3.2.1      Acceptable business models                     COMPLIANT        Selling own digital content via IAP.
+3.2.2      Unacceptable models                            COMPLIANT        No app-store-like interface, no charity collection, no manipulation.
+4.1        Copycats                                       COMPLIANT        Original content and UI.
+4.2        Minimum functionality                          COMPLIANT(checked) qa-behavior.mjs: shell + 22 library items render signed-out; real reader/games.
+4.2.3(i)   Works without another app                      COMPLIANT        Self-contained.
+4.2.3(ii)  Discloses download size                        N/A              No post-launch resource download; content bundled.
+4.2.6      Template/generation service                    COMPLIANT        Bespoke app, submitted by content owner (Wannabe Press).
+4.3        Spam / duplicate bundle IDs                    COMPLIANT        Single unique bundle id.
+4.4        Extensions                                     N/A              No app extensions.
+4.5        Apple sites/services                           N/A              No Apple Music/Game Center scraping.
+4.7        Mini apps/games/emulators                      N/A              Games are bundled HTML content authored by developer, not third-party downloadable software; still, adult items age-gated per 4.7.5.
+4.7.5      Age restriction for included software          COMPLIANT(checked) Adult game (Obsidian) carries 18+ gate. [adult_gate]
+4.8        Sign in with Apple                             COMPLIANT(checked) No third-party social login -> SIWA not required; email/password + magic link only. [no third-party login]
+4.9        Apple Pay                                      N/A              Apple Pay not used (IAP handles payment).
+4.10       Monetizing built-in capabilities               COMPLIANT        None monetized.
+5.1.1(i)   Privacy policy linked in-app + ASC             COMPLIANT(checked) qa-behavior.mjs: visible privacy link + privacy.html HTTP 200; ASC privacy URL is Russell (ACTION-IN-ASC).
+5.1.1(ii)  Consent for data collection                    COMPLIANT        Only account email + reading progress, tied to sign-in the user initiates.
+5.1.1(iii) Data minimization                              COMPLIANT        Collects only email + entitlements + reading progress.
+5.1.1(iv)  Respect permission settings                    COMPLIANT        No OS permission requests at all.
+5.1.1(v)   Login only if needed + in-app deletion         COMPLIANT(checked) qa-behavior.mjs: usable signed-out; delete-account reachable (in-app control + web route HTTP 200).
+5.1.2      Data use and sharing                           COMPLIANT        No third-party data sharing; no tracking; no ATT needed.
+5.1.3      Health data                                    N/A              No health data.
+5.1.4      Kids privacy                                   N/A              Not a kids app; mature content, 17+.
+5.1.5      Location services                              N/A              No location use.
+5.2.1      Third-party IP                                 COMPLIANT        All content owned by Wannabe Press.
+5.2.2      Third-party sites/services                     N/A              No third-party content.
+5.2.3      Audio/video downloading                        N/A              No media downloading from third parties.
+5.2.4      Apple endorsements                             COMPLIANT        No implication of Apple endorsement.
+5.2.5      Apple product confusion                        COMPLIANT        No Apple emoji/UI mimicry.
+5.3        Gaming/gambling/lotteries                      N/A              Story games, no real-money gambling.
+5.4        VPN                                            N/A              Not a VPN app.
+5.5        MDM                                            N/A              Not an MDM app.
+5.6        Developer Code of Conduct                      COMPLIANT        No manipulative practices; honest metadata.
+
+App Store Connect actions (NOT in the binary - Russell must do in ASC):
+  [ ] Guideline 3 price confirm  Reply in Resolution Center: '$114.99 is the intended price of the Everything IAP.'
+  [ ] Paid Apps Agreement        Business section: Active (confirmed by Russell's screenshot).
+  [ ] IAP submission             Attach all 7 IAPs to the SAME submission as the build (first IAP must ship with a version).
+  [ ] IAP localizations          Each product: Display Name + Description filled, not 'Rejected' (re-save to clear).
+  [ ] 2.3.3 screenshots          Show gameplay/reading, not splash.
+  [ ] 2.3.5 category             Set Books or Games.
+  [ ] 2.3.6 age rating           Set 17+ to match mature content.
+  [ ] 2.3.12 release notes       Fill 'What's New'.
+
+BINARY GAPS (fixable in code): 0
+
+================================================================================
+GOOGLE PLAY POLICY - COMPLETE LEDGER (38 policy areas)
+================================================================================
+Restricted Content: Sexual                 COMPLIANT          Mature fiction (Obsidian) is text, age-gated; no pornography.
+Restricted Content: Hate speech            COMPLIANT          No hate speech; fictional world.
+Restricted Content: Violence               COMPLIANT          Stylized fiction, no realistic graphic violence.
+Restricted Content: Bullying/harassment    N/A                No UGC/social.
+Restricted Content: Dangerous products     N/A                No weapons/drugs sale.
+Restricted Content: Marijuana              N/A                N/A.
+Restricted Content: Tobacco/alcohol        N/A                N/A.
+Restricted Content: Financial services     N/A                No financial products.
+Restricted Content: Real-money gambling    N/A                No gambling.
+Restricted Content: Illegal activities     COMPLIANT          None.
+Restricted Content: Child endangerment     COMPLIANT          Mature content is 18+ rated and age-gated; app not directed at children.
+Impersonation                              COMPLIANT          Original brand, Wannabe Press.
+Intellectual Property                      COMPLIANT          All content owned by developer.
+Privacy: Prominent disclosure/consent      COMPLIANT          Only email + reading progress after user-initiated sign-in.
+Privacy: Privacy policy (Play + in-app)    COMPLIANT(checked) privacy.html names Wannabe Press LLC + contact; linked in-app + Play listing. [G2]
+Privacy: Data Safety form                  ACTION-IN-CONSOLE  Play Console: Data Safety form must declare email + app-activity (Russell fills in Console).
+Privacy: Account deletion (in-app + web)   COMPLIANT(checked) In-app Delete Account + web delete-account.html email route (no app reinstall needed). [G3]
+User Data: Sensitive permissions           COMPLIANT(checked) No dangerous permissions declared. [G5]
+User Data: Prominent disclosure            COMPLIANT          No background/sensitive data collection.
+Permissions & APIs: Target API level       COMPLIANT(checked) targetSdkVersion 36 (Android 16 floor, effective 2026-08-31). [G1]
+Permissions: SMS/Call Log                  N/A                Not requested.
+Permissions: Location                      N/A                Not requested.
+Permissions: All files access              N/A                Not requested.
+Permissions: Package visibility            COMPLIANT          No QUERY_ALL_PACKAGES.
+Billing: Play Billing for digital goods    COMPLIANT(checked) Android IAP via Play Billing; product ids threadweaver_<bundle>. [G6]
+Billing: No alternative payment for digita COMPLIANT          No external payment links in the app.
+Billing: Subscriptions clarity             N/A                No subscriptions (one-time non-consumables).
+Deceptive Behavior: Metadata accuracy      COMPLIANT          Listing matches app; prices accurate ($114.99 native).
+Deceptive Behavior: Misleading claims      COMPLIANT          None.
+Deceptive Behavior: Device/network abuse   COMPLIANT          No hidden functionality; no malware.
+Malware / Mobile Unwanted Software         COMPLIANT(checked) No CDN code, no dynamic import, no secrets in www. [native checks]
+SafetyNet -> Play Integrity                COMPLIANT(checked) No retired SafetyNet calls. [G4]
+Families / Designed for Families           N/A                Not enrolled; mature content, not child-directed.
+Ads policy                                 N/A                No ads.
+News policy                                N/A                Not a news app.
+Store Listing: no misleading assets        ACTION-IN-CONSOLE  Play Console: screenshots/feature graphic accurate (Russell).
+Store Listing: content rating (IARC)       ACTION-IN-CONSOLE  Play Console: complete IARC questionnaire -> Mature rating (Russell).
+App Bundle: signed, versionCode ascending  COMPLIANT(checked) AAB signed with android.p12 (fingerprint locked); versionCode ascends. [keystore + version checks]
+
+Play Console actions (NOT in the binary - Russell must do in Console):
+  [ ] Privacy: Data Safety form          Play Console: Data Safety form must declare email + app-activity (Russell fills in Console).
+  [ ] Store Listing: no misleading asset Play Console: screenshots/feature graphic accurate (Russell).
+  [ ] Store Listing: content rating (IAR Play Console: complete IARC questionnaire -> Mature rating (Russell).
+
+BINARY GAPS (fixable in code): 0
