@@ -14,6 +14,8 @@
   var SERIES_IDS = { "Godsverse Chronicles":"godsverse", "Obsidian Spindle Saga":"obsidian-spindle",
     "Dragon Strife":"dragon-strife", "Quest Girls":"quest-girls", "Wonderland":"wonderland" };
   var CATALOG = null, MINE = null;
+  // 1.16.3: read-ahead one chapter at a time. Price and which app stores can verify it come from "mine".
+  var CH = { cents: 100, iap: { ios: false, android: false } };
 
   function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
   function token(){ return window.twAccessToken ? window.twAccessToken() : null; }
@@ -129,7 +131,9 @@
           (f.owns_all ? ' You own the whole series, so every chapter is open now.' : '') + '</div>' +
           (f.next_chapter ? (f.next_chapter.ready
             ? '<button class="sbtn go" onclick="twSerialClose();twSerialRead(\''+esc(sid)+'\','+f.next_chapter.g+')">Read '+esc(f.next_chapter.title)+'</button>'
-            : '<div class="sub" style="margin:0">Up next: <b>'+esc(f.next_chapter.title)+'</b>, arriving '+nice(f.next_delivery)+'.</div>') : '') +
+            : '<div class="sub" style="margin:0">Up next: <b>'+esc(f.next_chapter.title)+'</b>, arriving '+nice(f.next_delivery)+'.</div>' +
+              (f.next_chapter.can_buy && window.twChapterPriceLabel() ? '<button class="sbtn go" onclick="twSerialBuyChapter(\''+esc(sid)+'\')">Read it now — '+esc(window.twChapterPriceLabel())+'</button>' : '') +
+              (s.bundle && !f.owns_all ? '<button class="sbtn alt" onclick="twSerialBuy(\''+esc(s.bundle)+'\')">Unlock the whole series</button>' : '')) : '') +
           '<label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;color:#e6dcf5;margin-top:16px"><input type="checkbox" id="srEmail"'+(f.email!==false?' checked':'')+' onchange="twSerialEmail(\''+esc(sid)+'\',this.checked)" style="width:20px;height:20px"> Email me each new chapter</label>' +
           '<label for="srDay">Delivery day</label><select id="srDay">'+dayOpts+'</select>' +
           '<button class="sbtn alt" onclick="twSerialSetDay(\''+esc(sid)+'\')">Save day</button>' +
@@ -215,8 +219,57 @@
   };
   window.twSerialBuy = function(bundle){
     twSerialClose();
-    if (bundle === "unlock_all" || bundle === "everything") { if (window.openStore) window.openStore(); return; }
+    if (bundle === "unlock_all" || bundle === "everything") {
+      // 1.16.3: an "Unlock Everything" link lands ON Unlock Everything, not on the top of the store list
+      if (window.openStore) window.openStore();
+      setTimeout(function(){
+        var o = Array.prototype.filter.call(document.querySelectorAll("#sheet .opt"), function(x){ return /Unlock Everything/i.test(x.textContent); })[0];
+        if (o) { o.style.borderColor = "var(--gold)"; try{ o.scrollIntoView({ block:"center" }); }catch(e){} }
+      }, 60);
+      return;
+    }
     if (window.openSheet) window.openSheet(bundle); else if (window.openStore) window.openStore();
+  };
+
+  /* ------------------------------------------- read the next chapter now */
+  function nativePlat(){ try{ var p = window.cordova && window.cordova.platformId; return (p === "ios" || p === "android") ? p : null; }catch(e){ return null; } }
+  // The label to show on "read it now" buttons, or null when this build can't sell a single chapter
+  // (the app, until the store product exists and the server can verify it).
+  window.twChapterPriceLabel = function(){
+    var plat = nativePlat();
+    if (!plat) return "$" + (CH.cents / 100).toFixed(CH.cents % 100 ? 2 : 0);
+    if (!CH.iap[plat]) return null;
+    return window.twChapterNativePrice ? window.twChapterNativePrice() : null;
+  };
+  window.twSerialBuyChapter = function(sid){
+    if (!token()) {
+      try{ sessionStorage.setItem("tw_pending_link", "?serial=" + encodeURIComponent(sid) + "&unlock=next"); }catch(e){}
+      if (window.promptSignin) try{ window.promptSignin(); }catch(e){}
+      return;
+    }
+    try{ var pl = sessionStorage.getItem("tw_pending_link"); if (pl && /unlock=next/.test(pl)) sessionStorage.removeItem("tw_pending_link"); }catch(e){}
+    if (nativePlat()) {
+      if (window.twChapterPriceLabel() && window.twBuyChapterNative) { window.twBuyChapterNative(sid); return; }
+      var s0 = serialById(sid); if (s0 && s0.bundle) window.twSerialBuy(s0.bundle);
+      return;
+    }
+    body('<div class="sub">Opening secure checkout…</div>');
+    api({ action:"chapter_checkout", serial:sid }).then(function(j){
+      if (j && j.url) { location.href = j.url; return; }
+      if (j && j.error === "owned" && j.g != null) { twSerialClose(); window.twSerialRead(sid, j.g); return; }
+      if (j && j.error === "not following") { window.twSerialOpen(sid); setTimeout(function(){ msg(j.message || "Follow this serial first."); }, 400); return; }
+      body('<h2>Couldn’t open checkout</h2><div class="sub">' + esc((j && j.message) || "Something went wrong. Please try again.") + '</div>' +
+        '<button class="sbtn alt" onclick="twSerialOpen(\'' + esc(sid) + '\')">Back</button>');
+    });
+  };
+  // the app store approved and the server credited a chapter: open it
+  window.twSerialChapterBought = function(sid){
+    MINE = null;
+    loadMine().then(function(){
+      render();
+      var f = (MINE||[]).filter(function(x){ return x.serial === sid; })[0];
+      if (f) { twSerialClose(); window.twSerialRead(sid, f.through); }
+    });
   };
 
   /* ----------------------------------------------------------- reading */
@@ -235,13 +288,19 @@
   window.addEventListener("message", function(ev){
     var d = ev.data || {};
     if (d.type === "serial-buy") window.twSerialBuy(d.bundle);
+    if (d.type === "serial-chapter-buy" && d.serial) window.twSerialBuyChapter(String(d.serial));
     if (d.type === "serial-progress") { MINE = null; refresh(); }
   });
 
   /* ------------------------------------------------- "Your serials" row */
   function loadMine(){
     if (!token()) { MINE = []; return Promise.resolve(MINE); }
-    return api({ action:"mine" }).then(function(j){ MINE = (j && j.serials) || []; return MINE; });
+    return api({ action:"mine" }).then(function(j){
+      MINE = (j && j.serials) || [];
+      if (j && j.chapter_iap) CH.iap = j.chapter_iap;
+      if (j && j.chapter_price_cents) CH.cents = j.chapter_price_cents;
+      return MINE;
+    });
   }
   function wrap(){
     var w = document.getElementById("serialsWrap");
@@ -259,7 +318,7 @@
       '<div class="ss">One chapter a week, on your day. Tap to read.</div></div><div class="sr-cards">' +
       MINE.map(function(x){
         var nx = x.next_chapter, ready = nx && nx.ready;
-        var when = !nx ? "You’re all caught up — that’s the end." : (ready ? "▸ Ready to read" : "Next chapter "+nice(x.next_delivery));
+        var when = !nx ? "You’re all caught up — that’s the end." : (ready ? "▸ Ready to read" : "Next chapter "+nice(x.next_delivery) + (nx.can_buy && window.twChapterPriceLabel() ? " · or read it now" : ""));
         var click = nx && ready ? 'twSerialRead(\''+esc(x.serial)+'\','+nx.g+')' : 'twSerialOpen(\''+esc(x.serial)+'\')';
         return '<div class="sr-card" onclick="'+click+'"><button class="gear" aria-label="Serial settings" onclick="event.stopPropagation();twSerialOpen(\''+esc(x.serial)+'\')">&#9881;</button>' +
           '<div class="k">Every '+DAYS[x.weekday]+(x.owns_all?" · owned":"")+'</div><div class="t">'+esc(x.title)+'</div>' +
@@ -276,11 +335,29 @@
     var m = p.match(/\/(serial|book|buy)\/([^\/]+)$/), kind = m ? m[1] : null, id = m ? decodeURIComponent(m[2]) : null;
     if (/\/codex$/.test(p)) { kind = "open"; id = "codex"; }
     if (/\/quiz$/.test(p)) { kind = "open"; id = "quiz"; }
-    if (!kind) { ["serial","book","buy","open"].some(function(k){ if (q.get(k)) { kind=k; id=q.get(k); return true; } return false; }); }
-    if (!kind) { try{ var pend=sessionStorage.getItem("tw_pending_link"); if(pend && token()){ sessionStorage.removeItem("tw_pending_link"); q=new URLSearchParams(pend); kind=q.get("serial")?"serial":null; id=q.get("serial"); } }catch(e){} }
+    function pick(){ ["serial","book","buy","open"].some(function(k){ if (q.get(k)) { kind=k; id=q.get(k); return true; } return false; }); }
+    if (!kind) pick();
+    // a link that had to wait for sign-in: replay it in full (1.16.3: incl. &unlock=next)
+    if (!kind) { try{ var pend=sessionStorage.getItem("tw_pending_link"); if(pend && token()){ sessionStorage.removeItem("tw_pending_link"); q=new URLSearchParams(pend); pick(); } }catch(e){} }
     if (!kind) return;
     var from = q.get("from");
     var readG = q.get("read");
+    // back from a $1 chapter checkout: the Stripe webhook lands within seconds - wait for it, then open the chapter
+    if (kind === "serial" && q.get("purchase") === "chapter" && readG != null && /^\d+$/.test(readG)) {
+      try{ history.replaceState(null, "", location.pathname + location.search.replace(/[?&]purchase=chapter/, "").replace(/^&/, "?")); }catch(e){}
+      if (!token()) { try{ sessionStorage.setItem("tw_pending_link", "?serial="+encodeURIComponent(id)+"&read="+readG); }catch(e){} return; }
+      body('<h2>Thank you!</h2><div class="sub">Unlocking your chapter…</div>');
+      var delays = [800, 1500, 2500, 4000, 6000, 10000, 15000, 20000], k = 0;
+      (function attempt(){
+        api({ action:"chapter", serial:id, g:+readG }).then(function(j){
+          if (j && !j.locked && j.html) { MINE = null; refresh(); twSerialClose(); window.twSerialRead(id, +readG); return; }
+          if (k >= delays.length) { body('<h2>Payment received</h2><div class="sub">Your chapter is still unlocking. It will open in a minute — tap below to try again.</div><button class="sbtn go" onclick="twSerialClose();twSerialRead(\''+esc(id)+'\','+(+readG)+')">Open the chapter</button>'); return; }
+          setTimeout(attempt, delays[k++]);
+        });
+      })();
+      return;
+    }
+    if (kind === "serial" && q.get("unlock") === "next") { window.twSerialBuyChapter(id); return; }
     if (kind === "serial" && readG != null && /^\d+$/.test(readG) && token()) window.twSerialRead(id, +readG);
     else if (kind === "serial") window.twSerialOpen(id, from);
     else if (kind === "book") {

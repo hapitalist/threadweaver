@@ -52,6 +52,10 @@ h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-heig
   function post(m){ try{ parentWin && parentWin.postMessage(m, "*"); }catch(e){} }
   function go(g){ location.replace("serial.html?serial="+encodeURIComponent(SID)+"&g="+g); }
   window.twBuy = function(b){ post({ type:"serial-buy", bundle:b }); };
+  // 1.16.3: read the next chapter now for $1 (web) / the store's price (app, once the store product exists)
+  function chapterPrice(){ try{ return parentWin && parentWin.twChapterPriceLabel ? parentWin.twChapterPriceLabel() : null; }catch(e){ return null; } }
+  window.twBuyChapter = function(){ post({ type:"serial-chapter-buy", serial:SID }); };
+  function chapterBtn(label){ var p = chapterPrice(); return p ? '<button class="btn go" onclick="twBuyChapter()">'+esc(label)+' — '+esc(p)+'</button>' : ''; }
   window.twGo = go;
   function state(html){ document.getElementById("state").innerHTML = html; document.getElementById("state").hidden = false; document.getElementById("chap").hidden = true; }
 
@@ -63,10 +67,11 @@ h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-heig
   .then(function(res){
     var j = res.j;
     if (j.locked || (res.s === 403 && j.error === "locked")) {
-      var buy = j.bundle ? '<button class="btn go" onclick="twBuy(\''+esc(j.bundle)+'\')">Read the rest now</button>' : '';
+      var one = j.buy_next ? chapterBtn("Read this chapter now") : '';
+      var buy = j.bundle ? '<button class="btn '+(one ? 'alt' : 'go')+'" onclick="twBuy(\''+esc(j.bundle)+'\')">'+(one ? 'Unlock the whole series' : 'Read the rest now')+'</button>' : '';
       state('<div class="end" style="text-align:center"><div class="t">This chapter isn’t out yet</div><div class="s">' +
         (j.unlock_on ? 'It arrives <b>'+nice(j.unlock_on)+'</b>.' : 'Follow this serial to get a chapter every week.') +
-        '</div>'+buy+(G>0?'<button class="btn alt" onclick="twGo('+(G-1)+')">← Previous chapter</button>':'')+'</div>');
+        '</div>'+one+buy+(G>0?'<button class="btn alt" onclick="twGo('+(G-1)+')">← Previous chapter</button>':'')+'</div>');
       return;
     }
     if (res.s === 401) { state('Sign in to read your serial.'); return; }
@@ -83,7 +88,8 @@ h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-heig
     } else {
       end = '<div class="t">Next chapter '+(j.next.unlock_on ? nice(j.next.unlock_on) : 'next week')+'</div>' +
         '<div class="s">“'+esc(j.next.title)+'” arrives with your next delivery. Can’t wait?</div>' +
-        (j.bundle ? '<button class="btn go" onclick="twBuy(\''+esc(j.bundle)+'\')">Read the rest now</button>' : '') +
+        (j.next.can_buy ? chapterBtn("Read “"+j.next.title+"” now") : '') +
+        (j.bundle ? '<button class="btn '+(j.next.can_buy && chapterPrice() ? 'alt' : 'go')+'" onclick="twBuy(\''+esc(j.bundle)+'\')">'+(j.next.can_buy && chapterPrice() ? 'Unlock the whole series' : 'Read the rest now')+'</button>' : '') +
         (prev ? '<div class="nav" style="margin-top:10px">'+prev+'</div>' : '');
     }
     document.getElementById("end").innerHTML = end;

@@ -520,10 +520,20 @@
     var regs = bundles.map(function (b) {
       return { id: productIdFor(b, plat), type: TYPE, platform: thisPlat };
     });
+    // 1.16.3: one serial chapter (read ahead) - a CONSUMABLE, bought again for every chapter.
+    // Store ids: com.russellnohelty.threadweaver.chapter (Apple) / threadweaver_chapter (Google).
+    var CONSUMABLE = (P.ProductType && P.ProductType.CONSUMABLE) || "consumable";
+    regs.push({ id: productIdFor("chapter", plat), type: CONSUMABLE, platform: thisPlat });
     try { store.register(regs); } catch (e) {}
 
     // when a purchase is approved -> verify with our backend -> finish
     store.when().approved(function (transaction) {
+      // 1.16.3: a serial chapter is credited by the server only; the transaction is finished (consumed)
+      // only after the server confirms, so a failed check is re-delivered by the store on the next launch.
+      try {
+        var cPid = (transaction.products && transaction.products[0] && transaction.products[0].id) || transaction.id;
+        if (cPid === productIdFor("chapter", plat)) { handleChapterTransaction(transaction, plat); return; }
+      } catch (e) {}
       // Grant immediately + locally so the purchase works even with no account
       // (Apple sandbox review has none). If signed in, also record it server-side
       // so it syncs to other devices.
@@ -641,6 +651,48 @@
         return !!(r.ok && d && !d.error && (d.ok === true || d.granted || d.success));
       });
     }).catch(function () { return false; });
+  }
+
+  // --- 1.16.3: read the next chapter of a serial (store consumable) ---
+  var CHAPTER_PENDING_KEY = "tw.chapterPending";   // which serial the reader was buying for
+  window.twChapterNativePrice = function () {
+    try {
+      var plat = nativePlatform(); var s = _iapStore || (window.CdvPurchase && window.CdvPurchase.store);
+      if (!plat || !s || !s.get) return null;
+      var pr = s.get(productIdFor("chapter", plat));
+      var price = pr && ((pr.pricing && pr.pricing.price) || (pr.offers && pr.offers[0] && pr.offers[0].pricingPhases && pr.offers[0].pricingPhases[0] && pr.offers[0].pricingPhases[0].price));
+      return (pr && pr.canPurchase !== false && price) ? String(price) : null;
+    } catch (e) { return null; }
+  };
+  window.twBuyChapterNative = function (serial) {
+    var plat = nativePlatform();
+    if (!plat || !session) { if (!session) showLoginWall("Sign in to read ahead."); return; }
+    try { localStorage.setItem(CHAPTER_PENDING_KEY, JSON.stringify({ serial: serial, at: Date.now() })); } catch (e) {}
+    initIAP().then(function (store) {
+      var pr = store && store.get ? store.get(productIdFor("chapter", plat)) : null;
+      var offer = pr && (pr.getOffer ? pr.getOffer() : (pr.offers && pr.offers[0]));
+      if (offer && offer.order) { offer.order(); return; }
+      if (pr && pr.order) { pr.order(); return; }
+      alert("Reading ahead isn't available from the store right now.");
+    });
+  };
+  function handleChapterTransaction(transaction, plat) {
+    var pend = null; try { pend = JSON.parse(localStorage.getItem(CHAPTER_PENDING_KEY) || "null"); } catch (e) {}
+    if (!pend || !pend.serial || !session) return;          // not finished: the store re-delivers it later
+    var slim = slimTx(transaction, plat);
+    var payload = { kind: "chapter", serial: pend.serial, product_id: slim.prodId };
+    if (plat === "ios") { var rc = appleReceiptB64(); if (!rc) return; payload.receipt = rc; payload.transaction_id = slim.transactionId; }
+    else { if (!slim.purchaseToken) return; payload.purchase_token = slim.purchaseToken; }
+    fetch(FN + (plat === "ios" ? "/apple-iap-verify" : "/google-play-verify"), {
+      method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + session.access_token },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return r.ok && d && d.ok; }); })
+      .then(function (ok) {
+        if (!ok) return;                                       // stays unfinished -> retried on next launch
+        try { transaction.finish(); } catch (e) {}
+        try { localStorage.removeItem(CHAPTER_PENDING_KEY); } catch (e) {}
+        if (window.twSerialChapterBought) window.twSerialChapterBought(pend.serial);
+      }).catch(function () {});
   }
 
   // --- BUY: platform-aware. iOS->Apple IAP, Android->Google Play, web->Stripe ---
