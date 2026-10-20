@@ -1881,7 +1881,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){ var b=document.getElementById('boot'); if(b){ b.classList.add('gone'); setTimeout(function(){ b.style.display='none'; },600); } }, 900);
   // in-app version stamp (confirms which build is live after a deploy)
   try{
-    var TW_APP_VERSION="1.16.7";
+    var TW_APP_VERSION="1.16.8";
     if(!document.getElementById('twVer')){
       var v=document.createElement('div'); v.id='twVer';
       v.textContent='v'+TW_APP_VERSION;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; frame-src 'self' blob: data: https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>One-off emails · Thread Weaver Admin</title>
@@ -499,10 +499,11 @@ function useFileUpload(type){
       .then(res=>{setLoading(false);return res}).catch(err=>{setLoading(false);setErrors([{message:String(err&&err.message||err)}]);toast('Upload failed: '+(err&&err.message||err));return null})},[type]);
   return {isLoading,progress,errors,filesNumber,upload};
 }
-// Joy reads link previews with its own joy-embed function; Thread Weaver has none yet, so a bookmark or embed card
-// says so plainly instead of waiting. Paste the link as text, or use a button card.
+// Link previews for the bookmark and embed cards: Thread Weaver's tw-embed function reads the page (admins only).
 function fetchEmbed(url,options){
-  return Promise.reject(new Error('Link previews are not set up here yet - paste the link as text, or use a button card instead.'));
+  return sb.functions.invoke('tw-embed',{body:{url,type:options&&options.type}}).then(r=>{
+    if(r.error){return (r.error.context&&r.error.context.json?r.error.context.json():Promise.resolve(null)).then(j=>{throw new Error((j&&j.error)||'That link could not be read')},()=>{throw new Error('That link could not be read')})}
+    return r.data});
 }
 function loadSnippets(){rpc('joy_editor_snippets').then(d=>{SNIPPETS=arr(d);if(ROOT)renderKoenig()}).catch(()=>{})}
 function cardConfig(){

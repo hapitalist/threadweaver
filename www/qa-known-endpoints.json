@@ -7,5 +7,6 @@
  "admin-readers",
  "nl-unsubscribe",
  "nl-seq-send",
- "nl-ses-events"
+ "nl-ses-events",
+ "tw-embed"
 ]
