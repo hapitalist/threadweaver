@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Thread Weaver Admin · Readers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=DM+Mono&display=swap">
+<script src="lib/supabase.js"></script>
+<style>
+:root{--bg:#0e0a16;--panel:#16101f;--ink:#e9e1f6;--dim:#9b91ac;--gold:#e8b53a;--edge:#2e2742;--green:#7fd08a;
+  --hot:#ff7a59;--warm:#e8b53a;--cool:#6fb3e0;--cold:#7d7891}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.45}
+main{max-width:1200px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;margin:0}
+h2{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:16px;margin:28px 0 10px}
+.mono,.kick{font-family:'DM Mono',ui-monospace,monospace}
+.kick{font-size:11px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.who{color:var(--dim);font-size:12px}
+.who button{margin-left:8px}
+button,select,input{font:inherit;color:var(--ink)}
+button{background:#241b33;border:1px solid #3a3150;border-radius:8px;padding:7px 12px;cursor:pointer}
+button.go{background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f;border:none;font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+select,input{background:#1b1428;border:1px solid var(--edge);border-radius:8px;padding:7px 9px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;cursor:pointer}
+.card:hover{border-color:#4a3f66}
+.card .n{font-size:24px;font-weight:700}
+.card .l{color:var(--dim);font-size:12px}
+.card.Hot .n{color:var(--hot)}.card.Warm .n{color:var(--warm)}.card.Cool .n{color:var(--cool)}.card.Cold .n{color:var(--cold)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 10px}
+.filters input[type=search]{min-width:200px;flex:1}
+.tablewrap{overflow-x:auto;border:1px solid var(--edge);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:900px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #221a31;white-space:nowrap}
+th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);font-weight:600;background:#140e1d;position:sticky;top:0}
+tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.pill.Hot{background:#3a1a14;color:var(--hot)}.pill.Warm{background:#33280f;color:var(--warm)}
+.pill.Cool{background:#13283a;color:var(--cool)}.pill.Cold{background:#1f1d26;color:var(--cold)}
+.tag{display:inline-block;font-size:11px;color:#cdbfe6;background:#221a31;border-radius:6px;padding:1px 6px;margin-right:4px}
+.dim{color:var(--dim)}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap}
+#state{color:var(--dim);font-family:'DM Mono',ui-monospace,monospace;font-size:13px;text-align:center;padding:60px 10px}
+.gate{max-width:360px;margin:60px auto;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:22px}
+.gate input{width:100%;margin:6px 0}
+.gate button{width:100%;margin-top:10px}
+.err{color:#e0a0a0;font-size:13px;margin-top:8px}
+.drawer{position:fixed;inset:0;background:rgba(5,3,9,.6);display:none;justify-content:flex-end;z-index:20}
+.drawer.on{display:flex}
+.drawer .inner{width:min(560px,100%);height:100%;overflow:auto;background:var(--panel);border-left:1px solid var(--edge);padding:20px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 10px;margin:10px 0}
+.kv div:nth-child(odd){color:var(--dim)}
+.mini{width:100%;border-collapse:collapse;min-width:0}
+.mini td,.mini th{padding:5px 6px;font-size:12px;white-space:normal}
+.series{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+@media (max-width:640px){h1{font-size:20px}.card .n{font-size:20px}}
+</style>
+</head>
+<body>
+<main>
+  <div id="state">Checking your sign-in…</div>
+
+  <div id="gate" class="gate" hidden>
+    <div class="kick">Thread Weaver admin</div>
+    <h1 style="font-size:20px;margin:6px 0 14px">Sign in</h1>
+    <input id="em" type="email" placeholder="Email" autocomplete="username">
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="go" id="signin">Sign in</button>
+    <div class="err" id="gerr"></div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="top">
+      <div><div class="kick">Thread Weaver admin</div><h1>Readers: who's hot, who isn't</h1></div>
+      <div class="who" id="who"></div>
+    </div>
+    <div class="dim" id="asof" style="font-size:12px"></div>
+
+    <h2>Heat</h2>
+    <div class="cards" id="heatCards"></div>
+
+    <h2>Signals</h2>
+    <div class="cards" id="sigCards"></div>
+
+    <h2>Substack list (Wannabe Press)</h2>
+    <div class="cards" id="segCards"></div>
+
+    <h2>Readers</h2>
+    <div class="filters">
+      <input type="search" id="q" placeholder="Search email…">
+      <select id="fHeat"><option value="">Any heat</option><option>Hot</option><option>Warm</option><option>Cool</option><option>Cold</option></select>
+      <select id="fSeg"><option value="">Any Substack status</option><option>Active (30d)</option><option>Cooling (31-90d)</option><option>Lapsing (91-180d)</option><option>Dormant (180d+)</option><option>Never opened</option><option>Never received</option><option>Former subscriber (no longer on list)</option></select>
+      <select id="fSeries"><option value="">Any series</option><option value="time">Opened Time</option><option value="evil">Opened Evil</option><option value="the_fairy_queen">Opened The Fairy Queen</option><option value="the_wicked_witch">Opened The Wicked Witch</option></select>
+      <select id="fBacker"><option value="">Backers + non-backers</option><option value="1">Fiction backers only</option><option value="0">Not a backer</option></select>
+      <select id="fApp"><option value="">App + no app</option><option value="1">Uses Thread Weaver</option><option value="0">Not in the app yet</option></select>
+      <select id="fMisc"><option value="">Everyone</option><option value="superfan">Superfans</option><option value="verified">Confirmed real opens</option><option value="on_list">On Substack list</option></select>
+      <select id="fSort"><option value="heat_score">Sort: heat</option><option value="last_open">Sort: last open</option><option value="open_rate">Sort: open rate</option><option value="sends_opened">Sort: emails opened</option><option value="total_pledged">Sort: total pledged</option></select>
+      <button id="csv">Download CSV</button>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Email</th><th>Heat</th><th>Substack</th><th>Open rate</th><th>Opened</th><th>Last open</th><th>Series opened</th><th>Backed</th><th>Pledged</th><th>App</th><th>Where</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div class="pager"><span class="dim" id="count"></span><span><button id="prev">← Prev</button> <button id="next">Next →</button></span></div>
+
+    <h2>Series sends</h2>
+    <div class="series" id="series"></div>
+  </div>
+</main>
+
+<div class="drawer" id="drawer"><div class="inner" id="dInner"></div></div>
+
+<script>
+(function(){
+  var URL_ = "https://nzkgurdmvgkizvzisqxt.supabase.co";
+  var ANON = "sb_publishable_XhncOLTTqr5qTs_G9O3Ecw_m6m5fU0f";
+  var FN = URL_ + "/functions/v1/admin-readers";
+  var PAGE = 50, offset = 0, total = 0, sb, session;
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function n(v){ return (v==null?0:v).toLocaleString(); }
+  function pct(v){ return v==null ? "—" : Math.round(v*100)+"%"; }
+  function day(iso){ if(!iso) return "—"; var d=new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso+"T12:00:00" : iso); return isNaN(d) ? esc(iso) : d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }
+  function money(v){ return v ? "$"+Math.round(v).toLocaleString() : "—"; }
+  function show(id){ ["state","gate","app"].forEach(function(x){ $(x).hidden = (x!==id); }); }
+
+  function api(route, params){
+    var qs = params ? "?" + new URLSearchParams(params).toString() : "";
+    return fetch(FN + "/" + route + qs, { headers: { "Authorization": "Bearer " + session.access_token, "apikey": ANON } })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw Object.assign(new Error(j.error||j.message||("HTTP "+r.status)),{status:r.status}); return j; }); });
+  }
+
+  function card(cls, num, label, onclick){
+    var d = document.createElement("div"); d.className = "card " + (cls||"");
+    d.innerHTML = '<div class="n">'+n(num)+'</div><div class="l">'+esc(label)+'</div>';
+    if (onclick) d.onclick = onclick; else d.style.cursor = "default";
+    return d;
+  }
+  function setFilters(f){
+    ["q","fHeat","fSeg","fSeries","fBacker","fApp","fMisc"].forEach(function(id){ $(id).value = ""; });
+    Object.keys(f).forEach(function(k){ $(k).value = f[k]; });
+    offset = 0; loadRows(); $("rows").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function loadSummary(){
+    return api("summary").then(function(s){
+      $("asof").textContent = "Updated " + new Date(s.as_of).toLocaleString() + " · " + n(s.total_readers) + " people across Substack, BackerKit and the app";
+      var hc = $("heatCards"); hc.innerHTML = "";
+      ["Hot","Warm","Cool","Cold"].forEach(function(h){ hc.appendChild(card(h, s.by_heat[h], h, function(){ setFilters({fHeat:h}); })); });
+      var sc = $("sigCards"); sc.innerHTML = "";
+      sc.appendChild(card("", s.superfans, "Superfans (open 75%+, active)", function(){ setFilters({fMisc:"superfan"}); }));
+      sc.appendChild(card("", s.fading_superfans, "Fading superfans (were 75%+, now 31-180 days quiet)", function(){ setFilters({fSeg:"Cooling (31-90d)"}); }));
+      sc.appendChild(card("", s.hot_not_in_app, "Hot readers not in the app yet", function(){ setFilters({fHeat:"Hot",fApp:"0"}); }));
+      sc.appendChild(card("", s.fiction_backers, "Fiction backers (BackerKit)", function(){ setFilters({fBacker:"1"}); }));
+      sc.appendChild(card("", s.backers_on_substack, "Backers on the Substack list", function(){ setFilters({fBacker:"1",fMisc:"on_list"}); }));
+      sc.appendChild(card("", s.backers_not_on_substack, "Backers NOT on the Substack list", null));
+      sc.appendChild(card("", s.apple_privacy_only_openers, "Opens only via Apple privacy (may not be reading)", null));
+      sc.appendChild(card("", s.thread_weaver_users, "Thread Weaver app accounts", function(){ setFilters({fApp:"1"}); }));
+      var gc = $("segCards"); gc.innerHTML = "";
+      gc.appendChild(card("", s.substack_list, "On the list", function(){ setFilters({fMisc:"on_list"}); }));
+      Object.keys(s.substack_segments).forEach(function(k){ gc.appendChild(card("", s.substack_segments[k], k, function(){ setFilters({fSeg:k}); })); });
+    });
+  }
+
+  function params(){
+    var p = { limit: PAGE, offset: offset, sort: $("fSort").value };
+    if ($("q").value.trim()) p.q = $("q").value.trim();
+    if ($("fHeat").value) p.heat = $("fHeat").value;
+    if ($("fSeg").value) p.segment = $("fSeg").value;
+    if ($("fSeries").value) p.series = $("fSeries").value;
+    if ($("fBacker").value) p.backer = $("fBacker").value;
+    if ($("fApp").value) p.app = $("fApp").value;
+    var m = $("fMisc").value; if (m) p[m] = "1";
+    return p;
+  }
+  function seriesTags(o){
+    if (!o) return "";
+    return Object.keys(o).filter(function(k){ return k!=="announcements"; }).map(function(k){
+      return '<span class="tag">'+esc(k.replace(/^the_/,"").replace(/_/g," "))+' '+o[k]+'</span>'; }).join("");
+  }
+  function loadRows(){
+    $("rows").innerHTML = '<tr><td colspan="11" class="dim">Loading…</td></tr>';
+    return api("readers", params()).then(function(r){
+      total = r.total || 0;
+      $("rows").innerHTML = (r.readers||[]).map(function(x){
+        return '<tr class="row" data-email="'+esc(x.email)+'">'+
+          '<td>'+esc(x.email)+(x.superfan?' <span class="tag">superfan</span>':'')+'</td>'+
+          '<td><span class="pill '+esc(x.heat)+'">'+esc(x.heat)+'</span> <span class="dim">'+x.heat_score+'</span></td>'+
+          '<td>'+esc(x.substack_segment||"—")+'</td>'+
+          '<td>'+pct(x.open_rate)+(x.opens_verified_human==="yes"?"":(x.opens_verified_human?' <span class="dim" title="Only Apple privacy opens">*</span>':''))+'</td>'+
+          '<td>'+(x.sends_opened==null?"—":x.sends_opened)+'</td>'+
+          '<td>'+day(x.last_open)+'</td>'+
+          '<td>'+seriesTags(x.series_opens)+'</td>'+
+          '<td>'+(x.projects_backed||"—")+'</td>'+
+          '<td>'+money(x.total_pledged)+'</td>'+
+          '<td>'+(x.thread_weaver_user?"✓":"")+'</td>'+
+          '<td class="dim">'+esc([x.city,x.region,x.country].filter(Boolean).join(", "))+'</td></tr>';
+      }).join("") || '<tr><td colspan="11" class="dim">No one matches these filters.</td></tr>';
+      $("count").textContent = total ? ("Showing "+n(offset+1)+"–"+n(Math.min(offset+PAGE,total))+" of "+n(total)) : "0 people";
+      $("prev").disabled = offset===0; $("next").disabled = offset+PAGE>=total;
+      Array.prototype.forEach.call(document.querySelectorAll("tr.row"), function(tr){ tr.onclick = function(){ openReader(tr.getAttribute("data-email")); }; });
+    }).catch(fail);
+  }
+
+  function openReader(email){
+    $("dInner").innerHTML = '<div class="dim">Loading '+esc(email)+'…</div>'; $("drawer").classList.add("on");
+    api("reader", {email:email}).then(function(d){
+      var r = d.reader || {};
+      var h = '<div style="display:flex;justify-content:space-between;align-items:center"><div class="kick">Reader</div><button id="dClose">Close</button></div>'+
+        '<div style="margin:6px 0 10px;font-size:18px;font-weight:700;word-break:break-all">'+esc(email)+'</div>'+
+        '<div><span class="pill '+esc(r.heat)+'">'+esc(r.heat)+' · '+r.heat_score+'</span>'+(r.superfan?' <span class="tag">superfan</span>':'')+'</div>'+
+        '<div class="kv">'+
+          '<div>Substack</div><div>'+esc(r.substack_segment||"Not on Substack")+'</div>'+
+          '<div>Open rate</div><div>'+pct(r.open_rate)+' ('+(r.sends_opened||0)+' emails)</div>'+
+          '<div>Real opens?</div><div>'+esc(r.opens_verified_human||"—")+'</div>'+
+          '<div>Last open</div><div>'+day(r.last_open)+'</div>'+
+          '<div>Series</div><div>'+(seriesTags(r.series_opens)||"—")+'</div>'+
+          '<div>Location</div><div>'+esc([r.city,r.region,r.country].filter(Boolean).join(", ")||"—")+'</div>'+
+          '<div>Backed</div><div>'+(r.projects_backed||0)+' campaigns · '+money(r.total_pledged)+(r.last_pledged_on?' · last '+day(r.last_pledged_on):'')+'</div>'+
+          '<div>Thread Weaver</div><div>'+(r.thread_weaver_user?('Account since '+day(r.app_joined_at)+', last sign-in '+day(r.last_sign_in_at)):'No account yet')+'</div>'+
+        '</div>';
+      if ((d.pledges||[]).length){
+        h += '<h2>Pledges</h2><table class="mini"><tr><th>Campaign</th><th>Reward</th><th>Amount</th><th>Date</th></tr>'+
+          d.pledges.map(function(p){ return '<tr><td>'+esc(p.project)+'</td><td class="dim">'+esc(p.reward||"")+'</td><td>'+money(p.amount)+'</td><td>'+day(p.pledged_on)+'</td></tr>'; }).join("")+'</table>';
+      }
+      if ((d.opens||[]).length){
+        h += '<h2>Emails opened ('+d.opens.length+')</h2><table class="mini"><tr><th>Email</th><th>First opened</th><th>Opens</th><th>App</th></tr>'+
+          d.opens.map(function(o){ var s=o.substack_sends||{}; return '<tr><td>'+esc(s.title||o.post_id)+'</td><td>'+day(o.first_open)+'</td><td>'+o.opens+'</td><td class="dim">'+esc(o.client||"")+'</td></tr>'; }).join("")+'</table>';
+      }
+      $("dInner").innerHTML = h; $("dClose").onclick = closeDrawer;
+    }).catch(function(e){ $("dInner").innerHTML = '<div class="err">'+esc(e.message)+'</div><button id="dClose">Close</button>'; $("dClose").onclick = closeDrawer; });
+  }
+  function closeDrawer(){ $("drawer").classList.remove("on"); }
+  $("drawer").onclick = function(e){ if (e.target === $("drawer")) closeDrawer(); };
+
+  function loadSeries(){
+    return api("series").then(function(s){
+      $("series").innerHTML = (s.series||[]).sort(function(a,b){ return b.last_sent.localeCompare(a.last_sent); }).map(function(x){
+        return '<div class="card" style="cursor:default"><div style="font-weight:700">'+esc(x.series)+'</div>'+
+          '<div class="l">'+x.sends+' emails · '+day(x.first_sent)+' – '+day(x.last_sent)+'</div>'+
+          (x.sends_with_open_data<x.sends?'<div class="l" style="color:#e0a0a0">Open data for '+x.sends_with_open_data+' of '+x.sends+'</div>':'')+'</div>';
+      }).join("");
+    });
+  }
+
+  function csvExport(){
+    var btn = $("csv"); btn.disabled = true; btn.textContent = "Preparing…";
+    var all = [], p = params(); p.limit = 500; p.offset = 0;
+    function step(){
+      return api("readers", p).then(function(r){
+        all = all.concat(r.readers||[]); p.offset += 500;
+        if (all.length < (r.total||0) && all.length < 25000) return step();
+      });
+    }
+    step().then(function(){
+      var cols = ["email","heat","heat_score","substack_segment","superfan","opens_verified_human","open_rate","sends_opened","last_open","series_opens","projects_backed","total_pledged","last_pledged_on","thread_weaver_user","city","region","country"];
+      var q = function(v){ v = (v && typeof v==="object") ? JSON.stringify(v) : (v==null?"":String(v)); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+      var txt = cols.join(",") + "\n" + all.map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); }).join("\n");
+      var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt],{type:"text/csv"}));
+      a.download = "thread-weaver-readers.csv"; document.body.appendChild(a); a.click(); a.remove();
+    }).catch(fail).then(function(){ btn.disabled = false; btn.textContent = "Download CSV"; });
+  }
+
+  function fail(e){
+    if (e && e.status === 403){ show("state"); $("state").innerHTML = "This account isn't an admin. <br><br><button id='so'>Sign out</button>"; $("so").onclick = signOut; return; }
+    if (e && e.status === 401){ show("gate"); return; }
+    console.error(e); $("rows").innerHTML = '<tr><td colspan="11" class="err">'+esc(e && e.message || e)+'</td></tr>';
+  }
+  function signOut(){ sb.auth.signOut().then(function(){ location.reload(); }); }
+
+  function start(){
+    show("app");
+    $("who").innerHTML = esc(session.user.email) + ' <button id="out">Sign out</button>'; $("out").onclick = signOut;
+    loadSummary().then(function(){ return Promise.all([loadRows(), loadSeries()]); }).catch(fail);
+  }
+
+  var t; $("q").oninput = function(){ clearTimeout(t); t = setTimeout(function(){ offset=0; loadRows(); }, 300); };
+  ["fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fSort"].forEach(function(id){ $(id).onchange = function(){ offset=0; loadRows(); }; });
+  $("prev").onclick = function(){ offset = Math.max(0, offset-PAGE); loadRows(); };
+  $("next").onclick = function(){ offset += PAGE; loadRows(); };
+  $("csv").onclick = csvExport;
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeDrawer(); });
+
+  $("signin").onclick = function(){
+    $("gerr").textContent = "";
+    sb.auth.signInWithPassword({ email: $("em").value.trim(), password: $("pw").value }).then(function(r){
+      if (r.error){ $("gerr").textContent = r.error.message; return; }
+      session = r.data.session; start();
+    });
+  };
+  $("pw").onkeydown = function(e){ if (e.key === "Enter") $("signin").click(); };
+
+  try {
+    sb = window.SBVendor.createClient(URL_, ANON, { auth: { persistSession: true, detectSessionInUrl: false } });
+    sb.auth.onAuthStateChange(function(_e, s){ if (s) session = s; });
+    sb.auth.getSession().then(function(r){
+      session = r && r.data ? r.data.session : null;
+      if (session) start(); else show("gate");
+    });
+  } catch (e) { $("state").textContent = "Couldn't load sign-in: " + e.message; }
+})();
+</script>
+</body>
+</html>

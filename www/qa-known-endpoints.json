@@ -3,5 +3,6 @@
  "apple-iap-verify",
  "google-play-verify",
  "checkout",
- "library-url"
+ "library-url",
+ "admin-readers"
 ]
