@@ -268,6 +268,7 @@ select option{background:#1b1428;color:#e9e1f6}
 .opt .hchk input{width:18px;height:18px;accent-color:var(--gold)}
 .opt select.sel2,.opt input.inp{max-width:100%}
 .opt .oc{font-weight:400;color:var(--soft)}
+.delbtn{grid-column:2;grid-row:2;justify-self:end;padding:8px 14px;font-size:14px}@media (max-width:700px){.delbtn{grid-column:1;grid-row:auto;justify-self:start}}
 </style>
 </head>
 <body>
@@ -290,6 +291,7 @@ select option{background:#1b1428;color:#e9e1f6}
       <div class="head">
         <input id="sName" class="name" aria-label="Name (only you see it)" maxlength="120">
         <span class="state2" id="oState">Draft</span>
+        <button class="btn warn delbtn" id="archive" type="button">Delete this email</button>
         <div class="headnote" id="headNote"></div>
       </div>
       <div class="oo">
@@ -341,9 +343,6 @@ select option{background:#1b1428;color:#e9e1f6}
             </div>
           </div>
         </div>
-      </div>
-      <div style="margin-top:24px">
-        <button class="btn warn" id="archive" type="button">Put this one away</button>
       </div>
     </section>
   </div>
@@ -874,8 +873,8 @@ $('#newOne').addEventListener('click',newOne);$('#newOne2').addEventListener('cl
 $('#sName').addEventListener('change',async()=>{const v=$('#sName').value.trim();if(!v){$('#sName').value=SEQ.name;return}try{await rpc('seq_save',{p:{id:SEQ.id,name:v}});SEQ.name=v;await refresh();toast('Name saved')}catch(e){toast(msg(e))}});
 $('#eSubj').addEventListener('input',e=>{mark('subject',e.target.value)});
 $('#archive').addEventListener('click',async()=>{if(SEQ.status==='live'&&(ONES.find(x=>x.id===SEQ.id)||{}).waiting){toast('It is still going out - take it back first.');return}
-  if(!await ask('Put this one away?','<p>It goes out of the list. Nothing is thrown away.</p>','Put it away'))return;
-  try{await rpc('seq_save',{p:{id:SEQ.id,status:'archived'}});await refresh();SEQ=null;if(ONES[0])await open(ONES[0].id);else showNone();toast('Put away')}catch(e){toast(msg(e))}});
+  if(!await ask('Delete "'+esc(SEQ.name)+'"?','<p>It is deleted and gone from your list. It will not send.</p>','Delete'))return;
+  try{await rpc('seq_delete',{p_id:SEQ.id});await refresh();SEQ=null;if(ONES[0])await open(ONES[0].id);else showNone();toast('Deleted')}catch(e){toast(msg(e))}});
 function afterSave(){clearTimeout(afterSave.t);afterSave.t=setTimeout(refresh,1500)}
 
 /* ---------- who and when ---------- */

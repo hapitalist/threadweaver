@@ -278,6 +278,7 @@ select option{background:#1b1428;color:#e9e1f6}
 .opt .hchk input{width:18px;height:18px;accent-color:var(--gold)}
 .opt select.sel2,.opt input.inp{max-width:100%}
 .opt .oc{font-weight:400;color:var(--soft)}
+.delbtn{grid-column:2;grid-row:2;justify-self:end;padding:8px 14px;font-size:14px}@media (max-width:700px){.delbtn{grid-column:1;grid-row:auto;justify-self:start}}
 </style>
 </head>
 <body>
@@ -309,6 +310,7 @@ select option{background:#1b1428;color:#e9e1f6}
           <button type="button" data-s="live" role="radio">Live</button>
           <button type="button" data-s="paused" role="radio">Paused</button>
         </div>
+        <button class="btn warn delbtn" id="archive" type="button">Delete this sequence</button>
         <div class="headnote" id="headNote"></div>
       </div>
       <div class="tabs" role="tablist">
@@ -431,9 +433,6 @@ select option{background:#1b1428;color:#e9e1f6}
           </div>
           <p style="color:var(--soft);font-size:14px;margin:6px 0 0">An email that comes due on a day that is switched off waits for the next day that is on, and goes at this time. An email set a number of days after the one before goes at this time on that day; one set in hours goes that many hours later.</p>
           <p id="tzNote" style="color:var(--soft);font-size:14px;margin:6px 0 0"></p>
-          <hr style="border:0;border-top:2px dashed #3a3150;margin:16px 0">
-          <button class="btn warn" id="archive" type="button">Put this sequence away</button>
-          <span style="color:var(--soft);font-size:14px;margin-left:8px">It stops sending and moves to the bottom of the list. Nothing is thrown away.</span>
         </div>
       </div>
     </section>
@@ -480,7 +479,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const TZ='America/Los_Angeles';
 const DAYS=[[1,'Mon'],[2,'Tue'],[3,'Wed'],[4,'Thu'],[5,'Fri'],[6,'Sat'],[7,'Sun']];
-let sb, me='', LIST=[], META=null, SEQ=null, CUR=null, STATS={}, PEOPLE=null, TAB='map';
+let sb, me='', LIST=[], KITS=[], META=null, SEQ=null, CUR=null, STATS={}, PEOPLE=null, TAB='map';
 let pend={}, saveT=null, saving=null;
 
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('on'),4200)}
@@ -906,6 +905,7 @@ function seqName(id){return (LIST.find(x=>x.id===id)||{}).name||''}
 TWAdmin.ready(async(client,session)=>{
   sb=client;me=(session&&session.user&&session.user.email)||'';
   try{LIST=await rpc('seq_list')}catch(e){$('#gate').textContent='Could not load your sequences - '+msg(e)+'.';return}
+  try{KITS=await rpc('seq_kit_list')}catch(_){KITS=[]}
   loadMeta();loadSnippets();
   $('#gate').hidden=true;$('#app').hidden=false;
   buildStatic();
@@ -913,7 +913,7 @@ TWAdmin.ready(async(client,session)=>{
   const want=q.get('s'), wantE=q.get('e'), wantT=q.get('t');
   fillPick();
   const mine=LIST.filter(s=>s.kind!=='oneoff');
-  const first=(want&&mine.find(s=>s.id===want))||mine.find(s=>s.status!=='archived');
+  const first=(want&&mine.find(s=>s.id===want))||mine[0];
   if(first)await open(first.id,wantE,wantT||(wantE?'emails':'map'));else showNone();
 });
 async function loadMeta(){try{META=await rpc('seq_meta')||{}}catch(_){META={}}
@@ -931,17 +931,17 @@ function buildStatic(){
 }
 // One list: the sequences that are open, then the ones put away.
 function fillPick(){
-  const mine=LIST.filter(s=>s.kind!=='oneoff'), live=mine.filter(s=>s.status!=='archived'), arch=mine.filter(s=>s.status==='archived');
-  const o=s=>'<option value="'+s.id+'">'+esc(s.name)+' - '+({draft:'Draft',live:'Live',paused:'Paused',archived:'Put away'}[s.status])+', '+plural(s.steps||s.emails,'step')+'</option>';
-  $('#pick').innerHTML=(live.length?'<optgroup label="Your sequences">'+live.map(o).join('')+'</optgroup>':'')+
-    (arch.length?'<optgroup label="Put away">'+arch.map(o).join('')+'</optgroup>':'');
-  if(!SEQ)$('#pick').insertAdjacentHTML('afterbegin','<option value="" disabled selected>'+(mine.length?'Pick a sequence…':'No sequences yet')+'</option>');
+  const mine=LIST.filter(s=>s.kind!=='oneoff'), kit=KITS.filter(k=>!k.brought_over);
+  const o=s=>'<option value="'+s.id+'">'+esc(s.name)+' - '+({draft:'Draft',live:'Live',paused:'Paused',archived:'Stopped'}[s.status]||s.status)+', '+plural(s.steps||s.emails,'step')+'</option>';
+  $('#pick').innerHTML=(mine.length?'<optgroup label="Your sequences">'+mine.map(o).join('')+'</optgroup>':'')+
+    (kit.length?'<optgroup label="Your Kit sequences (pick one to bring it here)">'+kit.map(k=>'<option value="kit:'+k.id+'">'+esc(k.name)+' - '+plural(k.emails,'email')+'</option>').join('')+'</optgroup>':'');
+  if(!SEQ)$('#pick').insertAdjacentHTML('afterbegin','<option value="" disabled selected>'+(mine.length||kit.length?'Pick a sequence…':'No sequences yet')+'</option>');
   if(SEQ)$('#pick').value=SEQ.id;
 }
 function showNone(){
-  const any=LIST.some(s=>s.kind!=='oneoff');
+  const any=LIST.some(s=>s.kind!=='oneoff')||KITS.some(k=>!k.brought_over);
   $('#noneH').textContent=any?'Pick a sequence':'No sequences yet';
-  $('#noneP').textContent=any?'Your sequences are in the list above - pick one to open its map. Or start a new one.':'Start one from scratch: add the ways readers get in, then the emails and steps they get.';
+  $('#noneP').textContent=any?'Your sequences and your Kit sequences are in the list above - pick one to open it. Or start a new one.':'Start one from scratch: add the ways readers get in, then the emails and steps they get.';
   $('#none').hidden=false;$('#seq').hidden=true;SEQ=null;CUR=null;$('#pick').value='';setQS()}
 async function refreshList(){try{LIST=await rpc('seq_list');fillPick()}catch(_){}}
 
@@ -1525,22 +1525,34 @@ async function newSeq(){
   try{const id=await rpc('seq_save',{p:{name:'Untitled sequence'}});await refreshList();await open(id,null,'map');$('#sName').focus();$('#sName').select();toast('New sequence - give it a name')}catch(e){toast(msg(e))}
 }
 $('#newSeq').addEventListener('click',newSeq);$('#newSeq2').addEventListener('click',newSeq);
-$('#pick').addEventListener('change',e=>{const v=e.target.value;if(v)open(v,null,TAB==='emails'?'emails':'map')});
+// A Kit sequence picked from the list: its emails are copied in once and it opens here as a draft. Kit is never changed.
+async function openKit(kitId){
+  await flush();const pick=$('#pick');pick.disabled=true;toast('Bringing it over from Kit…');
+  try{const id=await rpc('seq_from_kit',{p_kit_id:kitId});
+    const s=await rpc('seq_get',{p_id:id});
+    for(const em of (s.emails||[])){const t=tidy(em.body_html||'');if(t!==em.body_html)await rpc('seq_email_save',{p:{id:em.id,body_html:t}})}
+    try{KITS=await rpc('seq_kit_list')}catch(_){}
+    await refreshList();loadMeta();await open(id,null,'map');toast('Brought over from Kit - it is a draft, nothing sends until you make it Live')}
+  catch(err){toast(msg(err));fillPick()}
+  finally{pick.disabled=false}
+}
+$('#pick').addEventListener('change',e=>{const v=e.target.value;if(v.startsWith('kit:'))openKit(+v.slice(4));else if(v)open(v,null,TAB==='emails'?'emails':'map')});
 
 /* ---------- when it sends ---------- */
 function paintWhen(){
   $$('#days .day').forEach(b=>{const on=SEQ.send_days.includes(+b.dataset.d);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('#hour').value=SEQ.send_hour;
   $('#tzNote').textContent=SEQ.time_zone==='America/Los_Angeles'?'Times are Pacific.':'Times are in '+SEQ.time_zone.replace('_',' ')+'.';
-  $('#archive').hidden=SEQ.status==='archived';
 }
 $('#days').addEventListener('click',async e=>{const b=e.target.closest('.day');if(!b)return;
   const d=+b.dataset.d;let days=SEQ.send_days.slice();days=days.includes(d)?days.filter(x=>x!==d):days.concat(d).sort();
   if(!days.length){toast('It needs at least one day to send on.');return}
   try{await rpc('seq_save',{p:{id:SEQ.id,send_days:days}});SEQ.send_days=days;paintWhen();toast('Send days saved')}catch(err){toast(msg(err))}});
 $('#hour').addEventListener('change',async e=>{try{await rpc('seq_save',{p:{id:SEQ.id,send_hour:+e.target.value}});SEQ.send_hour=+e.target.value;toast('Time saved')}catch(err){toast(msg(err))}});
-$('#archive').addEventListener('click',async()=>{if(!await ask('Put "'+esc(SEQ.name)+'" away?','<p>It stops and goes to the bottom of the list, under "Put away". Nothing is thrown away - pick it and choose Draft or Live to bring it back.</p>','Put it away'))return;
-  try{await rpc('seq_save',{p:{id:SEQ.id,status:'archived'}});SEQ.status='archived';paintHead();paintWhen();await refreshList();toast('Put away')}catch(e){toast(msg(e))}});
+$('#archive').addEventListener('click',async()=>{const n=(LIST.find(x=>x.id===SEQ.id)||{}).people_in||0;
+  if(!await ask('Delete "'+esc(SEQ.name)+'"?','<p>It is deleted and gone from your list.'+(n?' The '+plural(n,'person')+' in it now '+(n===1?'is':'are')+' taken out, so nothing more goes to them.':'')+'</p>','Delete'))return;
+  try{await flush();await rpc('seq_delete',{p_id:SEQ.id});SEQ=null;CUR=null;await refreshList();try{KITS=await rpc('seq_kit_list')}catch(_){};fillPick();
+    const next=LIST.find(s=>s.kind!=='oneoff');if(next)await open(next.id,null,'map');else showNone();toast('Deleted')}catch(e){toast(msg(e))}});
 
 /* ---------- who's in ---------- */
 let findT=null;
