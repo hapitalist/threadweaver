@@ -100,6 +100,11 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     <div class="kick" style="margin:14px 0 8px">Most common Kit tags (click to filter)</div>
     <div class="tags" id="kitTags"></div>
 
+    <h2>BookFunnel fiction downloads</h2>
+    <div class="cards" id="bfCards"></div>
+    <div class="kick" style="margin:14px 0 8px">Fiction pages (click to filter)</div>
+    <div class="tags" id="bfPages"></div>
+
     <h2>Readers</h2>
     <div class="filters">
       <input type="search" id="q" placeholder="Search email…">
@@ -111,11 +116,13 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       <select id="fMisc"><option value="">Everyone</option><option value="superfan">Superfans</option><option value="verified">Confirmed real opens</option><option value="on_list">On Substack list</option></select>
       <select id="fKit"><option value="">Kit: anyone</option><option value="in">Ever in Kit</option><option value="active">Subscribed in Kit</option><option value="gone">Unsubscribed/bounced in Kit</option><option value="none">Never in Kit</option></select>
       <input type="search" id="fKitTag" placeholder="Kit tag contains…" style="min-width:160px">
-      <select id="fSort"><option value="heat_score">Sort: heat</option><option value="last_open">Sort: last open</option><option value="open_rate">Sort: open rate</option><option value="sends_opened">Sort: emails opened</option><option value="total_pledged">Sort: total pledged</option><option value="kit_last_open">Sort: last Kit open</option><option value="kit_lifetime_opened">Sort: Kit emails opened</option></select>
+      <select id="fBf"><option value="">BookFunnel: anyone</option><option value="1">Downloaded fiction</option><option value="0">No fiction download</option><option value="only">Only known from BookFunnel</option></select>
+      <input type="search" id="fBfPage" placeholder="BookFunnel page contains…" style="min-width:170px">
+      <select id="fSort"><option value="heat_score">Sort: heat</option><option value="last_open">Sort: last open</option><option value="open_rate">Sort: open rate</option><option value="sends_opened">Sort: emails opened</option><option value="total_pledged">Sort: total pledged</option><option value="kit_last_open">Sort: last Kit open</option><option value="kit_lifetime_opened">Sort: Kit emails opened</option><option value="bf_fiction_page_count">Sort: BookFunnel downloads</option></select>
       <button id="csv">Download CSV</button>
     </div>
     <div class="tablewrap"><table>
-      <thead><tr><th>Email</th><th>Heat</th><th>Substack</th><th>Open rate</th><th>Opened</th><th>Last open</th><th>Series opened</th><th>Backed</th><th>Pledged</th><th>App</th><th>Kit</th><th>Where</th></tr></thead>
+      <thead><tr><th>Email</th><th>Heat</th><th>Substack</th><th>Open rate</th><th>Opened</th><th>Last open</th><th>Series opened</th><th>Backed</th><th>Pledged</th><th>App</th><th>Kit</th><th>BookFunnel</th><th>Where</th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
     <div class="pager"><span class="dim" id="count"></span><span><button id="prev">← Prev</button> <button id="next">Next →</button></span></div>
@@ -154,7 +161,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     return d;
   }
   function setFilters(f){
-    ["q","fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fKitTag"].forEach(function(id){ $(id).value = ""; });
+    ["q","fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fKitTag","fBf","fBfPage"].forEach(function(id){ $(id).value = ""; });
     Object.keys(f).forEach(function(k){ $(k).value = f[k]; });
     offset = 0; loadRows(); $("rows").scrollIntoView({behavior:"smooth",block:"start"});
   }
@@ -176,6 +183,14 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       var gc = $("segCards"); gc.innerHTML = "";
       gc.appendChild(card("", s.substack_list, "On the list", function(){ setFilters({fMisc:"on_list"}); }));
       Object.keys(s.substack_segments).forEach(function(k){ gc.appendChild(card("", s.substack_segments[k], k, function(){ setFilters({fSeg:k}); })); });
+      var bc = $("bfCards"); bc.innerHTML = ""; var bfs = s.bookfunnel || {};
+      bc.appendChild(card("", bfs.fiction, "Downloaded a fiction book", function(){ setFilters({fBf:"1"}); }));
+      bc.appendChild(card("", bfs.not_on_substack, "Downloaders not on Substack", null));
+      bc.appendChild(card("", bfs.not_in_kit, "Downloaders never in Kit", null));
+      bc.appendChild(card("", bfs.also_backers, "Downloaders who also backed", function(){ setFilters({fBf:"1",fBacker:"1"}); }));
+      bc.appendChild(card("", bfs.only_bookfunnel, "Only known from BookFunnel", function(){ setFilters({fBf:"only"}); }));
+      $("bfPages").innerHTML = (s.bf_top_pages||[]).map(function(t){ return '<span class="tagbtn bfbtn" data-page="'+esc(t.page)+'">'+esc(t.page)+'<b>'+n(t.people)+'</b></span>'; }).join("");
+      Array.prototype.forEach.call(document.querySelectorAll(".bfbtn"), function(b){ b.onclick = function(){ setFilters({fBfPage:b.getAttribute("data-page")}); }; });
       var kc = $("kitCards"); kc.innerHTML = ""; var k = s.kit || {};
       kc.appendChild(card("", k.in_kit, "Ever in Kit", function(){ setFilters({fKit:"in"}); }));
       kc.appendChild(card("", k.active, "Still subscribed in Kit", function(){ setFilters({fKit:"active"}); }));
@@ -184,7 +199,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       kc.appendChild(card("", k.in_kit_not_on_substack, "In Kit but not on Substack", null));
       kc.appendChild(card("", k.none, "Never in Kit", function(){ setFilters({fKit:"none"}); }));
       $("kitTags").innerHTML = (s.kit_top_tags||[]).map(function(t){ return '<span class="tagbtn" data-tag="'+esc(t.tag)+'">'+esc(t.tag)+'<b>'+n(t.people)+'</b></span>'; }).join("");
-      Array.prototype.forEach.call(document.querySelectorAll(".tagbtn"), function(b){ b.onclick = function(){ setFilters({fKitTag:b.getAttribute("data-tag")}); }; });
+      Array.prototype.forEach.call(document.querySelectorAll("#kitTags .tagbtn"), function(b){ b.onclick = function(){ setFilters({fKitTag:b.getAttribute("data-tag")}); }; });
     });
   }
 
@@ -199,6 +214,8 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     var m = $("fMisc").value; if (m) p[m] = "1";
     if ($("fKit").value) p.kit = $("fKit").value;
     if ($("fKitTag").value.trim()) p.kit_tag = $("fKitTag").value.trim();
+    if ($("fBf").value) p.bf = $("fBf").value;
+    if ($("fBfPage").value.trim()) p.bf_page = $("fBfPage").value.trim();
     return p;
   }
   function seriesTags(o){
@@ -214,7 +231,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
   }
   function kitTagList(t){ return (t||"").split(" | ").filter(Boolean).map(function(z){ return '<span class="tag">'+esc(z)+'</span>'; }).join(" "); }
   function loadRows(){
-    $("rows").innerHTML = '<tr><td colspan="12" class="dim">Loading…</td></tr>';
+    $("rows").innerHTML = '<tr><td colspan="13" class="dim">Loading…</td></tr>';
     return api("readers", params()).then(function(r){
       total = r.total || 0;
       $("rows").innerHTML = (r.readers||[]).map(function(x){
@@ -230,8 +247,9 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
           '<td>'+money(x.total_pledged)+'</td>'+
           '<td>'+(x.thread_weaver_user?"✓":"")+'</td>'+
           '<td>'+kitCell(x)+'</td>'+
+          '<td>'+(x.bf_fiction_page_count?(x.bf_fiction_page_count+(x.bf_fiction_page_count===1?' page':' pages')):'<span class="dim">—</span>')+'</td>'+
           '<td class="dim">'+esc(where(x))+'</td></tr>';
-      }).join("") || '<tr><td colspan="12" class="dim">No one matches these filters.</td></tr>';
+      }).join("") || '<tr><td colspan="13" class="dim">No one matches these filters.</td></tr>';
       $("count").textContent = total ? ("Showing "+n(offset+1)+"–"+n(Math.min(offset+PAGE,total))+" of "+n(total)) : "0 people";
       $("prev").disabled = offset===0; $("next").disabled = offset+PAGE>=total;
       Array.prototype.forEach.call(document.querySelectorAll("tr.row"), function(tr){ tr.onclick = function(){ openReader(tr.getAttribute("data-email")); }; });
@@ -265,6 +283,13 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
           '<div>Last Kit open</div><div>'+day(r.kit_last_open)+'</div>'+
           (r.kit_signup_source?'<div>Signed up via</div><div>'+esc(r.kit_signup_source)+'</div>':'')+
           '<div>Tags ('+(r.kit_tag_count||0)+')</div><div>'+(kitTagList(r.kit_tags)||"—")+'</div>'+
+        '</div>';
+      }
+      if (r.bookfunnel_fiction || r.bf_other_pages){
+        h += '<h2>BookFunnel</h2><div class="kv">'+
+          '<div>Fiction pages ('+(r.bf_fiction_page_count||0)+')</div><div>'+((r.bf_fiction_pages||"").split(" | ").filter(Boolean).map(function(z){ return '<span class="tag">'+esc(z)+'</span>'; }).join(" ")||"—")+'</div>'+
+          (r.bf_other_pages?'<div>Other pages</div><div>'+r.bf_other_pages.split(" | ").map(function(z){ return '<span class="tag">'+esc(z)+'</span>'; }).join(" ")+'</div>':'')+
+          '<div>First claimed</div><div>'+day(r.bf_first_claimed)+'</div>'+
         '</div>';
       }
       if ((d.pledges||[]).length){
@@ -301,7 +326,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       });
     }
     step().then(function(){
-      var cols = ["email","heat","heat_score","substack_segment","superfan","opens_verified_human","open_rate","sends_opened","last_open","series_opens","projects_backed","total_pledged","last_pledged_on","thread_weaver_user","city","region","country","in_kit","kit_state","kit_joined_at","kit_cancelled_at","kit_lifetime_sent","kit_lifetime_opened","kit_lifetime_clicked","kit_broadcasts_got","kit_broadcasts_opened","kit_broadcasts_clicked","kit_last_open","kit_tag_count","kit_tags","kit_first_name","kit_last_name","kit_signup_source","kit_city","kit_region","kit_country"];
+      var cols = ["email","heat","heat_score","substack_segment","superfan","opens_verified_human","open_rate","sends_opened","last_open","series_opens","projects_backed","total_pledged","last_pledged_on","thread_weaver_user","city","region","country","in_kit","kit_state","kit_joined_at","kit_cancelled_at","kit_lifetime_sent","kit_lifetime_opened","kit_lifetime_clicked","kit_broadcasts_got","kit_broadcasts_opened","kit_broadcasts_clicked","kit_last_open","kit_tag_count","kit_tags","kit_first_name","kit_last_name","kit_signup_source","kit_city","kit_region","kit_country","bookfunnel_fiction","bf_fiction_page_count","bf_fiction_pages","bf_other_pages","bf_first_claimed"];
       var q = function(v){ v = (v && typeof v==="object") ? JSON.stringify(v) : (v==null?"":String(v)); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
       var txt = cols.join(",") + "\n" + all.map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); }).join("\n");
       var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt],{type:"text/csv"}));
@@ -312,7 +337,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
   function fail(e){
     if (e && e.status === 403){ show("state"); $("state").innerHTML = "This account isn't an admin. <br><br><button id='so'>Sign out</button>"; $("so").onclick = signOut; return; }
     if (e && e.status === 401){ show("gate"); return; }
-    console.error(e); $("rows").innerHTML = '<tr><td colspan="12" class="err">'+esc(e && e.message || e)+'</td></tr>';
+    console.error(e); $("rows").innerHTML = '<tr><td colspan="13" class="err">'+esc(e && e.message || e)+'</td></tr>';
   }
   function signOut(){ sb.auth.signOut().then(function(){ location.reload(); }); }
 
@@ -323,8 +348,9 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
   }
 
   var t; $("q").oninput = function(){ clearTimeout(t); t = setTimeout(function(){ offset=0; loadRows(); }, 300); };
-  ["fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fSort"].forEach(function(id){ $(id).onchange = function(){ offset=0; loadRows(); }; });
+  ["fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fBf","fSort"].forEach(function(id){ $(id).onchange = function(){ offset=0; loadRows(); }; });
   var t2; $("fKitTag").oninput = function(){ clearTimeout(t2); t2 = setTimeout(function(){ offset=0; loadRows(); }, 300); };
+  var t3; $("fBfPage").oninput = function(){ clearTimeout(t3); t3 = setTimeout(function(){ offset=0; loadRows(); }, 300); };
   $("prev").onclick = function(){ offset = Math.max(0, offset-PAGE); loadRows(); };
   $("next").onclick = function(){ offset += PAGE; loadRows(); };
   $("csv").onclick = csvExport;

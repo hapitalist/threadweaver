@@ -16,7 +16,9 @@ Edge functions (Thread Weaver project): `library-url`, `checkout`, `book-checkou
 `hapi-member-sync`, `google-play-voided` (hourly: takes back Google Play refunds; log in `play_voided`).
 `admin-readers` (admin only: reader heat across Substack, BackerKit fiction backers and app accounts).
 Admin page `/admin.html` is web only. Since 1.16.5 it also shows Kit history from `public.kit_readers`
-(imported by Russell from the Cohortz table `tw_reader_kit_export`; summary via `admin_kit_summary()`).
+(imported by Russell from the Cohortz table `tw_reader_kit_export`; summary via `admin_heat_summary()`).
+Since 1.16.6 it also shows BookFunnel fiction downloads from `public.bookfunnel_readers` (imported from Cohortz
+`tw_bookfunnel_export`; fiction = pages in Russell's "fiction bookfunnel" Drive folder). Kit and BookFunnel feed heat.
 
 Refunds: Stripe refunds/disputes arrive at `book-checkout-webhook`. Apple notifies ONE address (the
 Hapitalist project's `apple-iap-notifications`); it and this project's listener pass every verified
