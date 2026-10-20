@@ -59,6 +59,9 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
 .kv div:nth-child(odd){color:var(--dim)}
 .mini{width:100%;border-collapse:collapse;min-width:0}
 .mini td,.mini th{padding:5px 6px;font-size:12px;white-space:normal}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tagbtn{font-size:12px;padding:4px 9px;border-radius:999px;background:#1b1428;border:1px solid var(--edge);cursor:pointer;color:#cdbfe6}
+.tagbtn:hover{border-color:#4a3f66}.tagbtn b{color:var(--gold);font-weight:600;margin-left:4px}
 .series{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 @media (max-width:640px){h1{font-size:20px}.card .n{font-size:20px}}
 </style>
@@ -92,6 +95,11 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     <h2>Substack list (Wannabe Press)</h2>
     <div class="cards" id="segCards"></div>
 
+    <h2>Kit history</h2>
+    <div class="cards" id="kitCards"></div>
+    <div class="kick" style="margin:14px 0 8px">Most common Kit tags (click to filter)</div>
+    <div class="tags" id="kitTags"></div>
+
     <h2>Readers</h2>
     <div class="filters">
       <input type="search" id="q" placeholder="Search email…">
@@ -101,11 +109,13 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       <select id="fBacker"><option value="">Backers + non-backers</option><option value="1">Fiction backers only</option><option value="0">Not a backer</option></select>
       <select id="fApp"><option value="">App + no app</option><option value="1">Uses Thread Weaver</option><option value="0">Not in the app yet</option></select>
       <select id="fMisc"><option value="">Everyone</option><option value="superfan">Superfans</option><option value="verified">Confirmed real opens</option><option value="on_list">On Substack list</option></select>
-      <select id="fSort"><option value="heat_score">Sort: heat</option><option value="last_open">Sort: last open</option><option value="open_rate">Sort: open rate</option><option value="sends_opened">Sort: emails opened</option><option value="total_pledged">Sort: total pledged</option></select>
+      <select id="fKit"><option value="">Kit: anyone</option><option value="in">Ever in Kit</option><option value="active">Subscribed in Kit</option><option value="gone">Unsubscribed/bounced in Kit</option><option value="none">Never in Kit</option></select>
+      <input type="search" id="fKitTag" placeholder="Kit tag contains…" style="min-width:160px">
+      <select id="fSort"><option value="heat_score">Sort: heat</option><option value="last_open">Sort: last open</option><option value="open_rate">Sort: open rate</option><option value="sends_opened">Sort: emails opened</option><option value="total_pledged">Sort: total pledged</option><option value="kit_last_open">Sort: last Kit open</option><option value="kit_lifetime_opened">Sort: Kit emails opened</option></select>
       <button id="csv">Download CSV</button>
     </div>
     <div class="tablewrap"><table>
-      <thead><tr><th>Email</th><th>Heat</th><th>Substack</th><th>Open rate</th><th>Opened</th><th>Last open</th><th>Series opened</th><th>Backed</th><th>Pledged</th><th>App</th><th>Where</th></tr></thead>
+      <thead><tr><th>Email</th><th>Heat</th><th>Substack</th><th>Open rate</th><th>Opened</th><th>Last open</th><th>Series opened</th><th>Backed</th><th>Pledged</th><th>App</th><th>Kit</th><th>Where</th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
     <div class="pager"><span class="dim" id="count"></span><span><button id="prev">← Prev</button> <button id="next">Next →</button></span></div>
@@ -144,7 +154,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     return d;
   }
   function setFilters(f){
-    ["q","fHeat","fSeg","fSeries","fBacker","fApp","fMisc"].forEach(function(id){ $(id).value = ""; });
+    ["q","fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fKitTag"].forEach(function(id){ $(id).value = ""; });
     Object.keys(f).forEach(function(k){ $(k).value = f[k]; });
     offset = 0; loadRows(); $("rows").scrollIntoView({behavior:"smooth",block:"start"});
   }
@@ -166,6 +176,15 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       var gc = $("segCards"); gc.innerHTML = "";
       gc.appendChild(card("", s.substack_list, "On the list", function(){ setFilters({fMisc:"on_list"}); }));
       Object.keys(s.substack_segments).forEach(function(k){ gc.appendChild(card("", s.substack_segments[k], k, function(){ setFilters({fSeg:k}); })); });
+      var kc = $("kitCards"); kc.innerHTML = ""; var k = s.kit || {};
+      kc.appendChild(card("", k.in_kit, "Ever in Kit", function(){ setFilters({fKit:"in"}); }));
+      kc.appendChild(card("", k.active, "Still subscribed in Kit", function(){ setFilters({fKit:"active"}); }));
+      kc.appendChild(card("", k.gone, "Unsubscribed / bounced in Kit", function(){ setFilters({fKit:"gone"}); }));
+      kc.appendChild(card("", k.opened_kit, "Opened Kit email (on record)", null));
+      kc.appendChild(card("", k.in_kit_not_on_substack, "In Kit but not on Substack", null));
+      kc.appendChild(card("", k.none, "Never in Kit", function(){ setFilters({fKit:"none"}); }));
+      $("kitTags").innerHTML = (s.kit_top_tags||[]).map(function(t){ return '<span class="tagbtn" data-tag="'+esc(t.tag)+'">'+esc(t.tag)+'<b>'+n(t.people)+'</b></span>'; }).join("");
+      Array.prototype.forEach.call(document.querySelectorAll(".tagbtn"), function(b){ b.onclick = function(){ setFilters({fKitTag:b.getAttribute("data-tag")}); }; });
     });
   }
 
@@ -178,6 +197,8 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     if ($("fBacker").value) p.backer = $("fBacker").value;
     if ($("fApp").value) p.app = $("fApp").value;
     var m = $("fMisc").value; if (m) p[m] = "1";
+    if ($("fKit").value) p.kit = $("fKit").value;
+    if ($("fKitTag").value.trim()) p.kit_tag = $("fKitTag").value.trim();
     return p;
   }
   function seriesTags(o){
@@ -185,8 +206,15 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
     return Object.keys(o).filter(function(k){ return k!=="announcements"; }).map(function(k){
       return '<span class="tag">'+esc(k.replace(/^the_/,"").replace(/_/g," "))+' '+o[k]+'</span>'; }).join("");
   }
+  function where(x){ var a=[x.city,x.region,x.country].filter(Boolean); if(!a.length) a=[x.kit_city,x.kit_region,x.kit_country].filter(Boolean); return a.join(", "); }
+  function kitCell(x){
+    if (!x.in_kit) return '<span class="dim">—</span>';
+    var st = x.kit_state==="active" ? "subscribed" : (x.kit_state||"gone");
+    return esc(st)+(x.kit_lifetime_opened?' <span class="dim">· '+x.kit_lifetime_opened+' opens</span>':'')+(x.kit_tag_count?' <span class="dim">· '+x.kit_tag_count+' tags</span>':'');
+  }
+  function kitTagList(t){ return (t||"").split(" | ").filter(Boolean).map(function(z){ return '<span class="tag">'+esc(z)+'</span>'; }).join(" "); }
   function loadRows(){
-    $("rows").innerHTML = '<tr><td colspan="11" class="dim">Loading…</td></tr>';
+    $("rows").innerHTML = '<tr><td colspan="12" class="dim">Loading…</td></tr>';
     return api("readers", params()).then(function(r){
       total = r.total || 0;
       $("rows").innerHTML = (r.readers||[]).map(function(x){
@@ -201,8 +229,9 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
           '<td>'+(x.projects_backed||"—")+'</td>'+
           '<td>'+money(x.total_pledged)+'</td>'+
           '<td>'+(x.thread_weaver_user?"✓":"")+'</td>'+
-          '<td class="dim">'+esc([x.city,x.region,x.country].filter(Boolean).join(", "))+'</td></tr>';
-      }).join("") || '<tr><td colspan="11" class="dim">No one matches these filters.</td></tr>';
+          '<td>'+kitCell(x)+'</td>'+
+          '<td class="dim">'+esc(where(x))+'</td></tr>';
+      }).join("") || '<tr><td colspan="12" class="dim">No one matches these filters.</td></tr>';
       $("count").textContent = total ? ("Showing "+n(offset+1)+"–"+n(Math.min(offset+PAGE,total))+" of "+n(total)) : "0 people";
       $("prev").disabled = offset===0; $("next").disabled = offset+PAGE>=total;
       Array.prototype.forEach.call(document.querySelectorAll("tr.row"), function(tr){ tr.onclick = function(){ openReader(tr.getAttribute("data-email")); }; });
@@ -222,10 +251,22 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
           '<div>Real opens?</div><div>'+esc(r.opens_verified_human||"—")+'</div>'+
           '<div>Last open</div><div>'+day(r.last_open)+'</div>'+
           '<div>Series</div><div>'+(seriesTags(r.series_opens)||"—")+'</div>'+
-          '<div>Location</div><div>'+esc([r.city,r.region,r.country].filter(Boolean).join(", ")||"—")+'</div>'+
+          '<div>Location</div><div>'+esc(where(r)||"—")+'</div>'+
           '<div>Backed</div><div>'+(r.projects_backed||0)+' campaigns · '+money(r.total_pledged)+(r.last_pledged_on?' · last '+day(r.last_pledged_on):'')+'</div>'+
           '<div>Thread Weaver</div><div>'+(r.thread_weaver_user?('Account since '+day(r.app_joined_at)+', last sign-in '+day(r.last_sign_in_at)):'No account yet')+'</div>'+
         '</div>';
+      if (r.in_kit){
+        h += '<h2>Kit</h2><div class="kv">'+
+          '<div>Status</div><div>'+esc(r.kit_state==="active"?"Subscribed":(r.kit_state||"Gone from Kit"))+'</div>'+
+          ((r.kit_first_name||r.kit_last_name)?'<div>Name in Kit</div><div>'+esc([r.kit_first_name,r.kit_last_name].filter(Boolean).join(" "))+'</div>':'')+
+          '<div>Joined Kit</div><div>'+day(r.kit_joined_at)+(r.kit_cancelled_at?' · left '+day(r.kit_cancelled_at):'')+'</div>'+
+          '<div>Kit emails</div><div>'+(r.kit_lifetime_sent!=null?(r.kit_lifetime_sent+' sent · '+(r.kit_lifetime_opened||0)+' opened · '+(r.kit_lifetime_clicked||0)+' clicked'):'—')+'</div>'+
+          '<div>Tracked broadcasts</div><div>'+(r.kit_broadcasts_got!=null?(r.kit_broadcasts_got+' received · '+(r.kit_broadcasts_opened||0)+' opened · '+(r.kit_broadcasts_clicked||0)+' clicked'):'—')+'</div>'+
+          '<div>Last Kit open</div><div>'+day(r.kit_last_open)+'</div>'+
+          (r.kit_signup_source?'<div>Signed up via</div><div>'+esc(r.kit_signup_source)+'</div>':'')+
+          '<div>Tags ('+(r.kit_tag_count||0)+')</div><div>'+(kitTagList(r.kit_tags)||"—")+'</div>'+
+        '</div>';
+      }
       if ((d.pledges||[]).length){
         h += '<h2>Pledges</h2><table class="mini"><tr><th>Campaign</th><th>Reward</th><th>Amount</th><th>Date</th></tr>'+
           d.pledges.map(function(p){ return '<tr><td>'+esc(p.project)+'</td><td class="dim">'+esc(p.reward||"")+'</td><td>'+money(p.amount)+'</td><td>'+day(p.pledged_on)+'</td></tr>'; }).join("")+'</table>';
@@ -260,7 +301,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
       });
     }
     step().then(function(){
-      var cols = ["email","heat","heat_score","substack_segment","superfan","opens_verified_human","open_rate","sends_opened","last_open","series_opens","projects_backed","total_pledged","last_pledged_on","thread_weaver_user","city","region","country"];
+      var cols = ["email","heat","heat_score","substack_segment","superfan","opens_verified_human","open_rate","sends_opened","last_open","series_opens","projects_backed","total_pledged","last_pledged_on","thread_weaver_user","city","region","country","in_kit","kit_state","kit_joined_at","kit_cancelled_at","kit_lifetime_sent","kit_lifetime_opened","kit_lifetime_clicked","kit_broadcasts_got","kit_broadcasts_opened","kit_broadcasts_clicked","kit_last_open","kit_tag_count","kit_tags","kit_first_name","kit_last_name","kit_signup_source","kit_city","kit_region","kit_country"];
       var q = function(v){ v = (v && typeof v==="object") ? JSON.stringify(v) : (v==null?"":String(v)); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
       var txt = cols.join(",") + "\n" + all.map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); }).join("\n");
       var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt],{type:"text/csv"}));
@@ -271,7 +312,7 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
   function fail(e){
     if (e && e.status === 403){ show("state"); $("state").innerHTML = "This account isn't an admin. <br><br><button id='so'>Sign out</button>"; $("so").onclick = signOut; return; }
     if (e && e.status === 401){ show("gate"); return; }
-    console.error(e); $("rows").innerHTML = '<tr><td colspan="11" class="err">'+esc(e && e.message || e)+'</td></tr>';
+    console.error(e); $("rows").innerHTML = '<tr><td colspan="12" class="err">'+esc(e && e.message || e)+'</td></tr>';
   }
   function signOut(){ sb.auth.signOut().then(function(){ location.reload(); }); }
 
@@ -282,7 +323,8 @@ tr.row{cursor:pointer}tr.row:hover td{background:#1a1326}
   }
 
   var t; $("q").oninput = function(){ clearTimeout(t); t = setTimeout(function(){ offset=0; loadRows(); }, 300); };
-  ["fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fSort"].forEach(function(id){ $(id).onchange = function(){ offset=0; loadRows(); }; });
+  ["fHeat","fSeg","fSeries","fBacker","fApp","fMisc","fKit","fSort"].forEach(function(id){ $(id).onchange = function(){ offset=0; loadRows(); }; });
+  var t2; $("fKitTag").oninput = function(){ clearTimeout(t2); t2 = setTimeout(function(){ offset=0; loadRows(); }, 300); };
   $("prev").onclick = function(){ offset = Math.max(0, offset-PAGE); loadRows(); };
   $("next").onclick = function(){ offset += PAGE; loadRows(); };
   $("csv").onclick = csvExport;

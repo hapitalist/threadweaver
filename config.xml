@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.russellnohelty.threadweaver" version="1.16.4" ios-CFBundleVersion="11604" android-versionCode="11604" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.russellnohelty.threadweaver" version="1.16.5" ios-CFBundleVersion="11605" android-versionCode="11605" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <icon src="resources/iconTemplate.png" />
     <name>Wannabe Press Thread Weaver</name>
     <description>Thread Weaver — A Reading RPG by Russell Nohelty. Story games, novels, comics, and The Weave lore codex.</description>

@@ -15,7 +15,8 @@ Edge functions (Thread Weaver project): `library-url`, `checkout`, `book-checkou
 `tw-auth` (sign-up / reset / sign-in-link emails, sent through Amazon SES from wannabepress.com),
 `hapi-member-sync`, `google-play-voided` (hourly: takes back Google Play refunds; log in `play_voided`).
 `admin-readers` (admin only: reader heat across Substack, BackerKit fiction backers and app accounts).
-Admin page `/admin.html` is web only.
+Admin page `/admin.html` is web only. Since 1.16.5 it also shows Kit history from `public.kit_readers`
+(imported by Russell from the Cohortz table `tw_reader_kit_export`; summary via `admin_kit_summary()`).
 
 Refunds: Stripe refunds/disputes arrive at `book-checkout-webhook`. Apple notifies ONE address (the
 Hapitalist project's `apple-iap-notifications`); it and this project's listener pass every verified

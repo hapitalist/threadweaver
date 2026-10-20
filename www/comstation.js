@@ -9,7 +9,7 @@
 (function(){
   "use strict";
 
-  var TW_VERSION = "1.16.4";
+  var TW_VERSION = "1.16.5";
   try{ console.log("Thread Weaver v"+TW_VERSION); }catch(e){}
 
   /* ---------- persistent state (its own namespace) ---------- */
