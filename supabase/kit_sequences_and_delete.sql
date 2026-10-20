@@ -1,0 +1,9 @@
+-- 20 Oct 2026 (applied live on nzkgurdmvgkizvzisqxt). Kit sequences in Thread Weaver + real Delete.
+-- * kit_sequences / kit_sequence_emails: copies of Russell's Kit fiction sequences (17 sequences, 58 emails, copied from Joy's
+--   copy and verified by md5). /admin/sequences lists them (seq_kit_list) and seq_from_kit(kit_id) brings one over as a draft.
+-- * nl_sequences.from_kit_id, nl_sequences.deleted_at. seq_delete(id): takes everyone waiting out (status 'left',
+--   note 'deleted'), sets status 'archived' + deleted_at; seq_list / oneoff_list hide deleted_at rows.
+-- * admin_app_users(): security-definer read of auth.users (email, created_at, last_sign_in_at) for admin_reader_heat,
+--   which is security_invoker and read by service_role (which cannot read auth.users directly).
+-- * kit-import edge function: token-gated loader (tw_import_tokens); its one key has expired. Not used.
+-- Function bodies: see pg_get_functiondef on the live project.
