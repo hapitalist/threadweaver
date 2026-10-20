@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Subscribers · Thread Weaver Admin</title>
+<!-- /admin/subscribers.html - Thread Weaver, 20 Oct 2026. Ported from Joy Looper's /admin/subscribers.
+     Find anyone on the list; open them to see their card (stars, their story in plain words, the facts) and everything
+     that happened between them and Wannabe Press, newest first. Nothing on the card is guessed.
+     Data: subscriber_list, subscriber_card (admin only). Joy's Kit look-up (subscriber_kit_stats), Gravatar photos and Ghost
+     charts are left out; Thread Weaver's reader heat (Substack, Kit history, BookFunnel, backers, Joy, the app) is shown. -->
+<style>
+:root{--paper:#0e0a16;--card:#16101f;--ink:#e9e1f6;--soft:#9b91ac;--line:#2e2742;--field:#1b1428;--gold:#e8b53a;--hot:#ff7a59;--warm:#e8b53a;--cool:#6fb3e0;--cold:#7d7891;--green:#7fd08a}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--ink)}
+.sb{max-width:1280px;margin:0 auto;padding:22px 22px 80px}
+h1{font-family:'Cinzel',Georgia,serif;font-weight:600;font-size:28px;margin:0;line-height:1.1;color:var(--gold)}
+h2{font-family:'Cinzel',Georgia,serif;font-weight:600;font-size:19px;margin:0 0 10px;color:var(--gold)}
+.sub{margin:4px 0 18px;color:var(--soft)}
+.btn{border:1px solid #3a3150;background:#241b33;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:700;min-height:42px;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.btn:hover{border-color:#6a5d8a}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.find{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.inp{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--field);min-height:44px;flex:1;min-width:0;width:100%;max-width:520px}
+.inp::placeholder{color:#7d7891}
+.inp:focus{outline:2px solid var(--gold);outline-offset:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid #3a3150;background:transparent;border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:700;min-height:38px;color:#cdbfe6}
+.chip.on{background:var(--gold);color:#16121f;border-color:var(--gold)}
+.count{color:var(--soft);font-size:14px;margin:0 0 10px}
+.rows{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:48px minmax(0,1.6fr) 120px minmax(0,1fr) 120px;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-decoration:none;color:var(--ink)}
+.row:hover{background:#1a1326;border-color:#4a3f66}
+.row .nm{font-weight:700;overflow-wrap:anywhere}.row .em{font-size:13px;color:var(--soft);overflow-wrap:anywhere}
+.row .meta{font-size:13px;color:var(--soft)}
+.av{width:44px;height:44px;border-radius:50%;border:1px solid #4a3f66;display:grid;place-items:center;font-family:'Cinzel',Georgia,serif;font-size:17px;background:#241b33;color:var(--gold);overflow:hidden;flex:none}
+.stars{color:var(--gold);letter-spacing:1px;white-space:nowrap}.stars .off{color:#3a3150}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;margin-left:4px}
+.pill.Hot{background:#3a1a14;color:var(--hot)}.pill.Warm{background:#33280f;color:var(--warm)}.pill.Cool{background:#13283a;color:var(--cool)}.pill.Cold{background:#1f1d26;color:var(--cold)}
+.more{margin-top:14px;text-align:center}
+.back{margin-bottom:14px}
+.who{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:22px;align-items:start}
+.story .top{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.story .av{width:76px;height:76px;font-size:30px}
+.story .nm{font-size:22px;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.story .em{font-size:14px;color:var(--soft);overflow-wrap:anywhere}
+.big-stars{font-size:24px;line-height:1}
+.status{display:inline-block;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700;background:#132219;color:var(--green)}
+.status.out{background:#221a31;color:var(--soft)}
+.tale{background:#1a1326;border:1px dashed #4a3f66;border-radius:12px;padding:12px 14px;margin:14px 0;font-size:16px;line-height:1.55}
+.tale b{font-weight:700;color:#fff}.tale p{margin:0 0 .6em}.tale p:last-child{margin:0}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px;margin:0}
+.facts dt{font-weight:700;color:var(--soft)}.facts dd{margin:0;overflow-wrap:anywhere}
+.facts .mute{color:var(--soft);font-size:13px}
+.facts a{color:var(--gold)}
+.tagc{display:inline-block;background:#221a31;color:#cdbfe6;border-radius:6px;padding:0 6px;font-size:12px;font-weight:700;margin:2px 0}
+.hist .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tl{list-style:none;margin:0;padding:0;position:relative}
+.tl:before{content:"";position:absolute;left:17px;top:6px;bottom:6px;border-left:2px dotted #4a3f66}
+.ev{position:relative;padding:6px 0 10px 50px}
+.ev .ic{position:absolute;left:2px;top:6px;width:34px;height:34px;border-radius:50%;border:1px solid #4a3f66;background:#1b1428;display:grid;place-items:center;font-size:15px;z-index:1;color:#cdbfe6}
+.ev[data-k=bought] .ic,.ev[data-k=backed] .ic,.ev[data-k=booked] .ic{background:#33280f;color:var(--gold)}
+.ev[data-k=opened] .ic,.ev[data-k=clicked] .ic,.ev[data-k=email] .ic,.ev[data-k=sequence] .ic{background:#16261f;color:var(--green)}
+.ev[data-k=left] .ic,.ev[data-k=bounced] .ic,.ev[data-k=complained] .ic{background:#2a1515;color:#ffb3a6}
+.ev .t{font-weight:700;overflow-wrap:anywhere}
+.ev .d{font-size:14px;color:var(--soft);overflow-wrap:anywhere}
+.ev .w{font-size:12px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.empty{color:var(--soft);padding:20px 0}
+#gate{padding:40px 0;color:var(--soft)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:#16121f;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9500;font-weight:700}
+#toast.on{opacity:1}
+@media (max-width:1000px){.who{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.sb{padding:16px 12px 80px}.row{grid-template-columns:44px minmax(0,1fr) auto}.row .hide{display:none}}
+</style>
+</head>
+<body>
+<main class="sb">
+  <h1>Subscribers</h1>
+  <p class="sub">Everyone on your list. Open anyone to see their story and everything that's happened with them.</p>
+  <div id="gate">Loading…</div>
+
+  <section id="listView" hidden>
+    <div class="find">
+      <input id="q" class="inp" type="search" placeholder="Find by email or name" aria-label="Find a subscriber by email or name" autocomplete="off">
+      <div class="chips" id="starChips" role="group" aria-label="Stars">
+        <button type="button" class="chip on" data-s="">Everyone</button>
+        <button type="button" class="chip" data-s="5">★★★★★</button>
+        <button type="button" class="chip" data-s="4">★★★★</button>
+        <button type="button" class="chip" data-s="3">★★★</button>
+        <button type="button" class="chip" data-s="2">★★</button>
+        <button type="button" class="chip" data-s="1">★</button>
+      </div>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="rows" id="rows"></div>
+    <div class="more"><button class="btn" id="more" type="button" hidden>Show 50 more</button></div>
+  </section>
+
+  <section id="cardView" hidden>
+    <div class="back"><a class="btn" href="/admin/subscribers.html" id="backLink">← All subscribers</a></div>
+    <div class="who">
+      <aside class="card story" id="story"></aside>
+      <section class="card hist">
+        <h2>Everything that's happened</h2>
+        <div class="filters chips" id="kinds" role="group" aria-label="Show"></div>
+        <ol class="tl" id="tl"></ol>
+      </section>
+    </div>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="/lib/supabase.js"></script>
+<script src="/admin/tw-admin.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const arr=v=>Array.isArray(v)?v:[];
+const TZ='America/Los_Angeles';
+const PAGE='/admin/subscribers.html';
+let sb, Q='', STARS='', OFF=0, CARD=null, KIND='all';
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('on'),4200)}
+async function rpc(f,a){const {data,error}=await sb.rpc(f,a||{});if(error)throw new Error(error.message);return data}
+const day=d=>{if(!d)return'';try{return new Date(String(d).length===10?d+'T12:00:00':d).toLocaleDateString('en-US',{timeZone:TZ,month:'short',day:'numeric',year:'numeric'})}catch(_){return d}};
+const monthYear=d=>{if(!d)return'';try{return new Date(String(d).length===10?d+'T12:00:00':d).toLocaleDateString('en-US',{timeZone:TZ,month:'long',year:'numeric'})}catch(_){return d}};
+const when=d=>{if(!d)return'';try{const x=new Date(d);return x.toLocaleString('en-US',{timeZone:TZ,month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).replace(' AM',' am').replace(' PM',' pm')+' PT'}catch(_){return d}};
+const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const pct=v=>v==null?'':Math.round(100*(+v||0))+'%';
+const starHtml=n=>n?'<span class="stars" aria-label="'+n+' of 5 stars">'+'★'.repeat(n)+'<span class="off">'+'★'.repeat(5-n)+'</span></span>':'<span class="stars" style="color:#7d7891;font-size:13px">no stars yet</span>';
+const heatPill=h=>h&&['Hot','Warm','Cool','Cold'].includes(h)?'<span class="pill '+h+'">'+h+'</span>':'';
+function initials(name,email){const s=(name||email||'?').replace(/@.*/,'').trim();const p=s.split(/[\s._-]+/).filter(Boolean);return ((p[0]||'?')[0]+((p[1]||'')[0]||'')).toUpperCase()}
+
+TWAdmin.ready(async(client)=>{
+  sb=client;
+  try{await rpc('subscriber_list',{p_q:'zz-no-one-zz',p_stars:null,p_offset:0})}catch(e){$('#gate').textContent='Could not load your subscribers - '+e.message+'.';return}
+  $('#gate').hidden=true;
+  route();
+});
+window.addEventListener('popstate',route);
+function route(){const e=new URLSearchParams(location.search).get('e');if(e)openCard(e);else showList()}
+
+/* ---------- the list ---------- */
+async function showList(){
+  $('#cardView').hidden=true;$('#listView').hidden=false;document.title='Subscribers · Thread Weaver Admin';
+  if(!$('#rows').children.length)await load(true);
+}
+async function load(fresh){
+  if(fresh){OFF=0;$('#rows').innerHTML='';}
+  $('#count').textContent='Looking…';
+  try{const r=await rpc('subscriber_list',{p_q:Q||null,p_stars:STARS?+STARS:null,p_offset:OFF});
+    const rows=arr(r&&r.rows), total=+(r&&r.total)||0;
+    $('#count').textContent=total.toLocaleString()+(total===1?' person':' people')+(Q||STARS?' match':'')+(total?' - newest first':'');
+    const frag=document.createDocumentFragment();
+    rows.forEach(x=>{const a=document.createElement('a');a.className='row';a.href=PAGE+'?e='+encodeURIComponent(x.email);a.dataset.e=x.email;
+      a.innerHTML='<span class="av">'+esc(initials(x.name,x.email))+'</span><span><div class="nm">'+esc(x.name||x.email.replace(/@.*/,''))+heatPill(x.heat||x.grade)+'</div><div class="em">'+esc(x.email)+'</div></span>'+
+        '<span>'+starHtml(x.stars)+'</span><span class="meta hide">'+esc(x.location||'')+(x.what?'<br>'+esc(x.what):'')+'</span>'+
+        '<span class="meta hide">'+(x.on_list===false?'Not on the list':(x.joined?'Joined '+esc(day(x.joined)):'On the list'))+(+x.spent>0?'<br>Pledged '+money(x.spent):'')+'</span>';
+      frag.appendChild(a)});
+    $('#rows').appendChild(frag);OFF+=rows.length;$('#more').hidden=OFF>=total;
+    if(!total)$('#rows').innerHTML='<div class="empty">Nobody matches that.</div>';
+  }catch(e){$('#count').textContent='Could not load the list - '+e.message}
+}
+let qT=null;
+$('#q').addEventListener('input',()=>{clearTimeout(qT);qT=setTimeout(()=>{Q=$('#q').value.trim();load(true)},300)});
+$('#starChips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;$$('#starChips .chip').forEach(c=>c.classList.toggle('on',c===b));STARS=b.dataset.s;load(true)});
+$('#more').addEventListener('click',()=>load(false));
+$('#rows').addEventListener('click',e=>{const a=e.target.closest('a.row');if(!a||e.metaKey||e.ctrlKey||e.shiftKey)return;e.preventDefault();history.pushState(null,'',a.href);openCard(a.dataset.e)});
+$('#backLink').addEventListener('click',e=>{if(e.metaKey||e.ctrlKey)return;e.preventDefault();history.pushState(null,'',PAGE);showList()});
+
+/* ---------- the card ---------- */
+async function openCard(email){
+  $('#listView').hidden=true;$('#cardView').hidden=false;window.scrollTo(0,0);
+  $('#story').innerHTML='<div class="empty">Opening '+esc(email)+'…</div>';$('#tl').innerHTML='';$('#kinds').innerHTML='';
+  try{CARD=await rpc('subscriber_card',{p_email:email})}catch(e){$('#story').innerHTML='<div class="empty">Could not open them - '+esc(e.message)+'</div>';return}
+  CARD=CARD||{};CARD.email=CARD.email||email;CARD.history=arr(CARD.history);
+  const h=CARD.heat||CARD.reader;
+  if(!h&&!CARD.list&&!CARD.grade&&!CARD.history.length){$('#story').innerHTML='<div class="empty">'+esc(email)+' is not on your list and nothing else is known about them.</div>';return}
+  paintStory();KIND='all';paintHistory();
+}
+function nameOf(c){const r=c.heat||c.reader||{},l=c.list||{};
+  return (l.name||r.name||[r.kit_first_name,r.kit_last_name].filter(Boolean).join(' ')||'').trim()}
+function seriesWords(so){if(!so||typeof so!=='object')return '';return Object.keys(so).filter(k=>+so[k]>0).map(k=>k.replace(/_/g,' ').replace(/\b\w/g,m=>m.toUpperCase())+' ('+so[k]+')').join(', ')}
+function paintStory(){
+  const c=CARD, h=c.heat||c.reader||{}, l=c.list||null, g=c.grade||{};
+  const name=nameOf(c), first0=(name.split(/\s+/)[0]||'').replace(/[^\p{L}'-]/gu,''), first=first0?first0[0].toUpperCase()+first0.slice(1):null, who=first||'This reader';
+  document.title=(name||c.email)+' · Subscribers';
+  const stars=+(g.stars||c.stars||h.stars||0), onList=l&&l.status==='subscribed';
+  const statusTxt=!l?'Not on your list':({subscribed:'Subscribed',unsubscribed:'Unsubscribed',bounced:'Address bounced',complained:'Marked you as spam'}[l.status]||l.status);
+  // their story, in plain words, only from what the database holds
+  const S=[];
+  if(l&&(l.joined_at||l.added_at)){const j=l.joined_at||l.added_at;S.push(onList?who+' has been on your list since <b>'+esc(monthYear(j))+'</b>'+(l.source?' (from '+esc(l.source)+')':'')+'.'
+    :who+' was on your list from <b>'+esc(monthYear(j))+'</b>'+(l.status_at?' until '+esc(day(l.status_at)):'')+' - '+esc(statusTxt.toLowerCase())+'.')}
+  else if(!l)S.push(who+' is not on your newsletter list.');
+  const place=[h.city,h.region,h.country].filter(Boolean).join(', ')||[h.kit_city,h.kit_region,h.kit_country].filter(Boolean).join(', ')||h.location;
+  if(place)S.push(who+' is in '+esc(place)+'.');
+  const P2s=S.length;
+  if(h.heat)S.push(who+' is <b>'+esc(h.heat)+'</b>'+(h.heat_score!=null?' (heat '+esc(h.heat_score)+')':'')+(h.superfan?' and a superfan':'')+'.');
+  if(h.sends_opened!=null||h.open_rate!=null)S.push('On Substack '+(who==='This reader'?'they':who)+' opened <b>'+Number(h.sends_opened||0).toLocaleString()+'</b> emails'+(h.open_rate!=null?' ('+pct(h.open_rate)+')':'')+(h.last_open?', most recently on '+esc(day(h.last_open)):'')+'.');
+  const sw=seriesWords(h.series_opens);if(sw)S.push('Series they opened: '+esc(sw)+'.');
+  if(+h.projects_backed>0)S.push(who+' backed <b>'+h.projects_backed+'</b> of your campaign'+(+h.projects_backed===1?'':'s')+(+h.total_pledged>0?' for '+money(h.total_pledged):'')+(h.last_pledged_on?', last in '+esc(monthYear(h.last_pledged_on)):'')+'.');
+  if(h.bookfunnel_fiction)S.push(who+' downloaded your fiction on BookFunnel'+(h.bf_fiction_pages?' ('+esc(h.bf_fiction_pages)+')':'')+'.');
+  if(h.in_kit)S.push('In Kit, '+(who==='This reader'?'they':who)+' opened '+Number(h.kit_lifetime_opened||0).toLocaleString()+' of '+Number(h.kit_lifetime_sent||0).toLocaleString()+' emails'+(h.kit_state&&h.kit_state!=='active'?' and later '+esc(h.kit_state==='cancelled'?'unsubscribed':h.kit_state):'')+'.');
+  if(h.on_joy)S.push(who+' is on your Joy list too'+(h.joy_opens_total!=null?' ('+Number(h.joy_opens_total).toLocaleString()+' opens)':'')+'.');
+  if(h.thread_weaver_user)S.push(who+' has a Thread Weaver account.');
+  const P3s=S.length;
+  const facts=[];
+  const add=(k,v)=>{if(v!==null&&v!==undefined&&v!=='')facts.push('<dt>'+esc(k)+'</dt><dd>'+v+'</dd>')};
+  add('Status',esc(statusTxt)+(l&&l.status_why&&!onList?' - '+esc(l.status_why):''));
+  if(l&&(l.joined_at||l.added_at))add('Joined',esc(day(l.joined_at||l.added_at))+(l.source?' (from '+esc(l.source)+')':''));
+  add('Where',esc(place||''));
+  if(h.heat)add('Heat',heatPill(h.heat)+(h.heat_score!=null?' '+esc(h.heat_score):''));
+  if(h.substack_segment)add('Substack',esc(h.substack_segment)+(h.open_rate!=null?' - opens '+pct(h.open_rate):''));
+  if(sw)add('Series',esc(sw));
+  if(+h.projects_backed>0)add('Backed',h.projects_backed+' campaign'+(+h.projects_backed===1?'':'s')+(+h.total_pledged>0?' - '+money(h.total_pledged):'')+(arr(h.projects).length?'<br><span class="mute">'+arr(h.projects).map(esc).join(', ')+'</span>':''));
+  if(h.bookfunnel_fiction)add('BookFunnel',esc(h.bf_fiction_pages||'fiction downloads')+(h.bf_first_claimed?'<br><span class="mute">first '+esc(day(h.bf_first_claimed))+'</span>':''));
+  if(h.in_kit)add('Kit',esc(h.kit_state||'')+(h.kit_lifetime_sent!=null?' - '+Number(h.kit_lifetime_sent).toLocaleString()+' sent, '+Number(h.kit_lifetime_opened||0).toLocaleString()+' opened':'')+(h.kit_last_open?'<br><span class="mute">last opened '+esc(day(h.kit_last_open))+'</span>':''));
+  if(h.on_joy)add('Joy',esc(h.joy_status||'on the list'));
+  if(h.thread_weaver_user!=null)add('App',h.thread_weaver_user?'Has a Thread Weaver account':'Not in the app yet');
+  if(arr(c.sequences).length)add('Sequences',c.sequences.map(s=>'<a href="/admin/'+(s.kind==='oneoff'?'one-offs':'sequences')+'.html?s='+encodeURIComponent(s.id||'')+'">'+esc(s.name)+'</a> ('+(s.kind==='oneoff'?({in:'not sent yet',done:'got it',left:'taken back',stopped:'stopped'}[s.status]||s.status):({in:'in it'+(s.at?' - '+esc(s.at):''),done:'finished',left:'left',stopped:'stopped'}[s.status]||s.status))+')').join('<br>'));
+  const T=arr(c.tags).length?arr(c.tags):(h.kit_tags?String(h.kit_tags).split(' | ').filter(Boolean):[]);
+  if(T.length)add('Tags',T.slice(0,24).map(t=>'<span class="tagc">'+esc(t)+'</span>').join(' ')+(T.length>24?' <span class="mute">and '+(T.length-24)+' more</span>':''));
+  if(g.why)add('Why '+(stars||'no')+' star'+(stars===1?'':'s'),esc(g.why));
+  $('#story').innerHTML='<div class="top"><span class="av">'+esc(initials(name,c.email))+'</span><div><div class="nm">'+esc(name||c.email.replace(/@.*/,''))+'</div><div class="em">'+esc(c.email)+'</div>'+
+      '<div class="big-stars">'+starHtml(stars)+'</div></div></div>'+
+    '<span class="status'+(onList?'':' out')+'">'+esc(statusTxt)+'</span>'+
+    '<div class="tale">'+(S.length?[S.slice(0,P2s),S.slice(P2s,P3s),S.slice(P3s)].filter(p=>p.length).map(p=>'<p>'+p.join(' ')+'</p>').join(''):'Nothing more is known about '+esc(c.email)+' yet.')+'</div>'+
+    '<dl class="facts">'+facts.join('')+'</dl>';
+}
+const KINDS=[['all','Everything'],['email','Emails'],['money','Backing'],['list','List']];
+const ICON={joined:'＋',left:'－',opened:'✉',clicked:'↗',email:'✉',sent:'✉',sequence:'↳',bought:'$',backed:'$',bounced:'!',complained:'!',unsubscribed:'－',app:'◆'};
+const GROUP={opened:'email',clicked:'email',email:'email',sent:'email',sequence:'email',delivered:'email',bounced:'list',complained:'list',unsubscribed:'list',bought:'money',backed:'money',joined:'list',left:'list'};
+function paintHistory(){
+  const h=CARD.history||[];
+  const n=k=>k==='all'?h.length:h.filter(x=>GROUP[x.kind]===k).length;
+  $('#kinds').innerHTML=KINDS.filter(([k])=>k==='all'||n(k)).map(([k,l])=>'<button type="button" class="chip'+(KIND===k?' on':'')+'" data-k="'+k+'">'+l+' ('+n(k)+')</button>').join('');
+  const list=KIND==='all'?h:h.filter(x=>GROUP[x.kind]===KIND);
+  $('#tl').innerHTML=list.length?list.map(x=>'<li class="ev" data-k="'+esc(x.kind)+'"><span class="ic" aria-hidden="true">'+(ICON[x.kind]||'•')+'</span>'+
+      '<div class="w">'+esc(!x.at?'date not known':x.dateonly?day(x.at):when(x.at))+'</div><div class="t">'+esc(x.title||x.kind)+'</div>'+(x.detail?'<div class="d">'+esc(x.detail)+'</div>':'')+'</li>').join('')
+    :'<li class="empty">Nothing here yet.</li>';
+}
+$('#kinds').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;KIND=b.dataset.k;paintHistory()});
+})();
+</script>
+</body>
+</html>

@@ -8,7 +8,7 @@
    FREE_CACHE is versioned SEPARATELY on purpose: it holds ~44MB of free books,
    so bumping the shell must not force every user to re-download all of it.
    Only bump FREE_CACHE when free_assets.json actually changes. */
-var SHELL_CACHE   = 'wl-shell-v1.16.6';
+var SHELL_CACHE   = 'wl-shell-v1.16.7';
 var FREE_CACHE    = 'wl-free-v1.14.81';   /* bumped: free_assets.json changed */      /* the 44MB of free books/comics, offline up front */
 var CONTENT_CACHE = 'wl-content-v2';   /* downloader fills this on unlock */
 

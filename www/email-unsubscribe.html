@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<title>Unsubscribe — Wannabe Press</title>
+<style>
+ :root{--gold:#e8b53a;--ink:#ece3d0;--bg:#0e0b16;--card:#16121f;--line:#2e2742;--mute:#9b91ac}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Cormorant Garamond',serif;line-height:1.6}
+ .wrap{max-width:520px;margin:0 auto;padding:56px 22px 80px}
+ .brand{font-family:'Cinzel',Georgia,serif;color:var(--gold);letter-spacing:1px;font-size:15px;margin:0 0 26px}
+ h1{font-size:25px;margin:0 0 10px;color:var(--ink)}
+ p{margin:0 0 16px}
+ a{color:var(--gold)}
+ .who{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;margin:0 0 20px;word-break:break-all}
+ button{font:inherit}
+ .btn{display:block;width:100%;padding:14px 16px;border:2px solid var(--gold);border-radius:12px;background:transparent;cursor:pointer;font-size:16px;font-weight:600;text-align:center;margin:0 0 10px;color:var(--gold)}
+ .btn:hover{background:#241a33}
+ .btn.go{background:var(--gold);color:#1a1424}
+ .btn.go:hover{background:#f2c654}
+ .btn[disabled]{opacity:.5;cursor:default}
+ .small{font-size:14px;color:var(--mute)}
+ .err{color:#ff9a8a}
+ footer{margin-top:34px;font-size:13px;color:var(--mute)}
+ .boot{color:var(--mute);font-style:italic}
+ @media (max-width:640px){.wrap{padding-top:36px}}
+</style>
+</head><body>
+<div class="wrap">
+<div class="brand">WANNABE PRESS</div>
+<div id="app"><p class="boot">one sec...</p></div>
+<footer>Russell Nohelty &middot; Wannabe Press &middot; <a href="mailto:help@wannabepress.com">help@wannabepress.com</a></footer>
+</div>
+<script>
+(function(){
+  // Thread Weaver, 20 Oct 2026 (ported from Joy Looper). The page behind "Unsubscribe from everything" in every email sent through Amazon SES.
+  // Signed out by design: the token in ?t= is the person's own key from their email. Nothing changes
+  // until they press the button - mail security systems open every link in an email, and opening
+  // this page must never take anybody off the list. The function answers JSON (nl-unsubscribe).
+  var EP = "https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1/nl-unsubscribe";
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+  var t = ""; try { t = (new URLSearchParams(location.search).get("t") || "").trim(); } catch(e) {}
+  function ask(action){
+    return fetch(EP, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: t, action: action }) })
+      .then(function(r){ return r.json().catch(function(){ return { ok: false, error: "Something went wrong - try again in a minute." }; }); })
+      .catch(function(){ return { ok: false, error: "Could not reach the server - check your connection and try again." }; });
+  }
+  function broken(msg){
+    $("app").innerHTML = '<h1>That link didn\'t work</h1><p>' + esc(msg) + '</p>' +
+      '<p>Or reply to any of Russell\'s emails with the word "unsubscribe" and you\'ll be taken off the list.</p>';
+  }
+  function paint(d, justNow){
+    if (d && d.test) { $("app").innerHTML = '<h1>This was a test email</h1><p>' + esc(d.error) + '</p>'; return; }
+    if (!d || !d.ok) return broken((d && d.error) || "It may have been cut off on the way here.");
+    if (d.subscribed) {
+      $("app").innerHTML =
+        '<h1>' + (justNow === "back" ? "You're back on the list" : "Unsubscribe from Russell\'s emails?") + '</h1>' +
+        (justNow === "back" ? '<p>Glad to have you. The next one will reach you as usual.</p>' : '<p>You\'ll stop getting Russell\'s Wannabe Press emails at this address.</p>') +
+        '<p class="who">' + esc(d.email) + '</p>' +
+        (justNow === "back" ? '<button class="btn" id="off">Unsubscribe after all</button>' : '<button class="btn go" id="off">Unsubscribe</button><p class="small">Changed your mind? Just close this page - nothing happens unless you press the button.</p>') +
+        '<p class="err" id="msg"></p>';
+      $("off").onclick = function(){ this.disabled = true; ask("unsubscribe").then(function(r){ if (r && r.ok) paint(r, "off"); else { $("off").disabled = false; $("msg").textContent = (r && r.error) || "That didn't save - try again."; } }); };
+    } else {
+      $("app").innerHTML =
+        '<h1>' + (justNow === "off" ? "Done - you're unsubscribed" : "You're not on the list") + '</h1>' +
+        '<p>' + (justNow === "off" ? "You won't get Russell's Wannabe Press emails at this address any more." : "This address isn't getting Russell's Wannabe Press emails.") + '</p>' +
+        '<p class="who">' + esc(d.email) + '</p>' +
+        '<button class="btn" id="on">' + (justNow === "off" ? "That was a mistake - keep me on the list" : "Put me back on the list") + '</button>' +
+        '<p class="err" id="msg"></p>';
+      $("on").onclick = function(){ this.disabled = true; ask("resubscribe").then(function(r){ if (r && r.ok) paint(r, "back"); else { $("on").disabled = false; $("msg").textContent = (r && r.error) || "That didn't save - try again."; } }); };
+    }
+  }
+  if (!/^[0-9a-f-]{36}$/i.test(t)) return broken("It may have been cut off on the way here.");
+  ask("state").then(function(d){ paint(d, null); });
+})();
+
+</script>
+</body></html>

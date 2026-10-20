@@ -39,3 +39,12 @@ Signing certificates and provisioning profiles are **not** in this repo. It is p
 
 Stamp every build in `www/comstation.js` (`TW_VERSION`), `www/app.html` (`TW_APP_VERSION`),
 `www/sw.js` (`SHELL_CACHE`) and `config.xml` (`version`, `ios-CFBundleVersion`, `android-versionCode`).
+
+## Email (one-offs, sequences, newsletter) — ported from Joy Looper, 20 Oct 2026 (1.16.7)
+- Readers = `nl_subscribers`, seeded from `substack_subscribers` where `on_list`; `nl_sync_from_substack()` keeps it in step hourly (cron `tw-nl-sync-from-substack`). Nobody outside the Substack list is added.
+- Admin screens (outside `www/`, not in the phone app): `/admin/one-offs.html`, `/admin/sequences.html`, `/admin/newsletter.html`, `/admin/subscribers.html` (shared `admin/tw-admin.js`, vendored editor in `admin/vendor/`). Admins: russell@ and help@wannabepress.com (`is_tw_admin()`).
+- Database: `supabase/email_engine.sql` (tables `nl_*`, `person_tags`, `person_fields`, flow engine `nl_flow_tick`, audiences `_seq_pick` incl. heat/series/backer/bookfunnel/joy/kit_tag/app).
+- Edge functions: `nl-seq-send` (cron `tw-nl-seq-send` every minute, only calls when something is due; page preview/test for admins), `nl-unsubscribe` (one-click + page JSON), `nl-ses-events` (SNS webhook).
+- Amazon SES: configuration set `wannabepress-email` -> SNS `wannabepress-email-events` -> `nl-ses-events`. The weekly serial chapter emails use the same configuration set (tag kind=serial_chapter).
+- Reader pages: `www/email-unsubscribe.html`, `www/email-leave.html`.
+- Heat: `admin_reader_heat.kit_points` counts Kit emails opened (1-4 +3, 5-19 +6, 20+ +10) and Kit open rate >= 50% of 10+ sent (+5), plus recency, clicks and tags.

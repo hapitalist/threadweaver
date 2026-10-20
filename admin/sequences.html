@@ -1,0 +1,1688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Sequences · Thread Weaver Admin</title>
+<!-- /admin/sequences.html - Thread Weaver, 20 Oct 2026. Ported from Joy Looper's /admin/sequences.
+     Russell's email sequences and automations, sent from russell@wannabepress.com through Amazon SES (nl-seq-send).
+     The map (ways in, steps, Yes/No and multiple branches), just the emails (the editor), who's in, and when it sends.
+     Nobody goes into a sequence unless Russell puts them in here or it is Live with a way in.
+     Data: seq_list, seq_get, seq_save, seq_email_save, seq_step_add/_move/_remove, seq_steps_remove, seq_trash_list/_restore,
+     seq_stats, seq_meta, seq_entry_preview, seq_people, seq_audience_preview, seq_audience_people, seq_add_people, seq_take_out,
+     joy_editor_snippets / _save / _retire. Joy's Kit import (seq_kit_*, seq_from_kit*) is left out. -->
+<style>
+:root{--paper:#0e0a16;--card:#16101f;--ink:#e9e1f6;--soft:#9b91ac;--line:#3a3150;--mint:#e8b53a;--mint-l:#2a2140;--yellow:#d9a441;--orange:#ff7a59;--red:#ff8a7a;--red-l:#3a1a14;--field:#1b1428;--on-accent:#16121f;--gold:#e8b53a;--sh:0 2px 0 rgba(0,0,0,.45);--sh-s:0 1px 0 rgba(0,0,0,.4)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+/* Ghost's editor is sized in rem for a 10px root, like Ghost Admin and /admin/write; this page's own sizes are px.
+   16 Oct 2026: !important - joy-a11y.js writes font-size:96% straight onto <html>, which beat this rule and made every
+   word in the editor 31px (Russell: "why is the font so enormous?"). Text size still works: joy-a11y zooms the body. */
+html{font-size:62.5%!important}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--ink)}
+.sq{max-width:1280px;margin:0 auto;padding:22px 22px 80px}
+h1{font-family:'Cinzel',Georgia,serif;font-weight:400;font-size:34px;margin:0;line-height:1.1}
+.sub{margin:4px 0 18px;color:var(--soft)}
+.btn{border:2px solid var(--line);background:var(--field);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:700;min-height:42px;box-shadow:var(--sh-s);white-space:nowrap}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:0 3px 0 rgba(0,0,0,.45)}
+.btn:active{transform:translate(1px,1px);box-shadow:none}
+.btn.mint{background:var(--mint)}.btn.yel{background:var(--yellow)}.btn.ghost{background:transparent;box-shadow:none;border-style:dashed}
+.btn.warn{color:var(--red);border-color:var(--red);box-shadow:2px 2px 0 var(--red)}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.deck{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.pick{min-height:44px;border:2px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--field);font-weight:700;max-width:100%;min-width:260px;box-shadow:var(--sh-s)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:18px}
+.head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-bottom:14px}
+.name{width:100%;border:0;border-bottom:3px dashed transparent;background:transparent;font-size:26px;font-weight:700;padding:4px 2px;min-width:0}
+.name:hover{border-bottom-color:#3a3150}.name:focus{outline:0;border-bottom-color:var(--ink)}
+.state{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;box-shadow:var(--sh-s);background:var(--field)}
+.state button{border:0;background:transparent;padding:8px 16px;cursor:pointer;font-weight:700;min-height:40px}
+.state button+button{border-left:2px solid var(--line)}
+.state button.on[data-s=draft]{background:#2a2140}.state button.on[data-s=live]{background:var(--mint)}.state button.on[data-s=paused]{background:var(--yellow)}
+.headnote{grid-column:1/-1;font-size:14px;color:var(--soft);margin-top:-4px}
+.tabs{display:flex;gap:8px;margin:4px 0 16px;flex-wrap:wrap}
+.tabs button{border:2px solid var(--line);background:transparent;border-radius:999px;padding:7px 16px;cursor:pointer;font-weight:700;min-height:40px}
+.tabs button.on{background:var(--ink);color:var(--paper)}
+.tabs .count{font-weight:400;opacity:.8}
+
+/* the route: the emails, top to bottom, with the gap between each */
+.split{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;align-items:start}
+/* 16 Oct 2026: on a laptop the list of emails stays beside the email you are writing, however far down it you are */
+@media (min-width:1101px){.split>div:first-child{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;overflow-x:hidden;padding:2px 8px 10px 2px}}
+.route{list-style:none;margin:0;padding:0;position:relative}
+.stop{position:relative;padding-left:46px}
+.stop:before{content:"";position:absolute;left:17px;top:0;bottom:0;border-left:3px dotted #6d6385}
+.stop:first-child:before{top:26px}.stop:last-child:before{bottom:calc(100% - 26px)}
+.gap{position:relative;font-size:13px;font-style:italic;color:var(--soft);padding:6px 0 6px 4px}
+.dot{position:absolute;left:2px;top:12px;width:34px;height:34px;border-radius:50%;border:3px solid var(--line);background:var(--field);display:grid;place-items:center;font-family:'Cinzel',Georgia,serif;font-size:15px;z-index:1}
+.stop.sel .dot{background:var(--mint)}
+.stop.off .dot{background:#221a31;color:#6d6385}
+.tile{display:block;width:100%;text-align:left;border:2px solid var(--line);border-radius:12px;background:var(--field);padding:10px 12px;cursor:grab;box-shadow:var(--sh-s);margin:4px 0}
+.tile:hover{background:#1d1529}
+.stop.sel .tile{background:var(--mint-l);box-shadow:var(--sh);border-width:3px}
+.stop.off .tile{background:#1a1326}
+.stop.drag .tile{opacity:.4}
+.stop.over-top .tile{box-shadow:0 -5px 0 var(--orange)}.stop.over-bot .tile{box-shadow:0 5px 0 var(--orange)}
+.when{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--soft)}
+.subj{font-weight:700;line-height:1.3;margin:2px 0;overflow-wrap:anywhere}
+.subj.none{font-style:italic;font-weight:400;color:#6d6385}
+.meta{font-size:13px;color:var(--soft);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-block;border:1.5px solid var(--line);border-radius:999px;padding:0 8px;font-size:12px;font-weight:700;background:var(--field)}
+.chip.on{background:var(--mint)}.chip.off{background:#221a31}
+.moves{display:none;gap:6px;margin-top:6px}
+.stop.sel .moves{display:flex}
+.moves button{border:1.5px solid var(--line);background:var(--field);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px}
+.addstop{padding-left:46px;margin-top:10px}
+/* 17 Oct 2026: pick several emails, the Taken out list */
+.stop .tick{position:absolute;right:8px;top:30px;z-index:2;display:flex;align-items:center;justify-content:center;width:34px;height:34px;cursor:pointer}
+.stop .tick input{width:20px;height:20px;accent-color:var(--ink);cursor:pointer}
+.stop.ticked .tile{outline:3px solid var(--red);outline-offset:2px}
+.stop .tile{padding-right:44px}
+.bulk{position:sticky;top:8px;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#2f2612;border:2px solid var(--line);border-radius:12px;padding:8px 12px;margin:0 0 10px;box-shadow:var(--sh-s)}
+.bulk b{margin-right:auto}
+.trash{margin:16px 0 0 46px;border:2px dashed #6d6385;border-radius:12px;padding:8px 12px;background:#1d1529}
+.trash summary{cursor:pointer;font-weight:700;padding:4px 0}
+.trash ul{list-style:none;margin:8px 0 0;padding:0}
+.trash li{display:flex;gap:10px;align-items:center;border-top:1px dashed #3a3150;padding:8px 0}
+.trash li div{flex:1;min-width:0}.trash li small{display:block;color:var(--soft)}
+.trash li b{display:block;overflow-wrap:anywhere}
+.addstop .btn{width:100%}
+
+/* the email you are on */
+.ed{padding:0;overflow:hidden}
+.edtop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:2px solid var(--line);background:#1f1730;flex-wrap:wrap}
+.stamp{font-family:'Cinzel',Georgia,serif;font-size:20px}
+.from{font-size:13px;color:var(--soft)}
+.sw{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;user-select:none}
+.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.sw .tr{width:52px;height:30px;border:2px solid var(--line);border-radius:999px;background:#221a31;position:relative;transition:background .15s}
+.sw .tr:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--field);border:2px solid var(--line);transition:left .15s}
+.sw input:checked+.tr{background:var(--mint)}.sw input:checked+.tr:after{left:25px}
+.sw input:focus-visible+.tr{outline:3px solid var(--orange);outline-offset:2px}
+.edbody{padding:16px 18px 18px}
+.f{margin-bottom:12px}
+.f label,.lab{display:block;font-weight:700;font-size:14px;margin-bottom:4px}
+.f .hint{font-weight:400;color:var(--soft)}
+.inp{width:100%;border:2px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--field);min-height:44px}
+.inp:focus,.pick:focus,.num:focus,.sel2:focus{outline:3px solid var(--mint);outline-offset:1px}
+.timing{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--field);border:2px dashed #6d6385;border-radius:12px;padding:8px 12px}
+.num{width:76px;border:2px solid var(--line);border-radius:8px;padding:6px 8px;min-height:40px;background:var(--field)}
+.sel2{border:2px solid var(--line);border-radius:8px;padding:6px 8px;min-height:40px;background:var(--field)}
+.warnbox{background:#2f2612;border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px}
+.warnbox .lk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed #8a6d1e}
+.warnbox code{background:var(--field);border:1px solid #3a3150;border-radius:6px;padding:0 5px;font-size:12px;overflow-wrap:anywhere}
+.tools{display:flex;flex-wrap:wrap;gap:4px;padding:6px;border:2px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#1f1730;position:sticky;top:0;z-index:5}
+.tools button{border:1.5px solid transparent;background:transparent;border-radius:8px;min-width:36px;height:36px;padding:0 8px;cursor:pointer;font-size:15px}
+.tools button:hover{border-color:var(--ink);background:var(--field)}
+.tools button.on{background:var(--ink);color:#fff}
+.tools .sep{width:1px;background:#3a3150;margin:4px 3px}
+.linkbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:2px solid var(--line);border-bottom:0;background:#16261f;font-size:14px}
+.linkbar .inp{min-height:36px;padding:5px 9px;flex:1;min-width:160px}
+.mtbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;border:2px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#1f1730;font-size:14px}
+.mtbar .hint{color:var(--soft);font-size:13px}
+.paper{border:2px solid var(--line);border-radius:0 0 12px 12px;background:#0b0812;padding:18px;overflow-x:clip}
+.kg-host{max-width:680px;margin:0 auto;background:var(--field);min-height:380px;padding:28px 34px 40px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.koenig-lexical{--kg-accent-color:#0d9488}
+.mail{max-width:640px;margin:0 auto;background:var(--field);min-height:360px;padding:26px 30px;box-shadow:0 1px 4px rgba(0,0,0,.18);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#15212a;outline:0;overflow-wrap:anywhere}
+.mail:focus{box-shadow:0 0 0 3px var(--mint)}
+.mail p{margin:0 0 1em}.mail img{max-width:100%;height:auto}
+.mail blockquote{margin:0 0 1em;padding-left:16px;border-left:3px solid #15212a}
+.mail a[href="%%SEQ_LEAVE_URL%%"],.mail a[href="%%UNSUB_URL%%"]{text-decoration-style:dashed;background:#16261f}
+.mail .mt{background:#2f2612;border:1px dashed #8a6d1e;border-radius:4px;padding:0 3px;white-space:nowrap}
+.mail:empty:before{content:"Write your email here.";color:#7d7891}
+.html{width:100%;min-height:360px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--line);border-radius:0 0 12px 12px;padding:12px;background:var(--field)}
+.edfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:14px}
+.saved{font-size:14px;color:var(--soft)}.saved.bad{color:var(--red);font-weight:700}
+.livenote{background:var(--mint-l);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px;margin-bottom:12px}
+
+/* people */
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.n{background:var(--field);border:2px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--sh-s)}
+.n b{display:block;font-family:'Cinzel',Georgia,serif;font-weight:400;font-size:30px;line-height:1.1}
+.n span{font-size:13px;color:var(--soft)}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--field);cursor:pointer}
+.opt input[type=radio]{margin-top:5px;width:18px;height:18px;accent-color:var(--ink);flex:none}
+.opt.on{background:var(--mint-l)}
+.opt small{display:block;color:var(--soft)}
+.ans{background:var(--field);border:2px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;background:var(--field);border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.tbl th{text-align:left;background:#1f1730;border-bottom:2px solid var(--line);padding:8px 10px;font-size:13px}
+.tbl td{padding:8px 10px;border-bottom:1px solid #241b33;vertical-align:top;overflow-wrap:anywhere}
+.mini{border:1.5px solid var(--line);background:var(--field);border-radius:8px;padding:3px 10px;cursor:pointer;font-size:13px}
+
+/* when it sends */
+.days{display:flex;gap:8px;flex-wrap:wrap}
+.day{border:2px solid var(--line);border-radius:12px;background:var(--field);padding:8px 0;width:74px;text-align:center;cursor:pointer;font-weight:700;box-shadow:var(--sh-s);position:relative}
+.day.on{background:var(--mint)}
+.day small{display:block;font-weight:400;font-size:11px;line-height:1.1;color:var(--soft)}
+
+dialog{border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 rgba(0,0,0,.45);background:var(--card);padding:0;max-width:min(680px,94vw);width:100%}
+dialog::backdrop{background:rgba(5,3,9,.72)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:2px solid var(--line)}
+.dh h2{font-family:'Cinzel',Georgia,serif;font-weight:400;margin:0;font-size:22px}
+.db{padding:16px 18px;max-height:70vh;overflow:auto}
+.df{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:2px solid var(--line);flex-wrap:wrap}
+.x{border:2px solid var(--line);background:var(--field);border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:18px;line-height:1}
+.kitrow{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--field);margin-bottom:8px}
+.pv-env{border:2px solid var(--line);border-radius:12px;background:var(--field);padding:10px 12px;margin-bottom:10px;font-size:14px}
+.pv-env b{font-size:15px}
+.pv-frame{width:100%;height:60vh;border:2px solid var(--line);border-radius:12px;background:var(--field)}
+.empty{text-align:center;padding:40px 18px}
+.empty p{color:var(--soft);max-width:520px;margin:8px auto 18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9500;font-weight:700}
+#toast.on{opacity:1}
+#gate{padding:40px 0;color:var(--soft)}
+/* ---------- the map ---------- */
+.mapbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.zoom{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:10px;background:var(--field);box-shadow:var(--sh-s);overflow:hidden}
+.zoom button{border:0;background:transparent;width:40px;height:38px;font-size:20px;cursor:pointer}
+.zoom button:hover{background:var(--mint-l)}
+.zoom span{min-width:56px;text-align:center;font-weight:700;font-size:14px;border-left:2px solid var(--line);border-right:2px solid var(--line);line-height:38px}
+.maphint{font-size:13px;color:var(--soft)}
+.mapview{position:relative;height:calc(100vh - 250px);min-height:480px;border:2px solid var(--line);border-radius:14px;overflow:hidden;cursor:grab;touch-action:none;
+  background-color:#120d1b;background-image:radial-gradient(#2e2742 1.2px,transparent 1.2px);background-size:22px 22px}
+.mapview.drag{cursor:grabbing}
+.mapview:focus{outline:3px solid var(--mint);outline-offset:2px}
+.world{position:absolute;left:0;top:0;transform-origin:0 0;padding:30px 40px 80px;display:inline-flex;flex-direction:column;align-items:center}
+.lane{display:flex;flex-direction:column;align-items:center}
+.node{width:250px;background:var(--field);border:2px solid var(--line);border-radius:12px;box-shadow:var(--sh-s);padding:10px 12px 11px;text-align:center;cursor:pointer;position:relative;border-top-width:7px;user-select:none}
+.node:hover{box-shadow:var(--sh)}
+.node.sel{outline:3px solid var(--gold);outline-offset:3px}
+.node.bad{background:#2a1515}
+.node .nk{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--soft)}
+.node .nt{font-weight:700;line-height:1.3;margin-top:3px;overflow-wrap:anywhere}
+.node .nt.none{font-weight:400;font-style:italic;color:#6d6385}
+.node .nd{font-size:13px;color:var(--soft);margin-top:3px;overflow-wrap:anywhere}
+.node .nc{font-size:12px;color:var(--soft);margin-top:6px;border-top:1px dashed #2e2742;padding-top:5px}
+.node .nc b{color:var(--ink)}
+.node .fix{font-size:12px;color:var(--red);font-weight:700;margin-top:5px}
+.k-email{border-top-color:#2bb89a}.k-wait{border-top-color:#e2b400}.k-tag_add,.k-tag_remove,.k-field_set,.k-sequence,.k-move{border-top-color:var(--orange)}
+.k-condition{border-top-color:#5b7fd6}.k-event{border-top-color:#b35fc9}.k-goto,.k-exit{border-top-color:#6d6385}.k-unsubscribe{border-top-color:var(--red)}
+.k-start{border-top-color:var(--ink);width:300px;cursor:default;background:#1f1730}
+.k-start .entry{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:8px;background:var(--field);padding:5px 8px;margin-top:6px;cursor:pointer;font-size:13px;line-height:1.35}
+.k-start .entry:hover{background:var(--mint-l)}
+.k-start .entry.warn{background:#2f2612}
+.k-start .hand{font-size:12px;color:var(--soft);margin-top:6px}
+.tagc{display:inline-block;background:#3a2a14;border:1.5px solid var(--line);border-radius:6px;padding:0 6px;font-size:12px;font-weight:700;margin:3px 2px 0;max-width:100%;overflow-wrap:anywhere}
+.link{position:relative;width:2px;height:46px;background:#6d6385;display:flex;align-items:center;justify-content:center}
+.plus{position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--field);font-size:18px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0;z-index:2}
+.plus:hover,.plus.on{background:var(--mint)}
+.done{border:2px dashed #6d6385;border-radius:999px;padding:3px 14px;font-size:13px;color:var(--soft);background:#1a1326}
+.branches{display:flex;align-items:flex-start;position:relative;padding-top:26px}
+.branches:before{content:"";position:absolute;top:0;left:50%;height:26px;border-left:2px solid #6d6385}
+.branch{position:relative;display:flex;flex-direction:column;align-items:center;padding:26px 22px 0;min-width:230px}
+.branch:before{content:"";position:absolute;top:0;left:0;right:0;border-top:2px solid #6d6385}
+.branch:first-child:before{left:50%}.branch:last-child:before{right:50%}
+.branch:only-child:before{display:none}
+.branch:after{content:"";position:absolute;top:0;left:50%;height:26px;border-left:2px solid #6d6385}
+.blab{position:absolute;top:13px;left:50%;transform:translateX(-50%);z-index:1;border:2px solid var(--line);border-radius:6px;padding:0 8px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--field);max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.blab.yes{background:#2bb89a;color:#fff}.blab.no{background:#c8322a;color:#fff}.blab.path{background:#5b7fd6;color:#fff}
+.branch>.lane{margin-top:6px}
+.addmenu{position:fixed;z-index:9000;background:var(--field);border:2px solid var(--line);border-radius:12px;box-shadow:var(--sh);width:290px;max-height:min(560px,80vh);overflow:auto;padding:6px}
+.addmenu .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--soft);padding:8px 8px 2px}
+.addmenu button{display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:8px;padding:7px 9px;cursor:pointer}
+.addmenu button:hover,.addmenu button:focus{background:var(--mint-l);outline:0}
+.addmenu button b{display:block;font-size:14px}.addmenu button small{color:var(--soft);font-size:12px}
+.addmenu .note{font-size:12px;color:var(--soft);padding:4px 9px 6px;border-bottom:1px dashed #2e2742}
+.panel{position:fixed;right:18px;top:80px;bottom:18px;width:400px;max-width:calc(100vw - 24px);z-index:8000;background:var(--card);border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 rgba(0,0,0,.45);display:flex;flex-direction:column}
+.panel .ph{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;border-bottom:2px solid var(--line)}
+.panel .ph h2{font-family:'Cinzel',Georgia,serif;font-weight:400;margin:0;font-size:21px}
+.panel .pb{padding:14px;overflow:auto;flex:1}
+.panel .pf{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-top:2px solid var(--line)}
+.panel .f select,.panel .f input:not([type=checkbox]):not([type=radio]){width:100%}
+.panel .row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.panel .row2 .num{width:80px}
+.panel .opt{padding:8px 10px}
+.rule{border:2px solid var(--line);border-radius:10px;background:var(--field);padding:8px 10px;margin-bottom:8px;position:relative}
+.rule .rx{position:absolute;right:6px;top:6px}
+.pathbox{border:2px solid #5b7fd6;border-radius:12px;background:var(--field);padding:10px;margin-bottom:10px}
+.tagbox{display:flex;flex-wrap:wrap;gap:4px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:6px;background:var(--field);min-height:44px}
+.tagbox .tg{display:inline-flex;align-items:center;gap:4px;background:#3a2a14;border:1.5px solid var(--line);border-radius:6px;padding:1px 4px 1px 7px;font-size:13px;font-weight:700}
+.tagbox .tg button{border:0;background:transparent;cursor:pointer;font-size:15px;line-height:1;padding:0 2px}
+.tagbox input{border:0;flex:1;min-width:120px;padding:4px;outline:0;background:transparent}
+.ctx{font-size:12px;color:#5b7fd6;font-weight:700}
+.problems{background:#2f2612;border:2px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0 0;font-size:14px;grid-column:1/-1}
+.problems ul{margin:4px 0 0;padding-left:20px}
+@media (max-width:700px){
+  .mapview{height:70vh;min-height:380px}
+  .panel{left:0;right:0;top:0;bottom:0;width:auto;max-width:none;border-radius:0;border-width:0}
+  .addmenu{left:8px!important;right:8px;width:auto;bottom:8px;top:auto!important;max-height:70vh}
+  .maphint{display:none}
+}
+
+@media (max-width:1100px){.split{grid-template-columns:1fr}.route{max-height:none}}
+@media (max-width:900px){#ed{scroll-margin-top:62px}.tools{top:58px}}
+@media (max-width:700px){.kg-host{padding:18px 14px 30px}.sq{padding:16px 12px 80px}h1{font-size:28px}.head{grid-template-columns:1fr}.nums{grid-template-columns:repeat(2,minmax(0,1fr))}.mail{padding:18px 16px}.paper{padding:8px}.pick{min-width:0;width:100%}.name{font-size:22px}}
+
+/* ---- Thread Weaver look (20 Oct 2026): dark page, gold accents; the email itself stays on white paper ---- */
+h1{color:var(--gold);font-weight:600}
+h2{color:var(--gold)}
+.btn.mint,.btn.yel,.state button.on[data-s=live],.state button.on[data-s=paused],.day.on,.stop.sel .dot,.plus:hover,.plus.on,.state2.live,.status,.chip.on{color:var(--on-accent)}
+.btn.mint,.btn.yel{border-color:transparent}
+.btn:hover{border-color:#6a5d8a}
+.kg-host,.mail,.pv-frame{background:#ffffff!important;color:#15212a}
+.kg-host .koenig-lexical{color:#15212a}
+.paper{background:#0b0812}
+dialog{color:var(--ink)}
+dialog::backdrop{background:rgba(5,3,9,.72)}
+input::placeholder,textarea::placeholder{color:#7d7891}
+select option{background:#1b1428;color:#e9e1f6}
+.inp,.sel2,.num,.pick{color:var(--ink)}
+.opt .hchk{display:inline-flex;align-items:center;gap:5px;margin:6px 10px 0 0;font-weight:700;white-space:nowrap}
+.opt .hchk input{width:18px;height:18px;accent-color:var(--gold)}
+.opt select.sel2,.opt input.inp{max-width:100%}
+.opt .oc{font-weight:400;color:var(--soft)}
+</style>
+</head>
+<body>
+<main class="sq">
+  <h1>Sequences</h1>
+  <p class="sub">How readers get in, what happens to them, and the emails they get from russell@wannabepress.com - your sequences and your automations, in one place. Nothing sends until you make a sequence Live.</p>
+  <div id="gate">Loading…</div>
+
+  <div id="app" hidden>
+    <div class="deck">
+      <label class="lab" for="pick" style="margin:0">Sequence</label>
+      <select id="pick" class="pick" aria-label="Which sequence"></select>
+      <button class="btn mint" id="newSeq" type="button">+ New sequence</button>
+    </div>
+
+    <div id="none" class="card empty" hidden>
+      <h2 id="noneH" style="font-family:'Cinzel',Georgia,serif;font-weight:400;margin:0">No sequences yet</h2>
+      <p id="noneP">Start one from scratch: add the ways readers get in, then the emails and steps they get.</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn mint" id="newSeq2" type="button">+ New sequence</button>
+      </div>
+    </div>
+
+    <section id="seq" hidden>
+      <div class="head">
+        <input id="sName" class="name" aria-label="Sequence name" maxlength="120">
+        <div class="state" role="radiogroup" aria-label="Is it sending?">
+          <button type="button" data-s="draft" role="radio">Draft</button>
+          <button type="button" data-s="live" role="radio">Live</button>
+          <button type="button" data-s="paused" role="radio">Paused</button>
+        </div>
+        <div class="headnote" id="headNote"></div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-t="map" class="on">Map <span class="count" id="tcSteps"></span></button>
+        <button type="button" role="tab" data-t="emails">Just the emails <span class="count" id="tcEmails"></span></button>
+        <button type="button" role="tab" data-t="people">Who's in <span class="count" id="tcPeople"></span></button>
+        <button type="button" role="tab" data-t="when">When emails send</button>
+      </div>
+
+      <!-- MAP -->
+      <div id="tMap">
+        <div class="mapbar">
+          <div class="zoom" role="group" aria-label="Zoom">
+            <button type="button" id="zOut" aria-label="Zoom out">−</button><span id="zPct">100%</span><button type="button" id="zIn" aria-label="Zoom in">+</button>
+          </div>
+          <button type="button" class="mini" id="zFit">Fit it all in</button><button type="button" class="mini" id="mapTrash" hidden>Taken out (0)</button>
+          <span class="maphint">Drag the background to move around. Click a step to change it, or a + to add one.</span>
+        </div>
+        <div class="mapview" id="mapView" tabindex="0" aria-label="The sequence map">
+          <div class="world" id="mapWorld"></div>
+        </div>
+      </div>
+
+      <!-- EMAILS -->
+      <div id="tEmails" hidden>
+        <p class="sub" style="margin-top:0">The same sequence with everything but the emails folded away. Emails on a branch say which one.</p>
+        <div class="split">
+          <div>
+            <div class="bulk" id="bulk" hidden><b id="bulkN"></b><button class="btn warn" id="bulkRm" type="button">Take them out</button><button class="mini" id="bulkAll" type="button">Pick all</button><button class="mini" id="bulkClear" type="button">Clear</button></div>
+            <ol class="route" id="route" aria-label="The emails in order"></ol>
+            <div class="addstop"><button class="btn ghost" id="addEmail" type="button">+ Add an email</button></div>
+            <details class="trash" id="trashBox" hidden><summary>Taken out (<span id="trashN">0</span>) - put any of them back</summary><ul id="trashList"></ul></details>
+          </div>
+          <div class="card ed" id="ed">
+            <div class="edtop">
+              <div><div class="stamp" id="eStamp">Email 1</div><div class="from">From Russell Nohelty &lt;russell@wannabepress.com&gt;</div></div>
+              <label class="sw"><input type="checkbox" id="ePub"><span class="tr" aria-hidden="true"></span><span id="ePubLab">Sends</span></label>
+            </div>
+            <div class="edbody">
+              <div class="livenote" id="liveNote" hidden>This sequence is live. What you change here is what goes to the next person this email reaches.</div>
+              <div class="f"><label for="eSubj">Subject line</label><input id="eSubj" class="inp" maxlength="250" autocomplete="off"></div>
+              <div class="f"><label for="ePrev">Preview line <span class="hint">- the grey words after the subject in the inbox</span></label><input id="ePrev" class="inp" maxlength="250" autocomplete="off"></div>
+              <div class="f">
+                <span class="lab">When it goes out</span>
+                <div class="timing">
+                  <span id="eWhenA">Goes out</span>
+                  <input type="number" id="eDelay" class="num" min="0" max="365" aria-label="How many">
+                  <select id="eUnit" class="sel2" aria-label="Days or hours"><option value="days">days</option><option value="hours">hours</option></select>
+                  <span id="eWhenB">after the one before</span>
+                </div>
+              </div>
+              <div class="warnbox" id="kitLinks" hidden></div>
+              <div class="mtbar"><span class="lab" style="margin:0">Add:</span>
+                <button type="button" class="mini" id="insFirst">Their first name</button>
+                <button type="button" class="mini" id="insLeave">"Stop these emails" link</button>
+                <span class="hint">For pictures, buttons, callouts, videos, files and more, press + or type / on an empty line.</span></div>
+              <div class="paper" id="paper"><div class="kg-host" id="kg"><div class="empty">Loading the editor…</div></div></div>
+              <div class="edfoot">
+                <span class="saved" id="saved" aria-live="polite"></span>
+                <div class="row">
+                  <button class="btn" id="ePreview" type="button">See it as an email</button>
+                  <button class="btn yel" id="eTest" type="button">Send me a test</button>
+                  <button class="btn warn" id="eRemove" type="button">Take this email out</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHO'S IN -->
+      <div id="tPeople" hidden>
+        <div class="nums">
+          <div class="n"><b id="nIn">0</b><span>in it now</span></div>
+          <div class="n"><b id="nDone">0</b><span>got every email</span></div>
+          <div class="n"><b id="nLeft">0</b><span>left this sequence</span></div>
+          <div class="n"><b id="nStop">0</b><span>stopped (unsubscribed or bounced)</span></div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div id="pNext" style="font-weight:700"></div>
+          <div id="pNotes" class="hint" style="color:var(--soft);font-size:14px;margin-top:4px"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <h2 style="font-family:'Cinzel',Georgia,serif;font-weight:400;margin:0 0 4px;font-size:22px">Put people in</h2>
+          <div style="color:var(--soft);font-size:14px">Nobody goes in until you press the button. People who left this sequence are never put back in.</div>
+          <div class="opts" id="opts">
+  <label class="opt"><input type="radio" name="who" value="engaged" checked><span><b>Readers who opened something lately</b><small>Everyone on your list who has opened an email recently.</small></span></label>
+  <label class="opt"><input type="radio" name="who" value="everyone"><span><b>Everyone on the list</b><small>Every subscribed reader.</small></span></label>
+  <label class="opt"><input type="radio" name="who" value="heat"><span style="flex:1"><b>Readers by heat</b><small>Hot, Warm, Cool and Cold, as on the Readers page. Tick the ones you want.</small><span id="pHeats" style="display:flex;flex-wrap:wrap"><label class="hchk"><input type="checkbox" data-h="Hot" checked>Hot<span class="hn" data-hn="Hot"></span></label><label class="hchk"><input type="checkbox" data-h="Warm" checked>Warm<span class="hn" data-hn="Warm"></span></label><label class="hchk"><input type="checkbox" data-h="Cool">Cool<span class="hn" data-hn="Cool"></span></label><label class="hchk"><input type="checkbox" data-h="Cold">Cold<span class="hn" data-hn="Cold"></span></label></span></span></label>
+  <label class="opt"><input type="radio" name="who" value="series"><span style="flex:1"><b>Readers of a Substack series</b><small>People who opened that series on Substack.</small><select id="pSeries" class="sel2" style="margin-top:6px;width:100%" aria-label="Which series"><option value="">Any series</option></select></span></label>
+  <label class="opt"><input type="radio" name="who" value="backer"><span style="flex:1"><b>Fiction backers</b><small>People who backed one of your campaigns - any of them, or the one you pick.</small><select id="pProject" class="sel2" style="margin-top:6px;width:100%" aria-label="Which campaign"><option value="">Any campaign</option></select></span></label>
+  <label class="opt"><input type="radio" name="who" value="bookfunnel"><span style="flex:1"><b>BookFunnel fiction readers</b><small>People who downloaded your fiction on BookFunnel - from any page, or the one you pick.</small><select id="pBfPage" class="sel2" style="margin-top:6px;width:100%" aria-label="Which BookFunnel page"><option value="">Any page</option></select></span></label>
+  <label class="opt"><input type="radio" name="who" value="joy"><span><b>Also on your Joy list</b><small>Readers who are on the Joy Looper list too.</small></span></label>
+  <label class="opt"><input type="radio" name="who" value="kit_tag"><span style="flex:1"><b>People with a Kit tag</b><small>From your old Kit list. Type part of a tag, or leave it empty for anyone who was in Kit.</small><input id="pKitTag" class="inp" style="margin-top:6px" placeholder="Any Kit tag" aria-label="Kit tag" autocomplete="off"></span></label>
+  <label class="opt"><input type="radio" name="who" value="app"><span><b>Thread Weaver app readers</b><small>People on your list who have a Thread Weaver account.</small></span></label>
+  <label class="opt"><input type="radio" name="who" value="tag"><span style="flex:1"><b>People with a tag</b><small>Anyone on your list who has any of these tags.</small><span class="tagbox" id="pTags" style="margin-top:6px"></span></span></label>
+  <label class="opt"><input type="radio" name="who" value="joined_since"><span><b>People who joined since a date</b><small><input type="date" id="since" class="sel2" style="margin-top:6px" aria-label="Joined since"></small></span></label>
+  <label class="opt"><input type="radio" name="who" value="paste"><span style="flex:1"><b>These email addresses</b><small>Paste them in - one a line, or separated by commas. Only people subscribed to your list can go in.</small><textarea id="paste" class="inp" rows="4" style="margin-top:6px" aria-label="Email addresses"></textarea></span></label>
+</div>
+          <button class="btn" id="pCheck" type="button" hidden>Count again</button>
+          <div class="ans" id="pAns" hidden></div>
+          <hr style="border:0;border-top:2px dashed #3a3150;margin:16px 0">
+          <div style="color:var(--soft);font-size:14px">People also come in by themselves through the ways in at the top of the <a href="#" id="toMap">Map</a> - joining your list, getting a tag, backing a campaign and more.</div>
+        </div>
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <h2 style="font-family:'Cinzel',Georgia,serif;font-weight:400;margin:0;font-size:22px">The people</h2>
+          <input id="pFind" class="inp" style="max-width:320px" placeholder="Find an email address" aria-label="Find an email address">
+        </div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Email</th><th>Where they are</th><th>How they got in</th><th></th></tr></thead><tbody id="pRows"></tbody></table></div>
+      </div>
+
+      <!-- WHEN IT SENDS -->
+      <div id="tWhen" hidden>
+        <div class="card">
+          <span class="lab">Days it sends</span>
+          <div class="days" id="days"></div>
+          <div class="f" style="margin-top:16px;max-width:360px">
+            <label for="hour">Time of day</label>
+            <select id="hour" class="sel2" style="width:100%"></select>
+          </div>
+          <p style="color:var(--soft);font-size:14px;margin:6px 0 0">An email that comes due on a day that is switched off waits for the next day that is on, and goes at this time. An email set a number of days after the one before goes at this time on that day; one set in hours goes that many hours later.</p>
+          <p id="tzNote" style="color:var(--soft);font-size:14px;margin:6px 0 0"></p>
+          <hr style="border:0;border-top:2px dashed #3a3150;margin:16px 0">
+          <button class="btn warn" id="archive" type="button">Put this sequence away</button>
+          <span style="color:var(--soft);font-size:14px;margin-left:8px">It stops sending and moves to the bottom of the list. Nothing is thrown away.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<dialog id="dPrev" aria-labelledby="dPrevH" style="max-width:min(820px,96vw)">
+  <div class="dh"><h2 id="dPrevH">How it will arrive</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db"><div class="pv-env" id="pvEnv"></div><iframe class="pv-frame" id="pvFrame" title="The email" sandbox=""></iframe></div>
+</dialog>
+<dialog id="dTest" aria-labelledby="dTestH">
+  <div class="dh"><h2 id="dTestH">Send me a test</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db">
+    <p style="margin-top:0">It goes to <b id="tMe"></b> now, from russell@wannabepress.com, exactly as people will get it - with "[Test]" in front of the subject.</p>
+    <div class="f"><label for="tMore">Anyone else? <span class="hint">- up to 4 more addresses, separated by commas</span></label><input id="tMore" class="inp" autocomplete="off"></div>
+    <div id="tOut"></div>
+  </div>
+  <div class="df"><button class="btn" type="button" data-close>Close</button><button class="btn yel" type="button" id="tSend">Send the test</button></div>
+</dialog>
+<dialog id="dAsk" aria-labelledby="dAskH">
+  <div class="dh"><h2 id="dAskH">Sure?</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db" id="askBody"></div>
+  <div class="df"><button class="btn" type="button" data-close>Not now</button><button class="btn mint" type="button" id="askYes">Yes</button></div>
+</dialog>
+<div class="addmenu" id="addMenu" hidden role="menu" aria-label="Add a step"></div>
+<aside class="panel" id="panel" hidden aria-label="This step"></aside>
+<datalist id="dlTags"></datalist><datalist id="dlFields"></datalist><datalist id="dlProducts"></datalist>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/lib/supabase.js"></script>
+<script src="/admin/tw-admin.js"></script>
+<script src="/admin/vendor/react.production.min.js"></script>
+<script src="/admin/vendor/react-dom.production.min.js"></script>
+<script>(function(){ /* the same jsx shim /admin/write uses: Koenig is built against React's jsx runtime; the UMD React only has createElement */
+  if(!window.React) return;
+  function jsx(t,p,k){ var q=Object.assign({},p); if(k!==undefined) q.key=k; return React.createElement(t,q); }
+  React.jsx=jsx; React.jsxs=jsx; })();</script>
+<script src="/admin/vendor/koenig-lexical.umd.js"></script>
+<script src="/admin/tw-email-html.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TZ='America/Los_Angeles';
+const DAYS=[[1,'Mon'],[2,'Tue'],[3,'Wed'],[4,'Thu'],[5,'Fri'],[6,'Sat'],[7,'Sun']];
+let sb, me='', LIST=[], META=null, SEQ=null, CUR=null, STATS={}, PEOPLE=null, TAB='map';
+let pend={}, saveT=null, saving=null;
+
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('on'),4200)}
+function msg(e){return String(e&&e.message||e||'That did not work').replace(/^.*?ERROR:\s*/,'')}
+async function rpc(f,a){const {data,error}=await sb.rpc(f,a||{});if(error)throw new Error(error.message);return data}
+async function fn(body){
+  const {data,error}=await sb.functions.invoke('nl-seq-send',{body});
+  if(error){let m=error.message;try{const j=await error.context.json();m=j.error||m}catch(_){}throw new Error(m)}
+  if(data&&data.ok===false)throw new Error(data.error||'That did not work');return data}
+function pt(d,withDay){if(!d)return'';try{const x=new Date(d);return x.toLocaleString('en-US',{timeZone:TZ,weekday:withDay?'short':undefined,month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).replace(':00','').replace(' AM',' am').replace(' PM',' pm')+' PT'}catch(_){return d}}
+function hourLabel(h){const a=h%12||12;return a+(h<12?' am':' pm')}
+function plural(n,w){n=+n||0;return n.toLocaleString()+' '+(n===1?w:(w==='person'?'people':w==='more'?'more':w==='address'?'addresses':w+'s'))}
+
+// Every change is kept against the email it was made on (pend[email id]), so moving to another email, another
+// sequence or another tab never puts one email's words into another.
+function mark(field,val){if(!CUR)return;CUR[field]=val;(pend[CUR.id]=pend[CUR.id]||{})[field]=val;$('#saved').textContent='Saving…';$('#saved').classList.remove('bad');clearTimeout(saveT);saveT=setTimeout(flush,800)}
+async function flush(){
+  clearTimeout(saveT);
+  if(KG_DIRTY||KG_RENDERING)await commitEditor();
+  if(saving)await saving;
+  const ids=Object.keys(pend);if(!ids.length)return;
+  const batch=pend;pend={};
+  saving=(async()=>{
+    for(const id of ids){
+      try{const r=await rpc('seq_email_save',{p:Object.assign({id},batch[id])});
+        const em=SEQ&&SEQ.emails.find(x=>x.id===id);if(em)em.updated_at=r.updated_at;
+        if(CUR&&CUR.id===id&&!pend[id]){$('#saved').textContent='Saved '+pt(r.updated_at);$('#saved').classList.remove('bad')}if(typeof afterSave==='function')afterSave(id)}
+      catch(e){pend[id]=Object.assign(batch[id],pend[id]||{});if(CUR&&CUR.id===id){$('#saved').textContent='Not saved - '+msg(e)+'. Trying again…';$('#saved').classList.add('bad')}
+        clearTimeout(saveT);saveT=setTimeout(flush,4000)}
+    }
+  })();
+  try{await saving}finally{saving=null}
+}
+window.addEventListener('beforeunload',e=>{if(KG_DIRTY||Object.keys(pend).length||saving){flush();e.preventDefault();e.returnValue=''}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
+$('#ePrev').addEventListener('input',e=>mark('preview_text',e.target.value));
+/* ---------- the editor: Ghost's own (Koenig), the one /admin/write uses ---------- */
+// 15 Oct 2026. Russell: "Does it have the ability to add all the elements that the open source host one does?"
+// It is the same editor as /admin/write now - @tryghost/koenig-lexical, every card Ghost has (pictures and uploads,
+// galleries, buttons, callouts, bookmarks, toggles, video, audio, files, dividers, HTML, snippets) - and the email is
+// made the same way the newsletter's is: Ghost's renderer (joy-ghost-html.js, target 'email') and the same inline
+// email styles (styleEmail, copied from joy-ghost-editor.js). What is saved: the editor's state (lexical) and that email
+// (body_html). Emails brought over from Kit open in it from their HTML; Kit's buttons and pictures become Ghost's.
+
+// Kit's Outlook-only copies, hidden trackers and style blocks are left out (seq_email.ts leaves them out of the sent
+// email too), and Kit's one big wrapper table is taken off.
+function tidy(html){
+  const d=new DOMParser().parseFromString('<div id="r">'+html+'</div>','text/html'), r=d.getElementById('r');
+  const walk=n=>{for(const c of [...n.childNodes]){if(c.nodeType===8){c.remove();continue}if(c.nodeType!==1)continue;
+    const t=c.tagName.toLowerCase();
+    if(['style','script','meta','title','link'].includes(t)){c.remove();continue}
+    if(t==='a'&&/display\s*:\s*none/i.test(c.getAttribute('style')||'')){const p=c.parentElement;c.remove();if(p&&p!==r&&!p.textContent.trim()&&!p.querySelector('img,table'))p.remove();continue}
+    if(c.getAttribute('class')!==null){const keep=(c.getAttribute('class')||'').split(/\s+/).filter(x=>x==='email-button'||/^kg-/.test(x));if(keep.length)c.setAttribute('class',keep.join(' '));else c.removeAttribute('class')}
+    c.removeAttribute('data-ck-element');
+    walk(c)}};
+  walk(r);
+  const onlyCell=t=>{const tds=t.querySelectorAll(':scope > tbody > tr > td, :scope > tr > td');return tds.length===1?tds[0]:null};
+  for(let k=0;k<3;k++){
+    const kids=[...r.children];
+    const tables=kids.filter(x=>x.tagName==='TABLE');
+    const rest=kids.filter(x=>x.tagName!=='TABLE'&&(x.textContent.trim()||x.querySelector('img')));
+    if(tables.length!==1||rest.length)break;
+    const td=onlyCell(tables[0]);if(!td)break;
+    const blocks=[...td.children].filter(x=>!/^(BR)$/.test(x.tagName));
+    if(blocks.length<2&&!td.querySelector('p'))break;
+    const frag=d.createDocumentFragment();[...td.childNodes].forEach(x=>frag.appendChild(x));
+    kids.forEach(x=>{if(x!==tables[0])x.remove()});tables[0].replaceWith(frag);
+  }
+  return r.innerHTML.trim();
+}
+// Kit's button tables and picture tables, as the Ghost cards the editor knows
+function kitToGhost(html){
+  const d=new DOMParser().parseFromString('<div id="r">'+tidy(html)+'</div>','text/html'), r=d.getElementById('r');
+  r.querySelectorAll('table').forEach(t=>{
+    if(!r.contains(t))return;
+    // 17 Oct 2026: our own email button (table.kg-button-card > table.btn > a), as sent, opens as a button too - it used to
+    // come in as an HTML card that lost its colour and showed as blank space
+    const btn=t.querySelector('a.email-button')||(t.classList.contains('kg-button-card')||t.classList.contains('btn')?t.querySelector('a[href]'):null);
+    if(btn&&!t.querySelector('p')){const div=d.createElement('div');div.className='kg-card kg-button-card kg-align-center';
+      const a=d.createElement('a');a.className='kg-btn kg-btn-accent';a.href=btn.getAttribute('href')||'#';a.textContent=btn.textContent.trim();div.appendChild(a);t.replaceWith(div);return}
+    const img=t.querySelector('img');
+    if(img&&!t.textContent.trim()){const fig=d.createElement('figure');fig.className='kg-card kg-image-card';const i=d.createElement('img');i.className='kg-image';i.src=img.getAttribute('src')||'';i.alt=img.getAttribute('alt')||'';
+      const link=img.closest('a');if(link){const a=d.createElement('a');a.href=link.getAttribute('href')||'';a.appendChild(i);fig.appendChild(a)}else fig.appendChild(i);t.replaceWith(fig);return}
+    const td=t.querySelectorAll('td');if(td.length===1){const f=d.createDocumentFragment();[...td[0].childNodes].forEach(x=>f.appendChild(x));t.replaceWith(f)}
+  });
+  return r.innerHTML;
+}
+
+let K=null, API=null, ROOT=null, KG_N=0, KG_FOR=null, KG_BOOTED=false, KG_DIRTY=false, KG_T=null, KG_RENDERING=null, SNIPPETS=[];
+const FILE_TYPES={
+  image:{mimeTypes:['image/gif','image/jpg','image/jpeg','image/png','image/svg+xml','image/webp'],extensions:['gif','jpg','jpeg','png','svg','svgz','webp']},
+  mediaThumbnail:{mimeTypes:['image/gif','image/jpg','image/jpeg','image/png','image/webp'],extensions:['gif','jpg','jpeg','png','webp']},
+  video:{mimeTypes:['video/mp4','video/webm','video/ogg'],extensions:['mp4','webm','ogv']},
+  audio:{mimeTypes:['audio/wav','audio/wave','audio/x-wav','audio/mp3','audio/mpeg','audio/ogg','audio/mp4','audio/x-m4a'],extensions:['wav','mp3','m4a','ogg']},
+  file:{mimeTypes:[],extensions:[]}
+};
+// Thread Weaver: every upload (pictures, video, audio, files) goes to the public Storage bucket "email-images";
+// only the two admin accounts can add to it. The email links to the file's public address.
+function uploadFile(f,type){
+  const bucket='email-images';
+  const dt=new Date(), safe=(f.name||'upload').replace(/[^a-zA-Z0-9._-]/g,'_').slice(-60);
+  const path='uploads/'+dt.getFullYear()+'/'+('0'+(dt.getMonth()+1)).slice(-2)+'/'+Math.random().toString(36).slice(2,10)+'-'+safe;
+  return sb.storage.from(bucket).upload(path,f,{contentType:f.type||'application/octet-stream',upsert:false}).then(r=>{
+    if(r.error)throw new Error(r.error.message||'the upload was refused');
+    return {url:sb.storage.from(bucket).getPublicUrl(path).data.publicUrl,fileName:f.name}});
+}
+function useFileUpload(type){
+  const [isLoading,setLoading]=React.useState(false),[progress,setProgress]=React.useState(0),[errors,setErrors]=React.useState([]),[filesNumber,setN]=React.useState(0);
+  const upload=React.useCallback(files=>{const list=[...(files||[])];setLoading(true);setErrors([]);setN(list.length);setProgress(0);let done=0;
+    return Promise.all(list.map(f=>uploadFile(f,type).then(r=>{done++;setProgress(Math.round(done/list.length*100));return r})))
+      .then(res=>{setLoading(false);return res}).catch(err=>{setLoading(false);setErrors([{message:String(err&&err.message||err)}]);toast('Upload failed: '+(err&&err.message||err));return null})},[type]);
+  return {isLoading,progress,errors,filesNumber,upload};
+}
+// Joy reads link previews with its own joy-embed function; Thread Weaver has none yet, so a bookmark or embed card
+// says so plainly instead of waiting. Paste the link as text, or use a button card.
+function fetchEmbed(url,options){
+  return Promise.reject(new Error('Link previews are not set up here yet - paste the link as text, or use a button card instead.'));
+}
+function loadSnippets(){rpc('joy_editor_snippets').then(d=>{SNIPPETS=arr(d);if(ROOT)renderKoenig()}).catch(()=>{})}
+function cardConfig(){
+  return {post:{displayName:'email',isPage:false,visibility:'public'},siteUrl:'https://thread.wannabepress.com',snippets:SNIPPETS,
+    createSnippet:snip=>{rpc('joy_editor_snippet_save',{p_name:snip.name,p_value:snip.value}).then(d=>{if(!d||!d.ok){toast('Snippet not saved');return}
+      SNIPPETS=SNIPPETS.filter(s=>s.name!==snip.name).concat([{name:snip.name,value:snip.value}]);renderKoenig();toast('Snippet "'+snip.name+'" saved')}).catch(e=>toast('Snippet not saved: '+msg(e)))},
+    deleteSnippet:async snip=>{if(!await ask('Delete snippet "'+esc(snip.name)+'"?','<p>It stops showing in the + and / menus. Emails that already use it keep their copy.</p>','Delete'))return;
+      rpc('joy_editor_snippet_retire',{p_name:snip.name}).then(()=>{SNIPPETS=SNIPPETS.filter(s=>s.name!==snip.name);renderKoenig();toast('Snippet deleted')}).catch(e=>toast(msg(e)))},
+    fetchEmbed,unsplash:null,klipy:null,pinturaConfig:null,visibilitySettings:'none',feature:{}};
+}
+let KG_STATE=null, KG_HTML=null, KG_Y=null;
+// 16 Oct 2026 - Russell's video: pick an email in the list and the page leapt thousands of pixels down into the email,
+// with the list gone off the top. Ghost's editor scrolls to where it puts the cursor while it loads an email brought over
+// from Kit, and the one scroll-back 0.8 s later lost the race on a real laptop. Now the page is held where it is while
+// the editor opens - until the person scrolls, clicks or types themselves, or 6 seconds pass.
+let PIN=null;const PIN_EV=['wheel','touchmove','keydown','mousedown'];
+function pinScroll(y,ms){unpin();const p={y:y};p.on=()=>{if(PIN===p&&Math.abs(window.scrollY-p.y)>2)window.scrollTo(0,p.y)};p.stop=()=>{if(PIN===p)unpin()};
+  window.addEventListener('scroll',p.on,{passive:true});PIN_EV.forEach(t=>window.addEventListener(t,p.stop,{capture:true,passive:true}));p.t=setTimeout(()=>{if(PIN===p)unpin()},ms||6000);PIN=p}
+function unpin(){const p=PIN;if(!p)return;PIN=null;clearTimeout(p.t);window.removeEventListener('scroll',p.on);PIN_EV.forEach(t=>window.removeEventListener(t,p.stop,{capture:true}))}
+function mountKoenig(email){
+  K=window['@tryghost/koenig-lexical'];
+  const host=$('#kg');
+  if(!K||!window.React||!window.ReactDOM||!window.JoyGhostHTML){host.innerHTML='<div class="empty">The editor did not load. Reload the page.</div>';return}
+  if(ROOT){try{ROOT.unmount()}catch(_){}ROOT=null}
+  host.innerHTML='';KG_N++;KG_FOR=email.id;KG_BOOTED=false;KG_DIRTY=false;API=null;KG_Y=null;pinScroll(window.scrollY,6000);
+  KG_STATE=email.lexical||null;KG_HTML=KG_STATE?null:kitToGhost(email.body_html||'');
+  ROOT=ReactDOM.createRoot(host);renderKoenig();
+}
+function renderKoenig(){
+  if(!ROOT)return;
+  const kids=[React.createElement(K.ExternalControlPlugin,{key:'api',registerAPI:a=>{API=a;if(!a)return;const n=KG_N;
+    // An email that has only HTML (brought over from Kit) is put into the editor the way Ghost takes pasted HTML,
+    // so its buttons and pictures become Ghost's cards. Then the page goes back to where it was.
+    setTimeout(()=>{if(n!==KG_N)return;
+      if(KG_HTML){pasteIntoEditor(KG_HTML,'');KG_HTML=null}
+      setTimeout(()=>{if(n!==KG_N)return;KG_BOOTED=true;try{a.blurEditor()}catch(_){}
+        if(PIN){window.scrollTo(0,PIN.y);const p=PIN;setTimeout(()=>{if(PIN===p)unpin()},1500)}
+        kitLinks()},500)},300)}})];
+  ROOT.render(React.createElement(K.KoenigComposer,{key:'kc'+KG_N,initialEditorState:KG_STATE?JSON.stringify(KG_STATE):undefined,
+      fileUploader:{useFileUpload,fileTypes:FILE_TYPES},cardConfig:cardConfig(),darkMode:false,onError:e=>console.error(e)},
+    React.createElement(K.KoenigEditor,{placeholderText:'Write your email…',onChange:()=>{if(!KG_BOOTED)return;KG_DIRTY=true;$('#saved').textContent='Saving…';$('#saved').classList.remove('bad');clearTimeout(KG_T);KG_T=setTimeout(commitEditor,900)}},...kids)));
+}
+// the editor's state and the email it makes, saved against the email it was written in
+async function commitEditor(){
+  clearTimeout(KG_T);
+  if(KG_RENDERING)await KG_RENDERING;
+  if(!KG_DIRTY||!API||!KG_FOR)return;
+  const id=KG_FOR;KG_DIRTY=false;
+  KG_RENDERING=(async()=>{
+    let lex=null,html='';
+    try{lex=JSON.parse(API.serialize())}catch(_){}
+    try{html=styleEmail(await window.JoyGhostHTML.render(API.editorInstance,{target:'email'}))}catch(e){console.error(e);KG_DIRTY=true;return}
+    const em=SEQ&&SEQ.emails.find(x=>x.id===id);if(em){em.lexical=lex;em.body_html=html}
+    (pend[id]=pend[id]||{}).body_html=html;if(lex)pend[id].lexical=lex;
+    clearTimeout(saveT);saveT=setTimeout(flush,300);kitLinks();
+  })();
+  try{await KG_RENDERING}finally{KG_RENDERING=null}
+}
+// "Their first name" and "Stop these emails": pasted into the editor where the cursor is, the way any paste goes in
+function pasteIntoEditor(html,text){
+  if(!API){toast('The editor is still loading');return}
+  const root=API.editorInstance.getRootElement();if(!root)return;
+  root.focus();
+  const dt=new DataTransfer();if(html)dt.setData('text/html',html);dt.setData('text/plain',text||'');
+  root.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+}
+$('#insFirst').addEventListener('mousedown',e=>e.preventDefault());$('#insLeave').addEventListener('mousedown',e=>e.preventDefault());
+$('#insFirst').addEventListener('click',()=>pasteIntoEditor(null,'{{ subscriber.first_name }}'));
+$('#insLeave').addEventListener('click',()=>pasteIntoEditor('<a href="%%SEQ_LEAVE_URL%%">Stop these emails</a>','Stop these emails'));
+
+// Links that only mean something inside Kit (they change Kit tags) do nothing when the email comes from here.
+// Kit's footer puts the same links in every email, so a choice made once is made for that link in every email of
+// this sequence (matched by the words around it, not by the address, which is the same for all of them).
+const KIT_RE=/preferencechange|\{\{|convertkit\.com|kit\.com\/(?:unsubscribe|subscribers)/i;
+const norm=s=>String(s||'').replace(/\s+/g,' ').trim();
+function lexText(n){if(!n)return '';if(typeof n.text==='string')return n.text;return (n.children||[]).map(lexText).join('')}
+function lexLinks(state){const out=[];const seen={};
+  const walk=(n,top,parent)=>{if(!n)return;if((n.type==='link'||n.type==='autolink')&&KIT_RE.test(n.url||'')){const t=norm(lexText(n)),p=norm(lexText(top));const k=t+'|'+p;seen[k]=(seen[k]||0)+1;out.push({node:n,parent,text:t,para:p,key:k+'|'+seen[k]})}
+    (n.children||[]).forEach(c=>walk(c,top||n,n))};
+  ((state&&state.root&&state.root.children)||[]).forEach(b=>walk(b,b,state.root));return out}
+function domLinks(r){const out=[];const seen={};
+  r.querySelectorAll('a').forEach(a=>{const h=a.getAttribute('href')||'';if(!(a.hasAttribute('trigger-id')||KIT_RE.test(h)))return;
+    let blk=a;while(blk.parentElement&&blk.parentElement!==r)blk=blk.parentElement;const t=norm(a.textContent),p=norm(blk?blk.textContent:'');const k=t+'|'+p;seen[k]=(seen[k]||0)+1;out.push({a,text:t,para:p,key:k+'|'+seen[k]})});return out}
+function applyLex(l,to){if(to==='plain'){const i=l.parent.children.indexOf(l.node);if(i>=0)l.parent.children.splice(i,1,...(l.node.children||[]))}else l.node.url=to==='leave'?'%%SEQ_LEAVE_URL%%':'%%UNSUB_URL%%'}
+function applyDom(l,to,d){if(to==='plain')l.a.replaceWith(d.createTextNode(l.a.textContent));else{l.a.setAttribute('href',to==='leave'?'%%SEQ_LEAVE_URL%%':'%%UNSUB_URL%%');l.a.removeAttribute('trigger-id');l.a.removeAttribute('target')}}
+function kitLinks(){
+  const box=$('#kitLinks');if(!CUR||!API){box.hidden=true;return}
+  let state=null;try{state=JSON.parse(API.serialize())}catch(_){}
+  const bad=lexLinks(state);
+  if(!bad.length){box.hidden=true;box.innerHTML='';return}
+  box.hidden=false;
+  const ctx=l=>{let t=l.para;if(t.length>110){const i=t.indexOf(l.text);t=(i>60?'…'+t.slice(i-50,i+60):t.slice(0,110))+'…'}return t};
+  box.innerHTML='<b>'+(bad.length===1?'One link here only works':bad.length+' links here only work')+' inside Kit</b> - they change your Kit tags, so from your own sender they would do nothing. Pick what each should do; the same link in the other emails of this sequence changes too.'+
+    bad.map((l,i)=>'<div class="lk"><span style="flex:1;min-width:220px">"<b>'+esc(l.text.slice(0,40)||'(no words)')+'</b>" in: '+esc(ctx(l))+'</span>'+
+      '<select class="sel2" data-kl="'+i+'" aria-label="What this link should do"><option value="">What should it do?</option><option value="leave">Take them out of this sequence</option><option value="unsub">Unsubscribe them from everything</option><option value="plain">Nothing - just words, no link</option></select></div>').join('');
+  box.onchange=async ev=>{const sel=ev.target.closest('[data-kl]');if(!sel||!sel.value)return;const l=bad[+sel.dataset.kl];if(!l)return;
+    const key=l.key, to=sel.value;
+    await commitEditor();
+    applyLex(l,to);
+    // this email: the editor opens again on the changed state, and its email is made again from it
+    const cur=CUR;cur.lexical=state;KG_STATE=state;KG_HTML=null;mountKoenig(cur);
+    setTimeout(()=>{KG_DIRTY=true;commitEditor()},900);
+    let n=0;
+    for(const em of SEQ.emails){if(em.id===cur.id)continue;
+      if(em.lexical){const ls=lexLinks(em.lexical).filter(x=>x.key===key);if(!ls.length)continue;ls.forEach(x=>applyLex(x,to));(pend[em.id]=pend[em.id]||{}).lexical=em.lexical;
+        // its email is made again the next time it is opened; until then the stored email gets the same change
+        if(em.body_html){const d=new DOMParser().parseFromString('<div id="r">'+em.body_html+'</div>','text/html'),r=d.getElementById('r');domLinks(r).filter(x=>x.key===key).forEach(x=>applyDom(x,to,d));em.body_html=r.innerHTML;pend[em.id].body_html=em.body_html}
+        n++;continue}
+      if(!em.body_html)continue;
+      const d=new DOMParser().parseFromString('<div id="r">'+em.body_html+'</div>','text/html'),r=d.getElementById('r');
+      const hits=domLinks(r).filter(x=>x.key===key);if(!hits.length)continue;
+      hits.forEach(x=>applyDom(x,to,d));em.body_html=r.innerHTML;(pend[em.id]=pend[em.id]||{}).body_html=em.body_html;n++}
+    toast(n?'Changed here and in '+plural(n,'other email'):'Link changed');await flush()};
+}
+
+/* the email's look - copied from joy-ghost-editor.js (/admin/write), so a sequence email looks like a newsletter */
+  /* ---------- the email's look ------------------------------------------------------------
+   * The renderer makes Ghost's email markup, which leans on Ghost's email style sheet. Mail
+   * programs throw style sheets away, and Kit's "Text only" template knows none of these
+   * classes, so each rule is written onto the tags themselves. A card's own inline style wins. */
+  var EMAIL_RULES = [
+    ['p', 'margin:0 0 1.5em;line-height:1.6'],
+    ['h2', 'margin:1.6em 0 .6em;font-size:26px;line-height:1.25;font-weight:700'],
+    ['h3', 'margin:1.5em 0 .5em;font-size:21px;line-height:1.3;font-weight:700'],
+    ['h4', 'margin:1.4em 0 .5em;font-size:18px;line-height:1.35;font-weight:700'],
+    ['h5, h6', 'margin:1.4em 0 .5em;font-size:16px;line-height:1.4;font-weight:700'],
+    ['ul, ol', 'margin:0 0 1.5em;padding-left:1.4em'],
+    ['li', 'margin:0 0 .5em;line-height:1.6'],
+    ['li > ul, li > ol', 'margin:.5em 0 0'],
+    ['blockquote', 'margin:0 0 1.5em;padding:0 0 0 20px;border-left:3px solid #15212a;font-style:italic'],
+    ['blockquote p', 'margin:0 0 .8em'],
+    ['blockquote.kg-blockquote-alt', 'border-left:0;padding:0 24px;text-align:center;font-size:1.2em;color:#5d6b76'],
+    ['code', 'font-family:Menlo,Consolas,monospace;font-size:.9em;background:#f1f3f4;padding:1px 4px;border-radius:3px'],
+    ['pre', 'margin:0 0 1.5em;padding:14px 16px;background:#15212a;color:#ffffff;border-radius:4px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.5'],
+    ['pre code', 'background:transparent;padding:0;color:#ffffff;font-size:14px'],
+    ['img', 'max-width:100%;height:auto;border:0'],
+    ['figure', 'margin:0 0 1.6em;padding:0'],
+    ['figure img', 'display:block;margin:0 auto'],
+    ['figcaption', 'padding-top:6px;text-align:center;font-size:13px;line-height:1.45;color:#738a94'],
+    ['.kg-gallery-image img', 'display:block;width:100%;height:auto;margin:0 0 8px'],
+    // divider
+    ['table.kg-hr-card', 'width:100%;margin:0 0 1.6em'],
+    ['table.kg-hr', 'width:100%'],
+    ['table.kg-hr td', 'border-top:1px solid #e0e7eb;font-size:1px;line-height:1px;height:1px'],
+    // callout
+    ['.kg-callout-card', 'margin:0 0 1.6em;padding:18px 24px;border-radius:4px;background:#f1f3f4'],
+    ['.kg-callout-card-white', 'background:#ffffff;border:1px solid #e0e7eb'],
+    ['.kg-callout-card-blue', 'background:#e9f6fb'],
+    ['.kg-callout-card-green', 'background:#e8f8ea'],
+    ['.kg-callout-card-yellow', 'background:#fcf4e3'],
+    ['.kg-callout-card-red', 'background:#fbe9e9'],
+    ['.kg-callout-card-pink', 'background:#fcf0f8'],
+    ['.kg-callout-card-purple', 'background:#f4f1fb'],
+    ['.kg-callout-card-accent', 'background:#15212a;color:#ffffff'],
+    ['.kg-callout-emoji', 'font-size:22px;line-height:1.3;padding-bottom:6px'],
+    ['.kg-callout-text', 'line-height:1.6'],
+    // toggle (email shows it opened)
+    ['table.kg-toggle-card', 'margin:0 0 1.6em;border:1px solid #e0e7eb;border-radius:4px'],
+    ['td.kg-toggle-heading', 'padding:16px 20px 4px'],
+    ['td.kg-toggle-heading h4', 'margin:0;font-size:18px'],
+    ['td.kg-toggle-content', 'padding:4px 20px 16px'],
+    ['td.kg-toggle-content p', 'margin:0 0 .8em'],
+    // buttons (button card, product, header, call to action)
+    ['table.kg-button-card', 'width:100%'],
+    ['td.kg-card-spacing', 'padding:0 0 1.6em'],
+    ['table.btn', 'margin:0 auto'],
+    ['table.btn td', 'background:#15212a;border-radius:6px;text-align:center'],
+    ['table.btn a', 'display:inline-block;padding:12px 24px;font-size:16px;font-weight:600;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:6px'],
+    // bookmark
+    ['figure.kg-bookmark-card', 'margin:0 0 1.6em'],
+    ['a.kg-bookmark-container', 'display:block;border:1px solid #e0e7eb;border-radius:4px;color:#15212a;text-decoration:none;overflow:hidden'],
+    ['.kg-bookmark-content', 'padding:18px 20px'],
+    ['.kg-bookmark-title', 'font-size:16px;line-height:1.4;font-weight:600;color:#15212a'],
+    ['.kg-bookmark-description', 'margin-top:8px;font-size:14px;line-height:1.5;color:#738a94;max-height:42px;overflow:hidden'],
+    ['.kg-bookmark-metadata', 'margin-top:12px;font-size:13px;line-height:1.4;color:#15212a'],
+    ['img.kg-bookmark-icon', 'display:inline-block;width:20px;height:20px;margin:0 8px 0 0;vertical-align:middle'],
+    ['.kg-bookmark-author, .kg-bookmark-publisher', 'vertical-align:middle'],
+    ['.kg-bookmark-publisher', 'color:#738a94'],
+    ['.kg-bookmark-thumbnail', 'display:block;background-size:cover;background-position:center'],
+    ['.kg-bookmark-thumbnail img', 'display:block;width:100%;height:auto;max-height:260px;margin:0'],
+    // file
+    ['table.kg-file-card', 'margin:0 0 1.6em;border:1px solid #e0e7eb;border-radius:4px'],
+    ['table.kg-file-card > tbody > tr > td', 'padding:12px 16px'],
+    ['a.kg-file-title', 'font-size:16px;font-weight:700;line-height:1.4;color:#15212a;text-decoration:none'],
+    ['a.kg-file-description', 'font-size:14px;line-height:1.4;color:#738a94;text-decoration:none'],
+    ['a.kg-file-meta', 'font-size:13px;line-height:1.6;color:#738a94;text-decoration:none'],
+    ['td.kg-file-thumbnail', 'text-align:center'],
+    // audio
+    ['table.kg-audio-card', 'width:100%;margin:0 0 1.6em;border:1px solid #e0e7eb;border-radius:4px'],
+    ['img.kg-audio-thumbnail', 'background:#15212a'],
+    ['a.kg-audio-title', 'font-size:17px;font-weight:600;line-height:1.4;color:#15212a;text-decoration:none'],
+    ['a.kg-audio-play-button', 'display:block;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #15212a'],
+    ['a.kg-audio-duration', 'font-size:13px;line-height:1.6;color:#738a94;text-decoration:none'],
+    ['.kg-audio-link', 'color:#738a94'],
+    // video
+    ['figure.kg-video-card', 'margin:0 0 1.6em'],
+    ['a.kg-video-preview', 'display:block;text-decoration:none;border-radius:4px;overflow:hidden'],
+    ['.kg-video-play-button', 'display:block;width:64px;height:64px;margin:0 auto;border-radius:50%;background:rgba(0,0,0,.55)'],
+    ['.kg-video-play-button div', 'width:0;height:0;margin:0 auto;position:relative;top:18px;left:3px;border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:22px solid #ffffff'],
+    // product
+    ['table.kg-product-card', 'width:100%;margin:0 0 1.6em'],
+    ['td.kg-product-card-container', 'padding:20px;border:1px solid #e0e7eb;border-radius:6px'],
+    ['td.kg-product-image img', 'display:block;width:100%;height:auto;border-radius:4px'],
+    ['h4.kg-product-title', 'margin:16px 0 4px;font-size:22px'],
+    ['tr.kg-product-rating img', 'display:block;width:96px;height:auto;margin:4px 0 8px'],
+    ['td.kg-product-description-wrapper p', 'margin:0 0 1em'],
+    ['td.kg-product-button-wrapper table.btn', 'width:100%'],
+    // header
+    ['.kg-header-card', 'margin:0 0 1.6em;border-radius:6px;overflow:hidden'],
+    ['td.kg-header-card-content', 'padding:44px 28px'],
+    ['h2.kg-header-card-heading', 'margin:0;font-size:32px;line-height:1.15'],
+    ['p.kg-header-card-subheading', 'margin:14px 0 0;font-size:17px;line-height:1.5'],
+    ['td.kg-header-button-wrapper', 'padding-top:24px'],
+    // call to action
+    ['table.kg-cta-card', 'margin:0 0 1.6em;border:1px solid #e0e7eb;border-radius:6px'],
+    ['table.kg-cta-bg-grey', 'background:#f1f3f4;border-color:#f1f3f4'],
+    ['table.kg-cta-bg-blue', 'background:#e9f6fb;border-color:#e9f6fb'],
+    ['table.kg-cta-bg-green', 'background:#e8f8ea;border-color:#e8f8ea'],
+    ['table.kg-cta-bg-yellow', 'background:#fcf4e3;border-color:#fcf4e3'],
+    ['table.kg-cta-bg-red', 'background:#fbe9e9;border-color:#fbe9e9'],
+    ['table.kg-cta-bg-pink', 'background:#fcf0f8;border-color:#fcf0f8'],
+    ['table.kg-cta-bg-purple', 'background:#f4f1fb;border-color:#f4f1fb'],
+    ['td.kg-cta-sponsor-label', 'padding:10px 20px;border-bottom:1px solid rgba(0,0,0,.08)'],
+    ['td.kg-cta-sponsor-label p', 'margin:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#738a94'],
+    ['td.kg-cta-content', 'padding:20px'],
+    ['td.kg-cta-text p', 'margin:0 0 14px'],
+    ['td.kg-cta-button-container table.btn', 'margin:0']
+  ];
+  function styleEmail(html) {
+    var doc = new DOMParser().parseFromString('<div id="ge-mail">' + (html || '') + '</div>', 'text/html');
+    var root = doc.getElementById('ge-mail');
+    if (!root) return html;
+    // Things no mail program runs, or that Kit would refuse.
+    root.querySelectorAll('script, style, link').forEach(function (n) { n.remove(); });
+    root.querySelectorAll('*').forEach(function (n) {
+      Array.prototype.slice.call(n.attributes).forEach(function (a) {
+        if (/^on/i.test(a.name) || a.name === 'loading' || a.name === 'srcset' || a.name === 'sizes') n.removeAttribute(a.name);
+      });
+    });
+    // An embedded player cannot play in an email: a YouTube video becomes its picture, linked;
+    // anything else becomes a plain link to it.
+    root.querySelectorAll('iframe').forEach(function (f) {
+      var src = f.getAttribute('src') || '';
+      var yt = src.match(/youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]{6,})/);
+      var box = doc.createElement('p');
+      if (yt) {
+        box.innerHTML = '<a href="https://www.youtube.com/watch?v=' + yt[1] + '"><img src="https://img.youtube.com/vi/' + yt[1] + '/hqdefault.jpg" alt="Watch the video" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;margin:0 auto"></a>';
+      } else if (/^https?:\/\//.test(src)) {
+        var host = ''; try { host = new URL(src).hostname.replace(/^www\./, ''); } catch (e) {}
+        var a = doc.createElement('a'); a.href = src; a.textContent = 'Open it' + (host ? ' on ' + host : '');
+        box.appendChild(a);
+      }
+      f.replaceWith(box);
+    });
+    // The signup card is web-only; in email Ghost leaves an empty box behind.
+    root.querySelectorAll('div').forEach(function (n) { if (!n.children.length && !n.textContent.trim() && !n.getAttribute('style')) n.remove(); });
+    var styles = new Map();
+    EMAIL_RULES.forEach(function (r) {
+      root.querySelectorAll(r[0]).forEach(function (n) { styles.set(n, (styles.get(n) || '') + r[1] + ';'); });
+    });
+    styles.forEach(function (s, n) {
+      var own = n.getAttribute('style');
+      n.setAttribute('style', s + (own ? own : ''));
+    });
+    return root.innerHTML;
+  }
+
+
+/* ---------- preview and test ---------- */
+$('#ePreview').addEventListener('click',async()=>{
+  if(!CUR)return;await flush();const b=$('#ePreview');b.disabled=true;b.textContent='Making it…';
+  try{const r=await fn({action:'preview',email_id:CUR.id});
+    $('#pvEnv').innerHTML='<div><b>'+esc(r.subject)+'</b></div><div style="color:#9b91ac">'+esc(r.preview_text)+'</div><div style="font-size:13px;margin-top:4px">From '+esc(r.from.name)+' &lt;'+esc(r.from.email)+'&gt;</div>';
+    $('#pvFrame').srcdoc=r.html;$('#dPrev').showModal()}
+  catch(e){toast(msg(e))}finally{b.disabled=false;b.textContent='See it as an email'}
+});
+$('#eTest').addEventListener('click',async()=>{if(!CUR)return;await flush();$('#tOut').innerHTML='';$('#dTest').showModal()});
+$('#tSend').addEventListener('click',async()=>{
+  const b=$('#tSend');b.disabled=true;b.textContent='Sending…';$('#tOut').innerHTML='';
+  try{const to=$('#tMore').value.split(/[\s,;]+/).filter(x=>x.includes('@')).slice(0,4);
+    const r=await fn({action:'test',email_id:CUR.id,to});
+    $('#tOut').innerHTML=r.results.map(x=>'<div>'+(x.ok?'✔ Sent to ':'✘ Did not go to ')+esc(x.to)+(x.error?' - '+esc(x.error):'')+'</div>').join('');toast('Test sent')}
+  catch(e){$('#tOut').innerHTML='<div class="saved bad">'+esc(msg(e))+'</div>'}finally{b.disabled=false;b.textContent='Send the test'}
+});
+/* ---------- small things ---------- */
+$$('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
+function ask(title,html,yes){return new Promise(res=>{const d=$('#dAsk');$('#dAskH').textContent=title.replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');$('#askBody').innerHTML=html;$('#askYes').textContent=yes||'Yes';
+  let v=false;$('#askYes').onclick=()=>{v=true;d.close()};d.onclose=()=>{$('#askYes').onclick=null;res(v)};d.showModal();setTimeout(()=>$('#askYes').focus(),30)})}
+/* ===================== /admin/sequences: the map, the emails, who's in, when ===================== */
+// 15 Oct 2026. Russell: "I want the automations to merge with the sequences" / "a tab where you can create it visually
+// and see it, and then also a way to collapse it to just the sequence. Otherwise, it will get impossible to see."
+// Map: how people get in, then every step, with Yes/No and multiple branches, zoom and drag to move around.
+// Just the emails: the same sequence with everything but the emails folded away, and Ghost's editor.
+const ENDS=['exit','move','goto','unsubscribe'];
+const KIND_WORD={email:'Email',wait:'Time delay',tag_add:'Action',tag_remove:'Action',field_set:'Action',sequence:'Action',move:'Action',goto:'Go to',unsubscribe:'Action',exit:'Exit',condition:'Yes/No branch',event:'Wait for something'};
+let SEL=null, Z=1, PX=0, PY=0, MAP_FIT=false, ROUTE=[], TICK=new Set(), TRASH=[];
+function setQS(){const u=new URL(location.href);if(SEQ)u.searchParams.set('s',SEQ.id);else u.searchParams.delete('s');
+  if(CUR&&TAB==='emails')u.searchParams.set('e',CUR.id);else u.searchParams.delete('e');if(TAB!=='map')u.searchParams.set('t',TAB);else u.searchParams.delete('t');history.replaceState(null,'',u)}
+function arr(v){return Array.isArray(v)?v:[]}
+function fmtDate(d){if(!d)return'';try{return new Date(d).toLocaleString('en-US',{timeZone:TZ,month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).replace(':00','').replace(' AM',' am').replace(' PM',' pm')+' PT'}catch(_){return d}}
+function chips(t){return arr(t).map(x=>'<span class="tagc">'+esc(x)+'</span>').join('')}
+function seqName(id){return (LIST.find(x=>x.id===id)||{}).name||''}
+
+/* ---------- start ---------- */
+TWAdmin.ready(async(client,session)=>{
+  sb=client;me=(session&&session.user&&session.user.email)||'';
+  try{LIST=await rpc('seq_list')}catch(e){$('#gate').textContent='Could not load your sequences - '+msg(e)+'.';return}
+  loadMeta();loadSnippets();
+  $('#gate').hidden=true;$('#app').hidden=false;
+  buildStatic();
+  const q=new URLSearchParams(location.search);
+  const want=q.get('s'), wantE=q.get('e'), wantT=q.get('t');
+  fillPick();
+  const mine=LIST.filter(s=>s.kind!=='oneoff');
+  const first=(want&&mine.find(s=>s.id===want))||mine.find(s=>s.status!=='archived');
+  if(first)await open(first.id,wantE,wantT||(wantE?'emails':'map'));else showNone();
+});
+async function loadMeta(){try{META=await rpc('seq_meta')||{}}catch(_){META={}}
+  ['tags','fields','sequences','heats','series','projects','bookfunnel_pages'].forEach(k=>{META[k]=arr(META[k])});
+  const dl=(id,a)=>{$('#'+id).innerHTML=arr(a).slice(0,1500).map(x=>'<option value="'+esc(x)+'">').join('')};
+  dl('dlTags',META.tags.map(t=>t&&t.tag!=null?t.tag:t));dl('dlFields',META.fields.map(f=>f&&f.key!=null?f.key:f));dl('dlProducts',metaList(META.projects,['project','name','value']).map(x=>x.v));
+  fillAudience(META);
+  if(SEQ)renderMap()}
+function buildStatic(){
+  $('#days').innerHTML=DAYS.map(([n,l])=>'<button type="button" class="day" data-d="'+n+'" aria-pressed="false">'+l+'</button>').join('');
+  $('#hour').innerHTML=Array.from({length:24},(_,h)=>'<option value="'+h+'">'+hourLabel(h)+'</option>').join('');
+  $('#since').value=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  $('#tMe').textContent=me||'your address';
+  tagBox($('#pTags'),[],()=>{$('#opts input[value=tag]').checked=true;$('#opts').dispatchEvent(new Event('change'))});
+}
+// One list: the sequences that are open, then the ones put away.
+function fillPick(){
+  const mine=LIST.filter(s=>s.kind!=='oneoff'), live=mine.filter(s=>s.status!=='archived'), arch=mine.filter(s=>s.status==='archived');
+  const o=s=>'<option value="'+s.id+'">'+esc(s.name)+' - '+({draft:'Draft',live:'Live',paused:'Paused',archived:'Put away'}[s.status])+', '+plural(s.steps||s.emails,'step')+'</option>';
+  $('#pick').innerHTML=(live.length?'<optgroup label="Your sequences">'+live.map(o).join('')+'</optgroup>':'')+
+    (arch.length?'<optgroup label="Put away">'+arch.map(o).join('')+'</optgroup>':'');
+  if(!SEQ)$('#pick').insertAdjacentHTML('afterbegin','<option value="" disabled selected>'+(mine.length?'Pick a sequence…':'No sequences yet')+'</option>');
+  if(SEQ)$('#pick').value=SEQ.id;
+}
+function showNone(){
+  const any=LIST.some(s=>s.kind!=='oneoff');
+  $('#noneH').textContent=any?'Pick a sequence':'No sequences yet';
+  $('#noneP').textContent=any?'Your sequences are in the list above - pick one to open its map. Or start a new one.':'Start one from scratch: add the ways readers get in, then the emails and steps they get.';
+  $('#none').hidden=false;$('#seq').hidden=true;SEQ=null;CUR=null;$('#pick').value='';setQS()}
+async function refreshList(){try{LIST=await rpc('seq_list');fillPick()}catch(_){}}
+
+/* ---------- the tree ---------- */
+function lane(parent,branch){return SEQ.steps.filter(s=>(s.parent_id||null)===(parent||null)&&(s.branch||null)===(branch||null)).sort((a,b)=>a.position-b.position||String(a.created_at).localeCompare(String(b.created_at)))}
+function rootLanes(){const ks=[null];SEQ.steps.forEach(s=>{if(!s.parent_id&&s.branch&&!ks.includes(s.branch))ks.push(s.branch)});arr(SEQ.entries).forEach(e=>{if(e.lane&&!ks.includes(e.lane))ks.push(e.lane)});return ks}
+// a path of a multiple branch is known by .path (older ones by .key); its own .key is free for a field test's field
+const pathId=p=>p&&(p.path||p.key);
+function branchKeys(c){if(c.config&&c.config.mode==='multi')return arr(c.config.paths).map(pathId).concat(['no']);return ['yes','no']}
+function branchLabel(c,k){if(c.config&&c.config.mode==='multi'){if(k==='no')return 'Everyone else';const p=arr(c.config.paths).find(x=>pathId(x)===k);return p?(p.label||testWords(p)):k}return k==='yes'?'Yes':'No'}
+function stepById(id){return SEQ.steps.find(s=>s.id===id)}
+// the emails in map order, each with the branch it sits on
+function emailsInOrder(){const out=[];ROUTE=[];
+  const walk=(parent,branch,ctx)=>{lane(parent,branch).forEach(s=>{if(s.kind==='email'){s._ctx=ctx;out.push(s);ROUTE.push(s)}
+    if(s.kind==='sequence'&&(s.config||{}).sequence_id){s._ctx=ctx;ROUTE.push(s)}
+    if(s.kind==='condition')branchKeys(s).forEach(k=>walk(s.id,k,(ctx?ctx+' › ':'')+branchLabel(s,k)+': '+condShort(s)))})};
+  rootLanes().forEach(k=>walk(null,k,k?entryLaneLabel(k):''));return out}
+function condShort(c){const t=c.config&&c.config.mode==='multi'?'which path fits':testWords(c.config||{});return t.length>60?t.slice(0,58)+'…':t}
+function entryLaneLabel(k){const e=arr(SEQ.entries).find(x=>x.lane===k);return e?entryWords(e):'another way in'}
+
+/* ---------- words for each thing ---------- */
+function testWords(t){t=t||{};
+  switch(t.test){
+    case 'tag':return ({all:'Has all of these tags',none:'Has none of these tags'}[t.match]||'Has any of these tags')+(arr(t.tags).length?': '+arr(t.tags).join(', '):'');
+    case 'field':return 'Their '+(t.key||'(field)')+' '+({is:'is "'+(t.value||'')+'"',is_not:'is not "'+(t.value||'')+'"',contains:'contains "'+(t.value||'')+'"',set:'has any value',empty:'is empty'}[t.op||'is']);
+    case 'opened':return t.step_id?'Opened the email "'+((stepById(t.step_id)||{}).subject||'?')+'"':'Opened any of your emails in the last '+(t.within_days||30)+' days';
+    case 'clicked':return (t.step_id?'Clicked in the email "'+((stepById(t.step_id)||{}).subject||'?')+'"':'Clicked any of your emails in the last '+(t.within_days||30)+' days')+(t.url_contains?' (a link with "'+t.url_contains+'")':'');
+    case 'bought':return 'Backed '+(t.product?'"'+t.product+'"':'a fiction campaign')+(t.within_days?' in the last '+t.within_days+' days':'');
+    case 'in_sequence':return ({done:'Finished',in:'Is in',ever:'Has been in'}[t.state||'ever'])+' "'+seqName(t.sequence_id)+'"';
+    case 'filter':return arr(t.rules).length?arr(t.rules).map(ruleWords).join(' and '):'Matches these filters (none set yet)';
+    default:return 'Nothing to check yet';
+  }}
+function ruleWords(r){switch(r.rule){
+  case 'joined_before':return 'joined before '+String(r.date||'').slice(0,10);case 'joined_after':return 'joined after '+String(r.date||'').slice(0,10);
+  case 'tags_any':return 'has any of '+arr(r.tags).join(', ');case 'tags_none':return 'has none of '+arr(r.tags).join(', ');
+  case 'cold':return 'opened nothing in '+(r.days||90)+' days';case 'not_cold':return 'opened something in the last '+(r.days||90)+' days';
+  case 'stars_at_least':return (r.stars||3)+'+ stars';case 'gmail':return r.is===false?'not on Gmail':'on Gmail';case 'bought':return 'has backed a campaign';default:return r.rule}}
+function eventWords(c){c=c||{};switch(c.type){
+  case 'tag_added':return 'They get the tag'+(arr(c.tags).length>1?'s':'');case 'tag_removed':return 'The tag comes off';
+  case 'bought':return 'They back '+(c.product?'"'+c.product+'"':'a campaign');case 'date':return c.at?'It is '+fmtDate(c.at):'A date comes (pick one)';
+  case 'field_changed':return 'Their '+(c.key||'(field)')+' changes'+(c.value?' to "'+c.value+'"':'');case 'clicked':return 'They click a link'+(c.url_contains?' with "'+c.url_contains+'"':'');default:return 'Pick what to wait for'}}
+function waitWords(c){c=c||{};if(c.mode==='until')return c.at?'Wait until '+fmtDate(c.at):'Wait until a date (pick one)';
+  if(c.mode==='weekday'){const d=arr(c.days).map(n=>(DAYS.find(x=>x[0]===+n)||[0,''])[1]);return 'Wait until it is '+(d.length?d.join(', '):'(pick days)')+', '+hourLabel(c.hour==null?9:+c.hour)+' PT'}
+  return 'Wait '+plural(c.value||0,({minutes:'minute',hours:'hour',weeks:'week',months:'month'}[c.unit]||'day'))}
+function entryWords(e){switch(e.type){
+  case 'joined':return 'Joins your list';case 'tag_added':return 'Gets the tag '+arr(e.tags).join(', ');
+  case 'bought':return 'Backs '+(e.product?'"'+e.product+'"':'a fiction campaign');case 'field_changed':return 'Their '+(e.key||'?')+' changes'+(e.value?' to "'+e.value+'"':'');
+  case 'clicked':return 'Clicks a link'+(e.url_contains?' with "'+e.url_contains+'"':'');
+  default:return 'Something that does nothing here ('+(e.type||'unknown')+')'}}
+const ENTRY_DEAD=['moved_here','date_start','kit_other','quiz','form','booked'];
+function stepBody(s){const c=s.config||{};
+  switch(s.kind){
+    case 'email':return {k:'Send email',t:s.subject.trim()||'No subject line yet',none:!s.subject.trim(),d:(s.published?'':'Switched off - skipped. ')+gapText(s)};
+    case 'wait':return {k:'Time delay',t:waitWords(c)};
+    case 'tag_add':return {k:'Action',t:'Add '+(arr(c.tags).length>1?'tags':'a tag'),d:chips(c.tags)||'(no tag picked)',html:1};
+    case 'tag_remove':return {k:'Action',t:'Remove '+(arr(c.tags).length>1?'tags':'a tag'),d:chips(c.tags)||'(no tag picked)',html:1};
+    case 'field_set':return {k:'Action',t:'Set '+(c.key||'a field'),d:c.key?(c.value?'to "'+c.value+'"':'to nothing (cleared)'):''};
+    case 'sequence':{const q=LIST.find(x=>x.id===c.sequence_id);return {k:'Email sequence',t:c.sequence_id?seqName(c.sequence_id):'Pick a sequence',none:!c.sequence_id,d:c.sequence_id?(q?plural(q.emails,'email')+', ':'')+(c.skip_first_email?'skipping its first email, ':'')+'then they carry on here':(c.note||'')}}
+    case 'move':return {k:'Move them',t:c.sequence_id?'To "'+seqName(c.sequence_id)+'"':'Pick a sequence',none:!c.sequence_id,d:'They leave this one and start that one'};
+    case 'goto':{const t=stepById(c.step_id);return {k:'Go to',t:'Go to another step',d:t?stepLabel(t):'(none picked)'}}
+    case 'unsubscribe':return {k:'Action',t:'Unsubscribe them',d:'They come off your list'};
+    case 'exit':return {k:'Exit',t:'They leave this sequence'};
+    case 'condition':return c.mode==='multi'?{k:'Multiple branch',t:'The first path that fits',d:plural(arr(c.paths).length,'path')+' and everyone else'}
+                        :{k:'Yes/No branch',t:'Yes if they…',d:testWords(c)};
+    case 'event':return {k:'Wait for something',t:eventWords(c),d:(c.type==='tag_added'||c.type==='tag_removed'?chips(c.tags):'')+(c.pull===false?'':'<div style="margin-top:3px">Anyone further up comes here when it happens</div>'),html:1};
+  }
+  return {k:s.kind,t:''}}
+function stepLabel(s){if(s.kind==='email')return 'Email "'+(s.subject||'no subject')+'"';const b=stepBody(s);return b.k+': '+String(b.t).replace(/<[^>]+>/g,'')+(b.d&&!b.html?' - '+b.d:'')}
+function gapText(e){const v=+e.delay_value||0,u=e.delay_unit==='hours'?'hour':'day';
+  const first=!e.parent_id&&lane(null,e.branch||null)[0]&&lane(null,e.branch||null)[0].id===e.id;
+  if(first)return v===0?'Goes right when they go in':plural(v,u)+' after they go in';
+  return v===0?'Straight after the step before':plural(v,u)+' after the step before'}
+
+/* ---------- open a sequence ---------- */
+async function open(id,stepId,tab){
+  await flush();closePanel();closeMenu();
+  try{SEQ=await rpc('seq_get',{p_id:id})}catch(e){toast(msg(e));return}
+  if(!SEQ){toast('That sequence is not there any more.');await refreshList();return}
+  try{STATS=await rpc('seq_stats',{p_seq:id})||{}}catch(_){STATS={}}
+  SEQ.emails=emailsInOrder();MAP_FIT=true;
+  $('#none').hidden=true;$('#seq').hidden=false;$('#pick').value=id;
+  paintHead();paintWhen();
+  const e=(stepId&&SEQ.emails.find(x=>x.id===stepId))||SEQ.emails[0];
+  CUR=null;
+  tabTo(tab||'map');
+  TICK.clear();
+  if(e)await pickEmail(e.id,TAB!=='emails');else{paintRoute();$('#ed').hidden=true}
+  loadPeople();loadTrash();
+}
+async function reload(keepView){
+  const id=SEQ.id;let s;try{s=await rpc('seq_get',{p_id:id})}catch(e){toast(msg(e));return}
+  // the email open in the editor keeps what is being typed
+  if(CUR){const c=s.steps.find(x=>x.id===CUR.id);if(c){c.lexical=CUR.lexical;c.body_html=CUR.body_html;c.subject=CUR.subject;c.preview_text=CUR.preview_text}}
+  SEQ=s;SEQ.emails=emailsInOrder();if(CUR)CUR=SEQ.emails.find(x=>x.id===CUR.id)||null;
+  if(!keepView)MAP_FIT=true;
+  paintHead();renderMap();paintRoute();paintEditorTop();refreshList();
+}
+// after an email is saved, what is still missing before it can go live is checked again
+let AS_T=null;function afterSave(){clearTimeout(AS_T);AS_T=setTimeout(async()=>{if(!SEQ)return;try{const s=await rpc('seq_get',{p_id:SEQ.id});SEQ.problems=s.problems;SEQ.counts=s.counts;paintHead()}catch(_){}},2000)}
+
+/* ---------- top: name, state, what is missing ---------- */
+function paintHead(){
+  $('#sName').value=SEQ.name;
+  $$('.state button').forEach(b=>{const on=b.dataset.s===SEQ.status;b.classList.toggle('on',on);b.setAttribute('aria-checked',on)});
+  $('#tcEmails').textContent='('+(SEQ.emails.length+ROUTE.filter(x=>x.kind==='sequence').reduce((t,x)=>t+(+((LIST.find(q=>q.id===x.config.sequence_id)||{}).emails)||0),0))+')';$('#tcSteps').textContent='('+SEQ.steps.length+')';
+  const notes={draft:'Draft - nothing happens until you make it Live.',live:'Live - people come in through the ways in at the top of the map, and each gets each step as it comes due.',paused:'Paused - nobody gets anything and nobody new comes in until you make it Live again. Nobody is skipped; they pick up where they were.',archived:'Put away - it does nothing. Choose Draft or Live to bring it back.'};
+  $('#headNote').textContent=(notes[SEQ.status]||'')+(SEQ.note?' '+SEQ.note+'.':'');
+  const old=$('#probs');if(old)old.remove();
+  const pr=arr(SEQ.problems);
+  if(pr.length&&SEQ.status!=='live')$('.head').insertAdjacentHTML('beforeend','<div class="problems" id="probs"><b>Before it can go live:</b><ul>'+pr.slice(0,8).map(p=>'<li>'+esc(p)+'</li>').join('')+(pr.length>8?'<li>and '+(pr.length-8)+' more</li>':'')+'</ul></div>');
+  const ub=arr(SEQ.used_by);
+  if(ub.length)$('#headNote').textContent+=' Also sent through by: '+ub.map(u=>'"'+u.name+'"').join(', ')+'.';
+  $('#liveNote').hidden=SEQ.status!=='live';
+}
+$('#sName').addEventListener('change',async()=>{const v=$('#sName').value.trim();if(!v){$('#sName').value=SEQ.name;return}
+  try{await rpc('seq_save',{p:{id:SEQ.id,name:v}});SEQ.name=v;await refreshList();toast('Name saved')}catch(e){toast(msg(e))}});
+$('#sName').addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()});
+$$('.state button').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.s)));
+async function setState(s){
+  if(!SEQ||s===SEQ.status)return;
+  await flush();
+  if(s==='live'){
+    await reload(true);
+    if(arr(SEQ.problems).length){toast('Not yet - see "Before it can go live" at the top.');return}
+    let p=PEOPLE;try{p=await rpc('seq_people',{p_seq:SEQ.id,p_q:null});PEOPLE=p}catch(_){}
+    const inN=p?p.in:0, ways=arr(SEQ.entries).filter(e=>!ENTRY_DEAD.includes(e.type));
+    const ok=await ask('Make "'+esc(SEQ.name)+'" live?',
+      (inN?'<p>'+plural(inN,'person')+' '+(inN===1?'is':'are')+' in it and start'+(inN===1?'s':'')+' within a minute.</p>':'<p>Nobody is in it yet.</p>')+
+      (ways.length?'<p>From now on, people come in by themselves when they: '+ways.map(e=>'<b>'+esc(entryWords(e))+'</b>').join('; ')+'. Only what happens from now on counts - nobody from before comes in.</p>':'<p>It has no ways in, so only people you put in on <b>Who\'s in</b> go through it.</p>'),'Make it live');
+    if(!ok)return;
+  }
+  if(s==='paused'&&!await ask('Pause it?','<p>Nobody gets anything from this sequence and nobody new comes in until you make it Live again. Nobody is skipped - they pick up where they were.</p>','Pause it'))return;
+  try{await rpc('seq_save',{p:{id:SEQ.id,status:s}});await reload(true);await refreshList();toast({live:'Live',paused:'Paused',draft:'Back to draft'}[s])}
+  catch(e){toast(msg(e))}
+}
+
+/* ---------- tabs ---------- */
+$$('.tabs button').forEach(b=>b.addEventListener('click',()=>tabTo(b.dataset.t)));
+$('#toMap').addEventListener('click',e=>{e.preventDefault();tabTo('map')});
+function tabTo(t){if(!['map','emails','people','when'].includes(t))t='map';TAB=t;$$('.tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);b.setAttribute('aria-selected',b.dataset.t===t)});
+  $('#tMap').hidden=t!=='map';$('#tEmails').hidden=t!=='emails';$('#tPeople').hidden=t!=='people';$('#tWhen').hidden=t!=='when';
+  if(t!=='map'){closePanel();closeMenu()}
+  if(t==='map')renderMap();
+  if(t==='emails'&&CUR&&(KG_FOR!==CUR.id||!ROOT))mountKoenig(CUR);
+  if(t==='people')loadPeople();setQS()}
+
+/* ===================== THE MAP ===================== */
+function statsLine(s){const c=(SEQ.counts||{})[s.id]||{};const bits=[];
+  if(c.here)bits.push('<b>'+c.here.toLocaleString()+'</b> here now');
+  if(s.kind==='email'){const st=STATS[s.id];if(st&&st.sent)bits.push('<b>'+st.sent.toLocaleString()+'</b> sent · '+Math.round(100*st.opened/st.sent)+'% opened'+(st.clicked?' · '+Math.round(100*st.clicked/st.sent)+'% clicked':''))}
+  else if(c.through)bits.push(c.through.toLocaleString()+' went through');
+  return bits.length?'<div class="nc">'+bits.join(' · ')+'</div>':''}
+function nodeHTML(s){const b=stepBody(s);
+  return '<div class="node k-'+s.kind+(SEL===s.id?' sel':'')+'" data-step="'+s.id+'" role="button" tabindex="0" aria-label="'+esc(b.k+': '+String(b.t).replace(/<[^>]+>/g,''))+'">'+
+    '<div class="nk">'+esc(b.k)+'</div><div class="nt'+(b.none?' none':'')+'">'+esc(b.t)+'</div>'+(b.d?'<div class="nd">'+(b.html?b.d:esc(b.d))+'</div>':'')+statsLine(s)+'</div>'}
+function plusHTML(after,parent,branch,atEnd,canSplit){return '<div class="link"><button type="button" class="plus" title="Add a step here" aria-label="Add a step here" data-after="'+(after||'')+'" data-parent="'+(parent||'')+'" data-branch="'+(branch||'')+'" data-end="'+(atEnd?1:0)+'">+</button></div>'}
+function laneHTML(parent,branch){
+  const steps=lane(parent,branch);let h='<div class="lane">';
+  if(!steps.length)return h+plusHTML(null,parent,branch,true)+'<div class="done">Done - they finish here</div></div>';
+  h+=plusHTML(null,parent,branch,false);
+  steps.forEach((s,i)=>{
+    h+=nodeHTML(s);
+    const last=i===steps.length-1;
+    if(s.kind==='condition'){
+      const cnt=((SEQ.counts||{})[s.id]||{}).went||{};
+      h+='<div class="branches">'+branchKeys(s).map(k=>'<div class="branch"><span class="blab '+(s.config&&s.config.mode==='multi'?(k==='no'?'no':'path'):k)+'" title="'+esc(branchLabel(s,k))+'">'+esc(branchLabel(s,k))+(cnt[k]?' · '+cnt[k]:'')+'</span>'+laneHTML(s.id,k)+'</div>').join('')+'</div>';
+      return}
+    if(ENDS.includes(s.kind))return;
+    h+=plusHTML(s.id,parent,branch,last);
+    if(last)h+='<div class="done">Done - they finish here</div>';
+  });
+  return h+'</div>'}
+function startHTML(){
+  const es=arr(SEQ.entries);
+  return '<div class="node k-start"><div class="nk">How people get in</div>'+
+    es.map((e,i)=>'<button type="button" class="entry'+(ENTRY_DEAD.includes(e.type)||e.kit_form?' warn':'')+'" data-entry="'+i+'">'+esc(entryWords(e))+(e.lane?' <small>(its own path)</small>':'')+'</button>').join('')+
+    '<div class="hand">'+(es.length?'Or you':'You')+' put them in on <a href="#" data-tab="people">Who\'s in</a>.</div>'+
+    '<button type="button" class="mini" data-addentry style="margin-top:8px">+ Add a way in</button></div>'}
+function renderMap(){
+  if(!SEQ||TAB!=='map')return;
+  const ks=rootLanes();
+  let h=startHTML();
+  if(ks.length===1)h+=laneHTML(null,null);
+  else h+='<div class="branches">'+ks.map(k=>'<div class="branch"><span class="blab path" title="'+esc(k?entryLaneLabel(k):'The main way in')+'">'+esc(k?entryLaneLabel(k):'Main path')+'</span>'+laneHTML(null,k)+'</div>').join('')+'</div>';
+  $('#mapWorld').innerHTML=h;
+  if(MAP_FIT){MAP_FIT=false;fit()}else applyView();
+}
+function applyView(){$('#mapWorld').style.transform='translate('+PX+'px,'+PY+'px) scale('+Z+')';$('#zPct').textContent=Math.round(Z*100)+'%'}
+function fit(){const v=$('#mapView'),w=$('#mapWorld');const vw=v.clientWidth,vh=v.clientHeight,ww=w.scrollWidth||1,wh=w.scrollHeight||1;
+  Z=Math.max(.3,Math.min(1,(vw-20)/ww,Math.max(.55,(vh-20)/wh)));PX=Math.max(10,(vw-ww*Z)/2);PY=10;
+  // too wide to fit: the top of the map (how people get in) goes in the middle
+  if(ww*Z>vw){const st=w.querySelector('.k-start');if(st){const cx=(st.offsetLeft+st.offsetWidth/2);PX=vw/2-cx*Z}}
+  applyView()}
+function zoomBy(f,cx,cy){const v=$('#mapView').getBoundingClientRect();cx=cx==null?v.width/2:cx;cy=cy==null?v.height/3:cy;
+  const nz=Math.max(.3,Math.min(1.6,Z*f));PX=cx-(cx-PX)*(nz/Z);PY=cy-(cy-PY)*(nz/Z);Z=nz;applyView()}
+$('#zIn').addEventListener('click',()=>zoomBy(1.15));$('#zOut').addEventListener('click',()=>zoomBy(1/1.15));$('#zFit').addEventListener('click',fit);
+(function(){const v=$('#mapView');let d=null;
+  v.addEventListener('pointerdown',e=>{if(e.target.closest('.node,.plus,button,a,input,select'))return;d={x:e.clientX,y:e.clientY,px:PX,py:PY,id:e.pointerId};v.classList.add('drag');try{v.setPointerCapture(e.pointerId)}catch(_){}});
+  v.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;PX=d.px+(e.clientX-d.x);PY=d.py+(e.clientY-d.y);applyView()});
+  const up=()=>{d=null;v.classList.remove('drag')};v.addEventListener('pointerup',up);v.addEventListener('pointercancel',up);
+  v.addEventListener('wheel',e=>{e.preventDefault();if(e.ctrlKey||e.metaKey){const r=v.getBoundingClientRect();zoomBy(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top)}else{PX-=e.deltaX;PY-=e.deltaY;applyView()}},{passive:false});
+  v.addEventListener('keydown',e=>{const k={ArrowLeft:[40,0],ArrowRight:[-40,0],ArrowUp:[0,40],ArrowDown:[0,-40]}[e.key];if(k&&e.target===v){e.preventDefault();PX+=k[0];PY+=k[1];applyView()}
+    if((e.key==='+'||e.key==='=')&&e.target===v)zoomBy(1.15);if(e.key==='-'&&e.target===v)zoomBy(1/1.15)});
+  v.addEventListener('click',e=>{
+    const pl=e.target.closest('.plus');if(pl){openMenu(pl);return}
+    const en=e.target.closest('[data-entry]');if(en){openEntry(+en.dataset.entry);return}
+    if(e.target.closest('[data-addentry]')){openEntry(-1);return}
+    const tb=e.target.closest('[data-tab]');if(tb){e.preventDefault();tabTo(tb.dataset.tab);return}
+    const n=e.target.closest('.node[data-step]');if(n){selectStep(n.dataset.step);return}
+  });
+  v.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const n=e.target.closest&&e.target.closest('.node[data-step]');if(n){e.preventDefault();selectStep(n.dataset.step)}}});
+})();
+function selectStep(id){SEL=id;$$('.node.sel').forEach(n=>n.classList.remove('sel'));const n=$('.node[data-step="'+id+'"]');if(n)n.classList.add('sel');openPanel(id);ensureVisible(id)}
+// keep the step you are working on in sight (and out from under the panel)
+function ensureVisible(id){const n=$('.node[data-step="'+id+'"]'),v=$('#mapView');if(!n||!v)return;
+  const vr=v.getBoundingClientRect(),nr=n.getBoundingClientRect();const pan=$('#panel');
+  let right=vr.right;if(!pan.hidden&&innerWidth>700)right=Math.min(right,pan.getBoundingClientRect().left-16);
+  let dx=0,dy=0;if(nr.right>right)dx=right-nr.right;if(nr.left+dx<vr.left+10)dx=vr.left+10-nr.left;
+  if(nr.bottom>vr.bottom-10)dy=vr.bottom-10-nr.bottom;if(nr.top+dy<vr.top+10)dy=vr.top+10-nr.top;
+  if(dx||dy){PX+=dx;PY+=dy;applyView()}}
+
+/* ---------- the + menu ---------- */
+let MENU_AT=null;
+function closeMenu(){$('#addMenu').hidden=true;$$('.plus.on').forEach(p=>p.classList.remove('on'));MENU_AT=null}
+document.addEventListener('pointerdown',e=>{if(!$('#addMenu').hidden&&!e.target.closest('#addMenu,.plus'))closeMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#addMenu').hidden)closeMenu();else if(!$('#panel').hidden)closePanel()}});
+function openMenu(pl){
+  closeMenu();pl.classList.add('on');
+  MENU_AT={after:pl.dataset.after||null,parent:pl.dataset.parent||null,branch:pl.dataset.branch||null,end:pl.dataset.end==='1'};
+  const it=(k,t,d)=>'<button type="button" role="menuitem" data-k="'+k+'"><b>'+t+'</b><small>'+d+'</small></button>';
+  let h=(MENU_AT.end?'':'<div class="note">Adding in the middle. A branch added here takes the steps below it onto its Yes side.</div>')+
+    '<div class="grp">Email</div>'+it('email','Email','Send them an email - you write it in the editor')+
+    '<div class="grp">Timing</div>'+it('wait','Time delay','Wait for a time, until a date, or until certain days')+it('event','Wait for something','Until they get a tag, back a campaign, click, or a date comes')+
+    '<div class="grp">Action</div>'+it('tag_add','Add a tag','Tag them')+it('tag_remove','Remove a tag','Take a tag off')+it('field_set','Set a field','Write something on their record')+it('sequence','Send them through a sequence','They get another sequence, then carry on here')+
+    '<div class="grp">Branch</div>'+it('condition','Yes/No branch','Split on a tag, a field, opens, clicks or backing')+it('multi','Multiple branch','Several paths - each person takes the first that fits');
+  if(MENU_AT.end)h+='<div class="grp">End</div>'+it('move','Move them to another sequence','They leave this one and start that one')+it('goto','Go to another step','Jump them somewhere else on this map')+it('unsubscribe','Unsubscribe them','Take them off your list')+it('exit','Exit','They leave this sequence');
+  const m=$('#addMenu');m.innerHTML=h;m.hidden=false;
+  const r=pl.getBoundingClientRect();let x=r.right+10,y=r.top-20;
+  if(x+300>innerWidth)x=Math.max(8,r.left-300);if(y+m.offsetHeight>innerHeight-8)y=Math.max(8,innerHeight-8-m.offsetHeight);
+  m.style.left=x+'px';m.style.top=y+'px';const f=m.querySelector('button');if(f)f.focus();
+}
+$('#addMenu').addEventListener('click',async e=>{const b=e.target.closest('[data-k]');if(!b||!MENU_AT)return;
+  const at=MENU_AT;closeMenu();await flush();
+  let kind=b.dataset.k,cfg;
+  if(kind==='multi'){kind='condition';cfg={mode:'multi',paths:[{path:'p1',label:'',test:'tag',match:'any',tags:[]}]}}
+  try{const r=await rpc('seq_step_add',{p:{sequence_id:SEQ.id,kind,parent_id:at.after?null:at.parent,branch:at.after?null:at.branch,after_id:at.after,config:cfg}});
+    await reload(true);
+    if(r.moved_to_yes)toast(plural(r.moved_to_yes,'step')+' that were below it are now on its Yes side');
+    selectStep(r.id)}
+  catch(err){toast(msg(err))}});
+
+/* ---------- the panel: one step's settings ---------- */
+function closePanel(){$('#panel').hidden=true;SEL=null;$$('.node.sel').forEach(n=>n.classList.remove('sel'))}
+let PSAVE=null;
+function panelShell(title,body,foot){const p=$('#panel');
+  p.innerHTML='<div class="ph"><h2>'+esc(title)+'</h2><button class="x" type="button" data-pclose aria-label="Close">×</button></div><div class="pb">'+body+'</div><div class="pf">'+(foot||'')+'<button class="btn" type="button" data-pclose style="margin-left:auto">Done</button></div>';
+  p.hidden=false;p.querySelectorAll('[data-pclose]').forEach(b=>b.onclick=closePanel)}
+function seqOptions(cur){const ms=LIST.filter(s=>s.kind!=='oneoff'&&s.id!==SEQ.id&&(s.status==='draft'||s.status==='live'||s.id===cur)).sort((a,b)=>a.name.localeCompare(b.name));
+  return '<option value="">Pick a sequence…</option>'+ms.map(s=>'<option value="'+s.id+'"'+(s.id===cur?' selected':'')+'>'+esc(s.name)+' ('+({draft:'draft',live:'live',paused:'paused'}[s.status]||s.status)+')</option>').join('')}
+function openPanel(id){
+  const s=stepById(id);if(!s){closePanel();return}
+  const c=JSON.parse(JSON.stringify(s.config||{}));
+  const foot=(ENDS.includes(s.kind)||s.kind==='condition'?'':'<button class="mini" type="button" data-mv="-1">Move up</button><button class="mini" type="button" data-mv="1">Move down</button>')+'<button class="btn warn" type="button" data-rm>Take this step out</button>';
+  // saved half a second after the last change; repaint=true opens the panel again on what was saved
+  const save=async(cfg,repaint)=>{s.config=cfg;clearTimeout(PSAVE);PSAVE=setTimeout(async()=>{try{await rpc('seq_email_save',{p:{id:s.id,config:cfg}});await reload(true);
+    const n=$('.node[data-step="'+s.id+'"]');if(n)n.classList.add('sel');if(repaint&&SEL===s.id&&!$('#panel').hidden)openPanel(s.id)}catch(e){toast(msg(e))}},repaint?50:500)};
+  let body='';
+  switch(s.kind){
+    case 'email':{
+      body='<div class="f"><label>Subject line</label><div style="font-weight:700">'+esc(s.subject||'No subject line yet')+'</div></div>'+
+        '<div class="f"><label>When it goes</label><div>'+esc(gapText(s))+(s.published?'':' - switched off, skipped')+'</div></div>'+
+        (s._ctx?'<div class="f"><label>On the branch</label><div class="ctx">'+esc(s._ctx)+'</div></div>':'')+
+        '<button class="btn mint" type="button" id="pWrite">Write this email</button><p class="hint" style="color:var(--soft);font-size:13px">Opens it in the editor on "Just the emails", where you set its subject, timing and words.</p>';
+      panelShell('Email',body,foot);$('#pWrite').onclick=async()=>{closePanel();tabTo('emails');await pickEmail(s.id)};break}
+    case 'wait':{
+      const m=c.mode||'for';
+      body='<label class="opt"><input type="radio" name="wm" value="for"'+(m==='for'?' checked':'')+'><span><b>For a while</b><span class="row2" style="margin-top:6px"><input type="number" min="1" max="999" class="num" id="wv" value="'+(c.value||1)+'"><select class="sel2" id="wu">'+['minutes','hours','days','weeks','months'].map(u=>'<option'+((c.unit||'days')===u?' selected':'')+'>'+u+'</option>').join('')+'</select></span></span></label>'+
+        '<label class="opt"><input type="radio" name="wm" value="until"'+(m==='until'?' checked':'')+'><span><b>Until a date and time</b> <small>Pacific time</small><input type="datetime-local" class="inp" id="wat" style="margin-top:6px" value="'+(c.at?toLocalInput(c.at):'')+'"></span></label>'+
+        '<label class="opt"><input type="radio" name="wm" value="weekday"'+(m==='weekday'?' checked':'')+'><span><b>Until it is one of these days</b><span class="days" id="wdays" style="margin-top:6px">'+DAYS.map(([n,l])=>'<button type="button" class="day'+(arr(c.days).map(Number).includes(n)?' on':'')+'" data-d="'+n+'" style="width:52px">'+l+'</button>').join('')+'</span><span class="row2" style="margin-top:6px">at <select class="sel2" id="whr">'+Array.from({length:24},(_,h)=>'<option value="'+h+'"'+((c.hour==null?9:+c.hour)===h?' selected':'')+'>'+hourLabel(h)+'</option>').join('')+'</select> PT</span></span></label>';
+      panelShell('Time delay',body,foot);
+      const p=$('#panel');const go=()=>{const mm=p.querySelector('input[name=wm]:checked').value;const cfg={mode:mm};
+        if(mm==='for'){cfg.value=Math.max(1,parseInt($('#wv').value,10)||1);cfg.unit=$('#wu').value}
+        if(mm==='until'){if(!$('#wat').value)return;cfg.at=fromLocalInput($('#wat').value)}
+        if(mm==='weekday'){cfg.days=$$('#wdays .day.on').map(b=>+b.dataset.d);cfg.hour=+$('#whr').value}save(cfg)};
+      p.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',go));$('#wv').addEventListener('input',go);
+      $('#wdays').addEventListener('click',e=>{const b=e.target.closest('.day');if(!b)return;b.classList.toggle('on');p.querySelector('input[value=weekday]').checked=true;go()});break}
+    case 'tag_add':case 'tag_remove':{
+      body='<div class="f"><label>'+(s.kind==='tag_add'?'Tags to add':'Tags to take off')+'</label><div class="tagbox" id="ptb"></div><div class="hint" style="color:var(--soft);font-size:13px;margin-top:4px">Type a tag and press Enter, or pick one from the list (your old Kit tags came over too); a new name makes a new tag. Tags live here - nothing is sent to Kit.</div></div>';
+      panelShell(s.kind==='tag_add'?'Add a tag':'Remove a tag',body,foot);tagBox($('#ptb'),arr(c.tags),tags=>save({tags}));break}
+    case 'field_set':{
+      body='<div class="f"><label for="fk">Field</label><input class="inp" id="fk" list="dlFields" value="'+esc(c.key||'')+'" placeholder="for example: source"></div><div class="f"><label for="fv">Set it to</label><input class="inp" id="fv" value="'+esc(c.value||'')+'" placeholder="Leave empty to clear it"></div>';
+      panelShell('Set a field',body,foot);const go=()=>save({key:$('#fk').value.trim(),value:$('#fv').value});$('#fk').addEventListener('change',go);$('#fv').addEventListener('change',go);break}
+    case 'sequence':case 'move':{
+      body=(c.note?'<p class="warnbox">'+esc(c.note)+'</p>':'')+'<div class="f"><label for="sq">'+(s.kind==='sequence'?'Send them through':'Move them to')+'</label><select class="sel2" id="sq" style="width:100%">'+seqOptions(c.sequence_id)+'</select></div>'+
+        (s.kind==='sequence'?'<label style="display:flex;gap:10px;align-items:flex-start;margin:10px 0;line-height:1.4"><input type="checkbox" id="sqSkip"'+(c.skip_first_email?' checked':'')+'><span>Skip its first email - they already got a welcome from this one</span></label><p style="color:var(--soft);font-size:14px">They get every email of that sequence on its own timing, then carry on with the next step here. Someone who has already been through it skips it.</p>':'<p style="color:var(--soft);font-size:14px">They leave this sequence and start that one from its first step.</p>')+
+        '<a href="#" id="sqOpen">Open that sequence</a>';
+      panelShell(s.kind==='sequence'?'Send them through a sequence':'Move them',body,foot);
+      const sqCfg=()=>Object.assign({},c,{sequence_id:$('#sq').value||null,skip_first_email:(s.kind==='sequence'&&$('#sqSkip')&&$('#sqSkip').checked)||undefined,note:undefined});
+      $('#sq').addEventListener('change',()=>save(sqCfg()));if($('#sqSkip'))$('#sqSkip').addEventListener('change',()=>save(sqCfg()));
+      $('#sqOpen').onclick=e=>{e.preventDefault();const v=$('#sq').value;if(v)open(v,null,'map');else toast('Pick one first')};break}
+    case 'goto':{
+      const opts=SEQ.steps.filter(x=>x.id!==s.id&&x.kind!=='goto').map(x=>'<option value="'+x.id+'"'+(x.id===c.step_id?' selected':'')+'>'+esc(stepLabel(x))+'</option>').join('');
+      body='<div class="f"><label for="gt">Go to</label><select class="sel2" id="gt" style="width:100%"><option value="">Pick a step…</option>'+opts+'</select></div>';
+      panelShell('Go to another step',body,foot);$('#gt').addEventListener('change',()=>save({step_id:$('#gt').value||null}));break}
+    case 'unsubscribe':panelShell('Unsubscribe them','<p class="warnbox">Everyone who reaches this step comes off your list - no more newsletter, no more sequences. They can come back only by signing up again themselves.</p>',foot);break;
+    case 'exit':panelShell('Exit','<p>They leave this sequence here. Anything that sent them through it carries on.</p>',foot);break;
+    case 'condition':{
+      if(c.mode==='multi'){
+        const paths=arr(c.paths);
+        body='<p style="margin-top:0;color:var(--soft);font-size:14px">Each person goes down the first path that fits. Anyone who fits none goes down "Everyone else".</p><div id="paths">'+paths.map((p,i)=>'<div class="pathbox" data-i="'+i+'"><div class="row2"><input class="inp" data-plabel placeholder="Name this path (optional)" value="'+esc(p.label||'')+'" style="flex:1"><button class="mini" type="button" data-prm>Remove</button></div><div data-test style="margin-top:8px"></div></div>').join('')+'</div><button class="mini" type="button" id="padd">+ Add a path</button>';
+        panelShell('Multiple branch',body,foot);
+        const push=()=>save({mode:'multi',paths});
+        $$('#paths .pathbox').forEach(box=>{const i=+box.dataset.i;testEditor(box.querySelector('[data-test]'),paths[i],t=>{paths[i]=Object.assign({},t,{path:pathId(paths[i]),label:paths[i].label});push()});
+          box.querySelector('[data-plabel]').addEventListener('change',e=>{paths[i].label=e.target.value.trim();push()});
+          box.querySelector('[data-prm]').onclick=()=>{if(lane(s.id,pathId(paths[i])).length){toast('Take the steps out of that path first.');return}if(paths.length<2){toast('A multiple branch needs at least one path.');return}paths.splice(i,1);save({mode:'multi',paths},true)}});
+        $('#padd').onclick=()=>{let n=1;while(paths.some(p=>pathId(p)==='p'+n))n++;paths.push({path:'p'+n,label:'',test:'tag',match:'any',tags:[]});save({mode:'multi',paths},true)};
+      }else{
+        panelShell('Yes/No branch','<p style="margin-top:0;color:var(--soft);font-size:14px">They go down <b>Yes</b> if this is true when they get here, otherwise <b>No</b>.</p><div id="ptest"></div>',foot);
+        testEditor($('#ptest'),c,t=>save(t));
+      }
+      break}
+    case 'event':{
+      const t=c.type||'tag_added';
+      body='<div class="f"><label for="evt">Wait until</label><select class="sel2" id="evt" style="width:100%">'+[['tag_added','They get a tag'],['tag_removed','A tag comes off'],['bought','They back a fiction campaign'],['date','A date comes'],['field_changed','A field changes'],['clicked','They click a link']].map(([v,l])=>'<option value="'+v+'"'+(t===v?' selected':'')+'>'+l+'</option>').join('')+'</select></div><div id="evx"></div>'+
+        '<label class="sw" style="margin-top:10px"><input type="checkbox" id="evp"'+(c.pull===false?'':' checked')+'><span class="tr" aria-hidden="true"></span><span>When it happens, anyone further up this map comes straight here</span></label>'+
+        '<p style="color:var(--soft);font-size:13px">Handy for a launch: when the date comes, everyone still waiting further up moves on to here, so the launch emails stop.</p>';
+      panelShell('Wait for something',body,foot);
+      const paint=()=>{const tt=$('#evt').value;let x='';
+        if(tt==='tag_added'||tt==='tag_removed')x='<div class="tagbox" id="evtags"></div>';
+        if(tt==='bought')x='<input class="inp" id="evprod" list="dlProducts" placeholder="Any campaign" value="'+esc(c.product||'')+'">';
+        if(tt==='date')x='<input type="datetime-local" class="inp" id="evat" value="'+(c.at?toLocalInput(c.at):'')+'"> <small>Pacific time</small>';
+        if(tt==='field_changed')x='<input class="inp" id="evk" list="dlFields" placeholder="Field" value="'+esc(c.key||'')+'"><input class="inp" id="evv" style="margin-top:6px" placeholder="To this value (empty = any change)" value="'+esc(c.value||'')+'">';
+        if(tt==='clicked')x='<input class="inp" id="evu" placeholder="Part of the link, for example kickstarter.com (empty = any link)" value="'+esc(c.url_contains||'')+'">';
+        $('#evx').innerHTML=x;
+        if($('#evtags'))tagBox($('#evtags'),arr(c.tags),tags=>{c.tags=tags;go()});
+        $$('#evx input').forEach(i=>i.addEventListener('change',go))};
+      const go=()=>{const tt=$('#evt').value;const cfg={type:tt,pull:$('#evp').checked};
+        if(tt==='tag_added'||tt==='tag_removed')cfg.tags=arr(c.tags);
+        if(tt==='bought')cfg.product=($('#evprod')||{}).value||'';
+        if(tt==='date'){const v=($('#evat')||{}).value;cfg.at=v?fromLocalInput(v):null}
+        if(tt==='field_changed'){cfg.key=($('#evk')||{}).value||'';cfg.value=($('#evv')||{}).value||''}
+        if(tt==='clicked')cfg.url_contains=($('#evu')||{}).value||'';
+        c=Object.assign(c,cfg);save(cfg)};
+      $('#evt').addEventListener('change',()=>{paint();go()});$('#evp').addEventListener('change',go);paint();break}
+  }
+  const p=$('#panel');
+  p.querySelectorAll('[data-mv]').forEach(b=>b.onclick=async()=>{try{const r=await rpc('seq_step_move',{p_id:s.id,p_dir:+b.dataset.mv});if(r&&r.ok===false){toast(r.error);return}await reload(true);selectStep(s.id)}catch(e){toast(msg(e))}});
+  const rm=p.querySelector('[data-rm]');if(rm)rm.onclick=async()=>{
+    const kids=s.kind==='condition'?SEQ.steps.filter(x=>x.parent_id===s.id).length:0;
+    if(!await ask('Take this step out?','<p>'+esc(stepBody(s).k)+': '+esc(String(stepBody(s).t))+'</p>'+(kids?'<p><b>Everything on its branches comes out with it ('+plural(kids,'step')+' directly under it).</b></p>':'')+'<p>The steps after it move up.</p>','Take it out'))return;
+    try{const r=await rpc('seq_step_remove',{p_id:s.id});if(r&&r.ok===false){toast(r.error);return}closePanel();if(CUR&&CUR.id===s.id)CUR=null;await reload(true);await loadTrash();await refreshList();toast('Taken out - it is in "Taken out" on Just the emails if you want it back')}catch(e){toast(msg(e))}};
+}
+function toLocalInput(iso){try{const d=new Date(iso);const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});return p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute}catch(_){return''}}
+// a Pacific wall-clock time to an exact moment
+function fromLocalInput(v){const [d,t]=v.split('T');const guess=new Date(d+'T'+t+':00Z');for(const off of [7,8]){const x=new Date(guess.getTime()+off*3600e3);if(toLocalInput(x.toISOString())===v)return x.toISOString()}return new Date(guess.getTime()+8*3600e3).toISOString()}
+
+// what a split checks (also each path of a multiple branch)
+function testEditor(box,t,onChange){
+  t=Object.assign({test:'tag',match:'any',tags:[]},t||{});
+  const emailOpts=cur=>'<option value="">Any of your emails</option>'+SEQ.emails.map(e=>'<option value="'+e.id+'"'+(e.id===cur?' selected':'')+'>'+esc(e.subject||'no subject')+'</option>').join('');
+  const paint=()=>{let x='<div class="f"><label>Check</label><select class="sel2" data-tt style="width:100%">'+[['tag','Their tags'],['field','A field'],['opened','Whether they opened'],['clicked','Whether they clicked'],['bought','Whether they backed a campaign'],['in_sequence','Another sequence'],['filter','Several things at once']].map(([v,l])=>'<option value="'+v+'"'+(t.test===v?' selected':'')+'>'+l+'</option>').join('')+'</select></div>';
+    switch(t.test){
+      case 'tag':x+='<div class="f"><select class="sel2" data-m style="width:100%"><option value="any"'+(t.match==='any'?' selected':'')+'>Has any of these tags</option><option value="all"'+(t.match==='all'?' selected':'')+'>Has all of these tags</option><option value="none"'+(t.match==='none'?' selected':'')+'>Has none of these tags</option></select></div><div class="tagbox" data-tags></div>';break;
+      case 'field':x+='<input class="inp" data-k list="dlFields" placeholder="Field" value="'+esc(t.key||'')+'"><select class="sel2" data-op style="width:100%;margin-top:6px">'+[['is','is'],['is_not','is not'],['contains','contains'],['set','has any value'],['empty','is empty']].map(([v,l])=>'<option value="'+v+'"'+((t.op||'is')===v?' selected':'')+'>'+l+'</option>').join('')+'</select><input class="inp" data-v style="margin-top:6px" placeholder="Value" value="'+esc(t.value||'')+'">';break;
+      case 'opened':case 'clicked':x+='<select class="sel2" data-st style="width:100%">'+emailOpts(t.step_id)+'</select><div class="row2" data-daysrow style="margin-top:6px'+(t.step_id?';display:none':'')+'">in the last <input type="number" class="num" data-d min="1" max="3650" value="'+(t.within_days||30)+'"> days</div>'+(t.test==='clicked'?'<input class="inp" data-u style="margin-top:6px" placeholder="A link with these words in it (optional)" value="'+esc(t.url_contains||'')+'">':'')+'<div style="color:var(--soft);font-size:12px;margin-top:4px">Any email counts what you sent from here.</div>';break;
+      case 'bought':x+='<input class="inp" data-p list="dlProducts" placeholder="Any campaign" value="'+esc(t.product||'')+'"><div class="row2" style="margin-top:6px">in the last <input type="number" class="num" data-d min="1" max="3650" value="'+(t.within_days||'')+'" placeholder="any"> days</div>';break;
+      case 'in_sequence':x+='<select class="sel2" data-s style="width:100%">'+seqOptions(t.sequence_id)+'</select><select class="sel2" data-ss style="width:100%;margin-top:6px"><option value="ever"'+((t.state||'ever')==='ever'?' selected':'')+'>Has ever been in it</option><option value="done"'+(t.state==='done'?' selected':'')+'>Finished it</option><option value="in"'+(t.state==='in'?' selected':'')+'>Is in it now</option></select>';break;
+      case 'filter':x+='<div data-rules>'+arr(t.rules).map((r,i)=>'<div class="rule" data-i="'+i+'"><button class="mini rx" type="button" data-rx>×</button>'+ruleEditor(r)+'</div>').join('')+'</div><select class="sel2" data-addr style="width:100%"><option value="">+ Add a filter…</option><option value="tags_any">Has any of these tags</option><option value="tags_none">Has none of these tags</option><option value="joined_before">Joined before a date</option><option value="joined_after">Joined after a date</option><option value="cold">Opened nothing lately</option><option value="not_cold">Opened something lately</option><option value="stars_at_least">Has at least N stars (from their heat)</option><option value="gmail">Is on Gmail</option><option value="bought">Has backed a campaign</option></select><div style="color:var(--soft);font-size:12px;margin-top:4px">All of them have to be true.</div>';break;
+    }
+    box.innerHTML=x;bind()};
+  const out=()=>{const o={test:t.test};
+    if(t.test==='tag'){o.match=t.match||'any';o.tags=arr(t.tags)}
+    if(t.test==='field'){o.key=t.key||'';o.op=t.op||'is';o.value=t.value||''}
+    if(t.test==='opened'||t.test==='clicked'){if(t.step_id)o.step_id=t.step_id;else o.within_days=+t.within_days||30;if(t.test==='clicked'&&t.url_contains)o.url_contains=t.url_contains}
+    if(t.test==='bought'){o.product=t.product||'';if(t.within_days)o.within_days=+t.within_days}
+    if(t.test==='in_sequence'){o.sequence_id=t.sequence_id||null;o.state=t.state||'ever'}
+    if(t.test==='filter')o.rules=arr(t.rules);
+    onChange(o)};
+  const bind=()=>{const q=s=>box.querySelector(s);
+    q('[data-tt]').onchange=e=>{t={test:e.target.value,match:'any',tags:[],rules:[]};paint();out()};
+    if(q('[data-tags]'))tagBox(q('[data-tags]'),arr(t.tags),tags=>{t.tags=tags;out()});
+    if(q('[data-m]'))q('[data-m]').onchange=e=>{t.match=e.target.value;out()};
+    if(q('[data-k]'))q('[data-k]').onchange=e=>{t.key=e.target.value.trim();out()};
+    if(q('[data-op]'))q('[data-op]').onchange=e=>{t.op=e.target.value;out()};
+    if(q('[data-v]'))q('[data-v]').onchange=e=>{t.value=e.target.value;out()};
+    if(q('[data-st]'))q('[data-st]').onchange=e=>{t.step_id=e.target.value||null;const r=q('[data-daysrow]');if(r)r.style.display=t.step_id?'none':'';out()};
+    if(q('[data-d]'))q('[data-d]').onchange=e=>{t.within_days=parseInt(e.target.value,10)||null;out()};
+    if(q('[data-u]'))q('[data-u]').onchange=e=>{t.url_contains=e.target.value.trim();out()};
+    if(q('[data-p]'))q('[data-p]').onchange=e=>{t.product=e.target.value.trim();out()};
+    if(q('[data-s]'))q('[data-s]').onchange=e=>{t.sequence_id=e.target.value||null;out()};
+    if(q('[data-ss]'))q('[data-ss]').onchange=e=>{t.state=e.target.value;out()};
+    if(q('[data-addr]'))q('[data-addr]').onchange=e=>{const v=e.target.value;if(!v)return;t.rules=arr(t.rules).concat([{rule:v,tags:[],days:90,stars:4,is:true,date:new Date().toISOString().slice(0,10)}]);paint();out()};
+    box.querySelectorAll('.rule').forEach(rb=>{const i=+rb.dataset.i;const r=t.rules[i];
+      rb.querySelector('[data-rx]').onclick=()=>{t.rules.splice(i,1);paint();out()};
+      const tb=rb.querySelector('[data-rtags]');if(tb)tagBox(tb,arr(r.tags),tags=>{r.tags=tags;out()});
+      rb.querySelectorAll('[data-rf]').forEach(inp=>inp.onchange=()=>{const f=inp.dataset.rf;r[f]=inp.type==='number'?(+inp.value||0):(f==='is'?inp.value==='true':inp.value);out()})})};
+  paint();
+}
+function ruleEditor(r){switch(r.rule){
+  case 'tags_any':case 'tags_none':return '<b>'+(r.rule==='tags_any'?'Has any of':'Has none of')+'</b><div class="tagbox" data-rtags style="margin-top:4px"></div>';
+  case 'joined_before':case 'joined_after':return '<b>Joined '+(r.rule==='joined_before'?'before':'after')+'</b> <input type="date" class="sel2" data-rf="date" value="'+esc(String(r.date||'').slice(0,10))+'">';
+  case 'cold':case 'not_cold':return '<b>'+(r.rule==='cold'?'Opened nothing':'Opened something')+'</b> in the last <input type="number" class="num" data-rf="days" value="'+(r.days||90)+'"> days';
+  case 'stars_at_least':return '<b>At least</b> <input type="number" class="num" min="1" max="5" data-rf="stars" value="'+(r.stars||4)+'"> stars';
+  case 'gmail':return '<b>On Gmail?</b> <select class="sel2" data-rf="is"><option value="true"'+(r.is!==false?' selected':'')+'>Yes</option><option value="false"'+(r.is===false?' selected':'')+'>No</option></select>';
+  case 'bought':return '<b>Has backed a fiction campaign</b>';default:return esc(r.rule)}}
+
+// a box of tags: type and press Enter (or pick from the list), × takes one off
+function tagBox(box,tags,onChange){tags=arr(tags).slice();
+  const paint=()=>{box.innerHTML=tags.map((t,i)=>'<span class="tg">'+esc(t)+'<button type="button" data-x="'+i+'" aria-label="Take off '+esc(t)+'">×</button></span>').join('')+'<input list="dlTags" placeholder="'+(tags.length?'Another tag…':'Type a tag, then Enter')+'" aria-label="Add a tag">';
+    const inp=box.querySelector('input');
+    const add=()=>{const v=inp.value.trim();if(!v)return;if(!tags.includes(v))tags.push(v);inp.value='';paint();box.querySelector('input').focus();onChange(tags.slice())};
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();add()}});
+    inp.addEventListener('change',()=>{if(inp.value&&META&&META.tags.some(t=>t.tag===inp.value))add()});
+    inp.addEventListener('blur',()=>{if(inp.value.trim())add()});
+    box.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{tags.splice(+b.dataset.x,1);paint();onChange(tags.slice())})};
+  box.getTags=()=>tags.slice();box.setTags=t=>{tags=arr(t).slice();paint()};paint()}
+
+/* ---------- ways in ---------- */
+function openEntry(i){
+  const es=arr(SEQ.entries).map(e=>Object.assign({},e));const isNew=i<0;const e=isNew?{type:'joined'}:es[i];
+  const dead=ENTRY_DEAD.includes(e.type);
+  let body=dead?'<p class="warnbox">'+esc(entryWords(e))+'. You can take it out.</p>':
+    '<div class="f"><label for="ent">They come in when they…</label><select class="sel2" id="ent" style="width:100%">'+[['joined','Join your list'],['tag_added','Get a tag'],['bought','Back one of your fiction campaigns'],['field_changed','Have a field change'],['clicked','Click a link in one of your emails']].map(([v,l])=>'<option value="'+v+'"'+(e.type===v?' selected':'')+'>'+l+'</option>').join('')+'</select></div><div id="enx"></div>'+
+    '<div id="enp" style="color:var(--soft);font-size:14px;margin-top:8px"></div><p style="color:var(--soft);font-size:13px">Only what happens after the sequence goes live counts. Only people subscribed to your list come in (nobody else can be emailed), and nobody goes through the same sequence twice.</p>';
+  panelShell(isNew?'Add a way in':'Way in',body,(isNew?'<button class="btn mint" type="button" id="enSave">Add it</button>':'<button class="btn warn" type="button" id="enDel">Take this way in out</button>'));
+  const read=()=>{const t=$('#ent').value;const o={type:t};if(e.since&&t===e.type)o.since=e.since;if(e.lane)o.lane=e.lane;
+    if(t==='tag_added')o.tags=$('#entags').getTags();if(t==='bought')o.product=$('#enprod').value.trim();
+    if(t==='field_changed'){o.key=$('#enk').value.trim();o.value=$('#env').value}
+    if(t==='clicked')o.url_contains=$('#enu').value.trim();return o};
+  let prevT=null;
+  const preview=()=>{clearTimeout(prevT);prevT=setTimeout(async()=>{const o=read();try{const r=await rpc('seq_entry_preview',{p_seq:SEQ.id,p_entry:o});$('#enp').textContent='In the last 30 days, '+plural(r.last_30_days,'person')+' on your list did this.'}catch(_){$('#enp').textContent=''}},400)};
+  const commit=async()=>{const o=read();if(o.type==='tag_added'&&!o.tags.length){toast('Pick a tag first');return false}if(o.type==='field_changed'&&!o.key){toast('Pick a field first');return false}
+    if(isNew)es.push(o);else es[i]=o;
+    try{await rpc('seq_save',{p:{id:SEQ.id,entries:es}});await reload(true);return true}catch(err){toast(msg(err));return false}};
+  if(!dead){
+    const paint=()=>{const t=$('#ent').value;let x='';
+      if(t==='tag_added')x='<div class="tagbox" id="entags"></div>';
+      if(t==='bought')x='<input class="inp" id="enprod" list="dlProducts" placeholder="Any campaign" value="'+esc(e.product||'')+'">';
+      if(t==='field_changed')x='<input class="inp" id="enk" list="dlFields" placeholder="Field" value="'+esc(e.key||'')+'"><input class="inp" id="env" style="margin-top:6px" placeholder="To this value (empty = any change)" value="'+esc(e.value||'')+'">';
+      if(t==='clicked')x='<input class="inp" id="enu" placeholder="Part of the link (empty = any link)" value="'+esc(e.url_contains||'')+'">';
+      $('#enx').innerHTML=x;
+      if($('#entags'))tagBox($('#entags'),arr(e.tags),()=>{preview();if(!isNew)commit()});
+      $$('#enx input').forEach(inp=>inp.addEventListener('change',()=>{preview();if(!isNew)commit()}));preview()};
+    $('#ent').addEventListener('change',()=>{paint();if(!isNew)commit()});paint();
+  }
+  if(isNew)$('#enSave').onclick=async()=>{if(await commit()){closePanel();toast('Way in added')}};
+  else $('#enDel').onclick=async()=>{if(!await ask('Take this way in out?','<p>'+esc(entryWords(e))+'</p><p>People already in the sequence stay where they are.</p>','Take it out'))return;es.splice(i,1);
+    try{await rpc('seq_save',{p:{id:SEQ.id,entries:es}});closePanel();await reload(true);toast('Taken out')}catch(err){toast(msg(err))}};
+}
+
+/* ===================== JUST THE EMAILS ===================== */
+function paintRoute(){
+  const ol=$('#route');
+  if(!ROUTE.length){ol.innerHTML='<li style="color:var(--soft);padding:8px 0">No emails yet. Add one on the Map, or with the button below.</li>';return}
+  let n=0;
+  ol.innerHTML=ROUTE.map(e=>{
+    if(e.kind==='sequence'){const sid=e.config.sequence_id,q=LIST.find(x=>x.id===sid);
+      return '<li class="stop" data-id="'+e.id+'"><div class="gap">Then</div><span class="dot" aria-hidden="true">↳</span>'+
+        '<button type="button" class="tile" data-openseq="'+sid+'">'+(e._ctx?'<div class="ctx">'+esc(e._ctx)+'</div>':'')+
+        '<div class="when">Email sequence</div><div class="subj">'+esc(seqName(sid)||'a sequence')+'</div><div class="meta"><span>'+(q?plural(q.emails,'email'):'')+'</span><span>Open its emails →</span></div></button></li>'}
+    const i=n++;
+    const st=STATS[e.id]||null, sel=CUR&&CUR.id===e.id;
+    let meta='<span class="chip '+(e.published?'on':'off')+'">'+(e.published?'Sends':'Off')+'</span>';
+    if(st&&st.sent){meta+='<span>'+st.sent.toLocaleString()+' sent</span><span>'+Math.round(100*st.opened/st.sent)+'% opened</span>'+(st.clicked?'<span>'+Math.round(100*st.clicked/st.sent)+'% clicked</span>':'')}
+    const sib=lane(e.parent_id,e.branch);const k=sib.findIndex(x=>x.id===e.id);
+    const tk=TICK.has(e.id);
+    return '<li class="stop'+(sel?' sel':'')+(e.published?'':' off')+(tk?' ticked':'')+'" data-id="'+e.id+'">'+
+      '<label class="tick" title="Pick this email"><input type="checkbox" data-tick="'+e.id+'"'+(tk?' checked':'')+' aria-label="Pick &quot;'+esc(e.subject.trim()||'No subject line yet')+'&quot;"></label>'+
+      '<div class="gap">'+esc(gapText(e))+'</div>'+
+      '<span class="dot" aria-hidden="true">'+(i+1)+'</span>'+
+      '<button type="button" class="tile" data-pick="'+e.id+'" aria-current="'+(sel?'true':'false')+'">'+
+        (e._ctx?'<div class="ctx">'+esc(e._ctx)+'</div>':'')+
+        '<div class="subj'+(e.subject.trim()?'':' none')+'">'+esc(e.subject.trim()||'No subject line yet')+'</div>'+
+        '<div class="meta">'+meta+'</div>'+
+      '</button>'+
+      '<div class="moves"><button type="button" data-mv="-1"'+(k<=0?' disabled':'')+'>Move up</button><button type="button" data-mv="1"'+(k<0||k>=sib.length-1||ENDS.concat(['condition']).includes((sib[k+1]||{}).kind)?' disabled':'')+'>Move down</button><button type="button" data-onmap>On the map</button></div>'+
+    '</li>'}).join('');
+  paintBulk();
+}
+// 17 Oct 2026. Russell: "There's no way to delete multiple emails. There's no way to recover emails."
+function paintBulk(){const ids=new Set(ROUTE.filter(e=>e.kind==='email').map(e=>e.id));[...TICK].forEach(i=>{if(!ids.has(i))TICK.delete(i)});
+  $('#bulk').hidden=!TICK.size;$('#bulkN').textContent=plural(TICK.size,'email')+' picked'}
+$('#route').addEventListener('change',e=>{const c=e.target.closest('[data-tick]');if(!c)return;if(c.checked)TICK.add(c.dataset.tick);else TICK.delete(c.dataset.tick);
+  const li=c.closest('.stop');if(li)li.classList.toggle('ticked',c.checked);paintBulk()});
+$('#bulkClear').addEventListener('click',()=>{TICK.clear();paintRoute()});
+$('#bulkAll').addEventListener('click',()=>{ROUTE.filter(e=>e.kind==='email').forEach(e=>TICK.add(e.id));paintRoute()});
+$('#bulkRm').addEventListener('click',async()=>{
+  if(!TICK.size)return;
+  if(SEQ.status==='live'){toast('This sequence is live. Switch the emails off instead, or pause the sequence first.');return}
+  const picked=ROUTE.filter(e=>TICK.has(e.id));
+  if(!await ask('Take '+(picked.length===1?'this email':'these '+picked.length+' emails')+' out?','<ul>'+picked.map(e=>'<li>'+esc(e.subject.trim()||'No subject line yet')+'</li>').join('')+'</ul><p>They go to "Taken out" at the bottom of this list, where you can put any of them back.</p>','Take them out'))return;
+  await flush();
+  try{const r=await rpc('seq_steps_remove',{p_ids:picked.map(e=>e.id)});
+    TICK.clear();if(CUR&&picked.some(e=>e.id===CUR.id))CUR=null;
+    await reload(true);await loadTrash();await refreshList();
+    if(CUR)await pickEmail(CUR.id);else if(SEQ.emails[0])await pickEmail(SEQ.emails[0].id);else $('#ed').hidden=true;
+    toast(r.errors&&r.errors.length?plural(r.removed,'email')+' taken out. '+r.errors[0]:plural(r.removed,'email')+' taken out - they are in "Taken out" if you want them back')}
+  catch(err){toast(msg(err))}
+});
+/* ---------- Taken out ---------- */
+async function loadTrash(){if(!SEQ)return;try{TRASH=await rpc('seq_trash_list',{p_seq:SEQ.id})||[]}catch(_){TRASH=[]}paintTrash()}
+function paintTrash(){const n=TRASH.length;$('#trashBox').hidden=!n;$('#trashN').textContent=n;$('#mapTrash').hidden=!n;$('#mapTrash').textContent='Taken out ('+n+')';
+  $('#trashList').innerHTML=TRASH.map(t=>'<li><div><b>'+esc(t.label)+'</b><small>Taken out '+esc(pt(t.removed_at,true))+(t.kind==='condition'&&t.emails?' - '+plural(t.emails,'email')+' on it':'')+'</small></div><button class="btn" type="button" data-back="'+t.id+'">Put back</button></li>').join('')}
+$('#trashList').addEventListener('click',async e=>{const b=e.target.closest('[data-back]');if(!b)return;b.disabled=true;await flush();
+  try{const r=await rpc('seq_trash_restore',{p_id:b.dataset.back});if(r&&r.ok===false){toast(r.error);b.disabled=false;return}
+    await reload(true);await loadTrash();await refreshList();
+    const back=SEQ.emails.find(x=>x.id===r.step_id);if(back)await pickEmail(back.id);
+    toast('Put back'+(back?' - "'+(back.subject||'No subject line yet')+'" is open':''))}
+  catch(err){toast(msg(err));b.disabled=false}});
+$('#mapTrash').addEventListener('click',()=>{tabTo('emails');$('#trashBox').open=true;setTimeout(()=>$('#trashBox').scrollIntoView({block:'center'}),60)});
+// where a new email can go: the end of every path (before a "Go to" or an end), and right after the open email
+function addPlaces(){const out=[];
+  const walk=(parent,branch,ctx)=>{const st=lane(parent,branch);
+    const last=st[st.length-1];
+    if(!last||last.kind!=='condition'){
+      let after=null;if(last){if(ENDS.includes(last.kind))after=st.length>1?st[st.length-2].id:null;else after=last.id}
+      const prev=after?stepById(after):null;
+      const words=x=>x.kind==='email'?'"'+(x.subject.trim()||'No subject line yet')+'"':stepLabel(x);
+      out.push({parent,branch,after,label:ctx||'The main path',tail:prev?'at the end, after '+words(prev):(last?'at the start, before '+words(last):'nothing on this path yet')})}
+    st.forEach(s=>{if(s.kind==='condition')branchKeys(s).forEach(k=>walk(s.id,k,(ctx?ctx+' › ':'')+branchLabel(s,k)+': '+condShort(s)))})};
+  rootLanes().forEach(k=>walk(null,k,k?entryLaneLabel(k):''));return out}
+$('#route').addEventListener('click',async e=>{
+  const os=e.target.closest('[data-openseq]');if(os){await open(os.dataset.openseq,null,'emails');return}
+  const p=e.target.closest('[data-pick]');if(p){await pickEmail(p.dataset.pick);if(innerWidth<1100){const t=Math.max(0,Math.round($('#ed').getBoundingClientRect().top+window.scrollY-8));pinScroll(t,6000);window.scrollTo(0,t)}return}
+  const m=e.target.closest('[data-mv]');if(m){const li=m.closest('.stop');await flush();try{const r=await rpc('seq_step_move',{p_id:li.dataset.id,p_dir:+m.dataset.mv});if(r&&r.ok===false){toast(r.error);return}await reload(true);toast('Order saved')}catch(err){toast(msg(err))};return}
+  const om=e.target.closest('[data-onmap]');if(om){const id=om.closest('.stop').dataset.id;tabTo('map');setTimeout(()=>selectStep(id),50)}
+});
+$('#addEmail').addEventListener('click',async()=>{
+  await flush();
+  const places=addPlaces();
+  if(CUR)places.unshift({after:CUR.id,label:'Right after the email you have open',tail:'"'+(CUR.subject.trim()||'No subject line yet')+'"'});
+  let pl=places[0];
+  if(places.length>1){
+    const html='<p style="margin-top:0">Where should the new email go?</p><div style="display:grid;gap:8px">'+places.map((p,i)=>'<label class="opt"><input type="radio" name="addAt" value="'+i+'"'+(i?'':' checked')+'><span><b>'+esc(p.label)+'</b><small>'+esc(p.tail)+'</small></span></label>').join('')+'</div>';
+    if(!await ask('Add an email',html,'Add it there'))return;
+    const c=$('#askBody input[name=addAt]:checked');pl=places[c?+c.value:0]}
+  try{const r=await rpc('seq_step_add',{p:{sequence_id:SEQ.id,kind:'email',after_id:pl.after,parent_id:pl.after?null:pl.parent,branch:pl.after?null:pl.branch}});
+    await reload(true);await pickEmail(r.id);await refreshList();
+    const t=Math.max(0,Math.round($('#ed').getBoundingClientRect().top+window.scrollY-8));pinScroll(t,6000);window.scrollTo(0,t);
+    $('#eSubj').focus({preventScroll:true});toast('New email added - give it a subject line, then write it below')}catch(e){toast(msg(e))}
+});
+async function pickEmail(id,quiet){
+  if(CUR&&CUR.id!==id){await commitEditor();flush()}
+  CUR=SEQ.emails.find(x=>x.id===id)||null;
+  paintRoute();
+  $('#ed').hidden=!CUR;
+  if(!CUR){setQS();return}
+  $('#eSubj').value=CUR.subject||'';$('#ePrev').value=CUR.preview_text||'';
+  $('#ePub').checked=!!CUR.published;$('#ePubLab').textContent=CUR.published?'Sends':'Off - skipped';
+  $('#eDelay').value=CUR.delay_value;$('#eUnit').value=CUR.delay_unit;
+  if(!quiet&&(KG_FOR!==CUR.id||!ROOT))mountKoenig(CUR);
+  paintEditorTop();
+  $('#saved').textContent=CUR.updated_at?'Saved '+pt(CUR.updated_at):'';$('#saved').classList.remove('bad');
+  setQS();
+}
+function paintEditorTop(){
+  if(!CUR)return;const i=SEQ.emails.findIndex(x=>x.id===CUR.id);
+  $('#eStamp').textContent='Email '+(i+1)+' of '+SEQ.emails.length;
+  const first=!CUR.parent_id&&lane(null,CUR.branch||null)[0]&&lane(null,CUR.branch||null)[0].id===CUR.id;
+  $('#eWhenB').textContent=first?'after they go in':'after the step before';
+  $('#eRemove').disabled=SEQ.steps.length<=1;
+}
+$('#eSubj').addEventListener('input',e=>{mark('subject',e.target.value);const t=$('.stop.sel .subj');if(t){t.textContent=e.target.value.trim()||'No subject line yet';t.classList.toggle('none',!e.target.value.trim())}});
+$('#ePub').addEventListener('change',e=>{mark('published',e.target.checked);$('#ePubLab').textContent=e.target.checked?'Sends':'Off - skipped';flush();paintRoute()});
+$('#eDelay').addEventListener('input',e=>{let v=parseInt(e.target.value,10);if(isNaN(v))return;v=Math.max(0,Math.min(365,v));mark('delay_value',v);paintRoute()});
+$('#eDelay').addEventListener('blur',e=>{if(e.target.value===''||isNaN(parseInt(e.target.value,10))){e.target.value=CUR?CUR.delay_value:0}});
+$('#eUnit').addEventListener('change',e=>{mark('delay_unit',e.target.value);flush();paintRoute()});
+$('#eRemove').addEventListener('click',async()=>{
+  if(!CUR)return;
+  if(SEQ.status==='live'){toast('This sequence is live. Switch the email off instead, or pause the sequence first.');return}
+  if(!await ask('Take this email out?','<p>"'+esc(CUR.subject||'No subject line yet')+'" comes out of the sequence. The steps after it move up.</p><p>It goes to "Taken out" at the bottom of the list, where you can put it back.</p>','Take it out'))return;
+  await flush();
+  try{const r=await rpc('seq_step_remove',{p_id:CUR.id});if(r&&r.ok===false){toast(r.error);return}
+    const i=SEQ.emails.findIndex(x=>x.id===CUR.id);CUR=null;await reload(true);await loadTrash();const n=SEQ.emails[Math.max(0,i-1)];if(n)await pickEmail(n.id);else $('#ed').hidden=true;await refreshList();toast('Taken out - it is in "Taken out" if you want it back')}
+  catch(e){toast(msg(e))}
+});
+
+/* ---------- new, and from Kit ---------- */
+async function newSeq(){
+  await flush();
+  try{const id=await rpc('seq_save',{p:{name:'Untitled sequence'}});await refreshList();await open(id,null,'map');$('#sName').focus();$('#sName').select();toast('New sequence - give it a name')}catch(e){toast(msg(e))}
+}
+$('#newSeq').addEventListener('click',newSeq);$('#newSeq2').addEventListener('click',newSeq);
+$('#pick').addEventListener('change',e=>{const v=e.target.value;if(v)open(v,null,TAB==='emails'?'emails':'map')});
+
+/* ---------- when it sends ---------- */
+function paintWhen(){
+  $$('#days .day').forEach(b=>{const on=SEQ.send_days.includes(+b.dataset.d);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  $('#hour').value=SEQ.send_hour;
+  $('#tzNote').textContent=SEQ.time_zone==='America/Los_Angeles'?'Times are Pacific.':'Times are in '+SEQ.time_zone.replace('_',' ')+'.';
+  $('#archive').hidden=SEQ.status==='archived';
+}
+$('#days').addEventListener('click',async e=>{const b=e.target.closest('.day');if(!b)return;
+  const d=+b.dataset.d;let days=SEQ.send_days.slice();days=days.includes(d)?days.filter(x=>x!==d):days.concat(d).sort();
+  if(!days.length){toast('It needs at least one day to send on.');return}
+  try{await rpc('seq_save',{p:{id:SEQ.id,send_days:days}});SEQ.send_days=days;paintWhen();toast('Send days saved')}catch(err){toast(msg(err))}});
+$('#hour').addEventListener('change',async e=>{try{await rpc('seq_save',{p:{id:SEQ.id,send_hour:+e.target.value}});SEQ.send_hour=+e.target.value;toast('Time saved')}catch(err){toast(msg(err))}});
+$('#archive').addEventListener('click',async()=>{if(!await ask('Put "'+esc(SEQ.name)+'" away?','<p>It stops and goes to the bottom of the list, under "Put away". Nothing is thrown away - pick it and choose Draft or Live to bring it back.</p>','Put it away'))return;
+  try{await rpc('seq_save',{p:{id:SEQ.id,status:'archived'}});SEQ.status='archived';paintHead();paintWhen();await refreshList();toast('Put away')}catch(e){toast(msg(e))}});
+
+/* ---------- who's in ---------- */
+let findT=null;
+async function loadPeople(){
+  if(!SEQ)return;
+  try{PEOPLE=await rpc('seq_people',{p_seq:SEQ.id,p_q:$('#pFind').value.trim()||null})}catch(e){toast(msg(e));return}
+  const p=PEOPLE;
+  $('#tcPeople').textContent='('+(p.in||0).toLocaleString()+')';
+  $('#nIn').textContent=(p.in||0).toLocaleString();$('#nDone').textContent=(p.done||0).toLocaleString();$('#nLeft').textContent=(p.left||0).toLocaleString();$('#nStop').textContent=(p.stopped||0).toLocaleString();
+  let next='';
+  if(!p.in)next=(p.done||p.left||p.stopped)?'Nobody is waiting for anything from this sequence right now.':'Nobody is in this sequence yet.';
+  else if(SEQ.status!=='live')next=plural(p.in,'person')+' in it. Nothing happens until you make the sequence Live.';
+  else if(p.not_started)next=plural(p.not_started,'person')+' starting within a minute.';
+  else if(p.due_now)next=plural(p.due_now,'person')+' due an email now - it goes within a few minutes.';
+  else if(p.next_at)next='Next email goes out '+pt(p.next_at,true)+'.';
+  else if(p.waiting_event)next=plural(p.waiting_event,'person')+' waiting for something to happen.';
+  $('#pNext').textContent=next;
+  const notes=[];
+  if(p.gmail_waiting)notes.push(plural(p.gmail_waiting,'Gmail address')+' wait for the next day: Gmail gets up to '+p.gmail_per_day.toLocaleString()+' of these emails a day while Gmail warms up to your sender, and that number grows every week.');
+  if(p.retrying)notes.push(plural(p.retrying,'person')+' will be tried again in a few minutes'+(p.retry_errors&&p.retry_errors.length?' ('+esc(p.retry_errors[0])+')':'')+'.');
+  $('#pNotes').innerHTML=notes.join('<br>');
+  if(TAB==='people'&&WHO_INIT!==SEQ.id){WHO_INIT=SEQ.id;previewWho().then(()=>whoCounts())}
+  const where=x=>{
+    if(x.status==='done')return 'Finished';
+    if(x.status==='left')return 'Left - '+esc(x.note||'');
+    if(x.status==='stopped')return 'Stopped - '+esc(x.note||'');
+    if(!x.at_step)return SEQ.status==='live'?'Starting within a minute':'Waiting for the sequence to go live';
+    const s=stepById(x.at_step);if(!s)return 'In it';
+    const lab=s.kind==='email'?'Next: "'+esc(s.subject||'no subject')+'"':s.kind==='sequence'?'Getting "'+esc(seqName((s.config||{}).sequence_id))+'"':s.kind==='event'?'Waiting until: '+esc(eventWords(s.config)):s.kind==='wait'?esc(waitWords(s.config)):esc(stepBody(s).t);
+    return lab+(SEQ.status==='live'&&x.next_due_at?', '+pt(x.next_due_at,true):'')+(x.sent?' ('+x.sent+' sent)':'')+(x.note?' - '+esc(x.note):'')};
+  $('#pRows').innerHTML=(p.people||[]).length?p.people.map(x=>'<tr><td><a href="/admin/subscribers.html?e='+encodeURIComponent(x.email)+'">'+esc(x.email)+'</a></td><td>'+where(x)+'</td><td>'+esc(x.added_how||'')+(x.sent_by?'':'')+'</td><td>'+(x.status==='in'?'<button class="mini" type="button" data-out="'+esc(x.email)+'">Take out</button>':'')+'</td></tr>').join('')
+    :'<tr><td colspan="4" style="color:#9b91ac">'+($('#pFind').value.trim()?'Nobody in this sequence matches that.':'Nobody yet.')+'</td></tr>';
+}
+$('#pFind').addEventListener('input',()=>{clearTimeout(findT);findT=setTimeout(loadPeople,350)});
+$('#pRows').addEventListener('click',async e=>{const b=e.target.closest('[data-out]');if(!b)return;
+  if(!await ask('Take '+esc(b.dataset.out)+' out?','<p>They get nothing more from this sequence, and nothing puts them back in.</p>','Take them out'))return;
+  try{await rpc('seq_take_out',{p_seq:SEQ.id,p_email:b.dataset.out});toast('Taken out');loadPeople()}catch(err){toast(msg(err))}});
+$('#opts').addEventListener('change',e=>{$$('.opt').forEach(o=>{const r=o.querySelector('input[type=radio]');if(r)o.classList.toggle('on',r.checked)});whoSoon(0);const k=choice().kind;if(['tag','heat','series','backer','bookfunnel'].includes(k))whoCounts([k])});
+const pickOpt=v=>()=>{$('#opts input[value='+v+']').checked=true;$('#opts').dispatchEvent(new Event('change'))};
+/* ---------- Thread Weaver audiences (20 Oct 2026) ----------
+   Joy's kinds (everyone, engaged, joined_since, tag, paste) plus TW's: heat, series, backer, bookfunnel, joy, kit_tag, app.
+   Each is sent to the database as {kind, ...} - the shape _seq_pick reads: heat {heats:[..]}, series {series},
+   backer {project}, bookfunnel {page}, kit_tag {tag}. Joy's bought / stars / members are not offered here. */
+function metaList(a,keys){return arr(a).map(x=>{if(x==null)return null;if(typeof x!=='object')return {v:String(x),l:String(x),n:null};
+  let v=null;for(const k of keys){if(x[k]!=null&&x[k]!==''){v=String(x[k]);break}}
+  const l=x.name||x.label||x.title||v;const n=x.people!=null?x.people:x.n!=null?x.n:x.count!=null?x.count:null;return v?{v,l:String(l),n}:null}).filter(Boolean)}
+function fillSelect(sel,items,anyLabel){const e=$(sel);if(!e)return;const cur=e.value;
+  e.innerHTML='<option value="">'+esc(anyLabel)+'</option>'+items.map(x=>'<option value="'+esc(x.v)+'">'+esc(x.l)+(x.n!=null?' ('+(+x.n).toLocaleString()+')':'')+'</option>').join('');
+  if(cur&&items.some(x=>x.v===cur))e.value=cur}
+function fillAudience(m){m=m||{};
+  fillSelect('#pSeries',metaList(m.series,['key','series','slug','value','name']),'Any series');
+  fillSelect('#pProject',metaList(m.projects,['project','name','value']),'Any campaign');
+  fillSelect('#pBfPage',metaList(m.bookfunnel_pages,['page','name','value']),'Any page');
+  metaList(m.heats,['heat','name','value']).forEach(h=>{const s=document.querySelector('[data-hn="'+h.v+'"]');if(s&&h.n!=null)s.textContent=' ('+(+h.n).toLocaleString()+')'});
+  if(AUD_WANT){setChoice(AUD_WANT);AUD_WANT=null}}
+let AUD_WANT=null;
+function heatsPicked(){return $$('#pHeats input[data-h]').filter(x=>x.checked).map(x=>x.dataset.h)}
+function audOf(k){const c={kind:k};
+  if(k==='joined_since')c.since=$('#since').value;if(k==='paste')c.emails=$('#paste').value;if(k==='tag')c.tags=$('#pTags').getTags?$('#pTags').getTags():[];
+  if(k==='heat')c.heats=heatsPicked();if(k==='series')c.series=$('#pSeries').value;if(k==='backer')c.project=$('#pProject').value;
+  if(k==='bookfunnel')c.page=$('#pBfPage').value;if(k==='kit_tag')c.tag=$('#pKitTag').value.trim();return c}
+function choice(){return audOf($('#opts input[name=who]:checked').value)}
+// what is missing before a choice can be counted (null = nothing)
+function audProblem(c){if(c.kind==='paste'&&!String(c.emails||'').includes('@'))return 'Paste some email addresses first.';
+  if(c.kind==='tag'&&!arr(c.tags).length)return 'Type a tag first.';if(c.kind==='heat'&&!arr(c.heats).length)return 'Tick at least one heat.';
+  if(c.kind==='joined_since'&&!c.since)return 'Pick a date first.';return null}
+// put a saved choice back on the page
+function setChoice(a){if(!a||!a.kind)return;const r=$('#opts input[name=who][value="'+a.kind+'"]');if(!r)return;r.checked=true;
+  const setSel=(s,v)=>{const e=$(s);if(!e||v==null)return;if(v&&![...e.options].some(o=>o.value===v)){AUD_WANT=a}e.value=v};
+  if(a.kind==='heat'){const hs=arr(a.heats).length?arr(a.heats):[a.heat||a.value].filter(Boolean);$$('#pHeats input[data-h]').forEach(x=>x.checked=hs.map(h=>String(h).toLowerCase()).includes(x.dataset.h.toLowerCase()))}
+  if(a.kind==='series')setSel('#pSeries',a.series||a.value||'');if(a.kind==='backer')setSel('#pProject',a.project||a.value||'');
+  if(a.kind==='bookfunnel')setSel('#pBfPage',a.page||a.value||'');if(a.kind==='kit_tag')$('#pKitTag').value=a.tag||a.value||'';
+  if(a.kind==='joined_since'&&a.since)$('#since').value=String(a.since).slice(0,10);if(a.kind==='paste'&&a.emails)$('#paste').value=a.emails;
+  if(a.kind==='tag'&&arr(a.tags).length&&$('#pTags').setTags)$('#pTags').setTags(a.tags);
+  $('#opts').dispatchEvent(new Event('change'))}
+// clicking or typing in a choice's own box picks that choice
+$('#opts').addEventListener('focusin',e=>{if(e.target.type==='radio')return;const o=e.target.closest('.opt');if(!o)return;const r=o.querySelector('input[type=radio]');if(r&&!r.checked){r.checked=true;$('#opts').dispatchEvent(new Event('change'))}});
+// changing a choice's own box (a list, a tick) picks that choice too - before the page reads what is picked
+$('#opts').addEventListener('change',e=>{if(e.target.type==='radio')return;const o=e.target.closest('.opt');if(!o)return;const r=o.querySelector('input[type=radio]');if(r&&!r.checked)r.checked=true},true);
+
+// 16 Oct 2026 - Russell: "what does who is that mean?", "I see no way to see who to add to a sequence", "there's no
+// calculation anywhere". The count only came from a button called "Who is that?". Now every choice carries its own
+// count, and picking one (or typing a tag, a date, a product, addresses) shows straight away how many would go in AND
+// who they are - the most engaged first, with a search - and the button to put them in.
+let WHO_INIT=null, WHO_N=0, WHO_T=null, WHO_C=null, WHO_FIND_T=null;
+function whoSoon(ms){clearTimeout(WHO_T);WHO_T=setTimeout(()=>previewWho(),ms==null?450:ms)}
+async function whoCounts(only){
+  if(!SEQ)return;const id=SEQ.id;
+  const ask1=(v,c)=>(only&&!only.includes(v))?null:rpc('seq_audience_preview',{p_seq:id,p:Object.assign({counts_only:true},c)}).then(r=>{if(!SEQ||SEQ.id!==id)return;
+    const o=$('#opts input[value='+v+']');if(!o)return;const b=o.closest('.opt').querySelector('b');if(!b)return;
+    let x=b.querySelector('.oc');if(!x){x=document.createElement('span');x.className='oc';b.appendChild(x)}
+    x.textContent=' · '+(r.new||0).toLocaleString()+(r.new===1?' person':' people')+(r.already_in?' (+'+r.already_in.toLocaleString()+' already in)':'')},()=>{});
+  ['engaged','everyone','series','backer','bookfunnel','joy','kit_tag','app'].forEach(k=>ask1(k,audOf(k)));
+  if(heatsPicked().length)ask1('heat',audOf('heat'));
+  const tg=$('#pTags').getTags?$('#pTags').getTags():[];if(tg.length)ask1('tag',{kind:'tag',tags:tg});
+  const sn=$('#since').value;if(sn)ask1('joined_since',{kind:'joined_since',since:sn});
+}
+function whoRow(x){const d=x.joined?new Date(x.joined).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';
+  return '<tr><td><a href="/admin/subscribers.html?e='+encodeURIComponent(x.email)+'" target="_blank" rel="noopener">'+esc(x.email)+'</a>'+(x.name?'<div style="color:#9b91ac;font-size:13px">'+esc(x.name)+'</div>':'')+'</td><td>'+esc(d)+'</td><td>'+(x.opens?x.opens+' lately':'none lately')+'</td></tr>'}
+async function whoList(c,n){
+  const box=$('#pWho');if(!box)return;const f=($('#pWhoFind')||{}).value||'';const my=WHO_N;
+  try{const r=await rpc('seq_audience_people',{p_seq:SEQ.id,p:c,p_find:f.trim()||null,p_limit:60});if(my!==WHO_N)return;
+    const ppl=r.people||[];
+    box.innerHTML=ppl.length?'<div style="color:#9b91ac;font-size:14px;margin:2px 0 6px">'+(f.trim()?plural(r.count,'person')+' match "'+esc(f.trim())+'"'+(r.count>ppl.length?' - the '+ppl.length+' most engaged:':':'):(n>ppl.length?'The '+ppl.length+' most engaged of the '+n.toLocaleString()+' (search to find anyone):':'All of them:'))+'</div>'+
+      '<div style="max-height:340px;overflow:auto;border:2px solid var(--ink);border-radius:10px;background:var(--field)"><table class="tbl" style="margin:0"><thead><tr><th>Who</th><th>Joined</th><th>Opened</th></tr></thead><tbody>'+ppl.map(whoRow).join('')+'</tbody></table></div>'
+      :'<div style="color:#9b91ac">'+(f.trim()?'Nobody in that choice matches "'+esc(f.trim())+'".':'')+'</div>'}
+  catch(e){if(my===WHO_N)box.innerHTML='<div style="color:#9b91ac">Could not list them: '+esc(msg(e))+'</div>'}
+}
+async function previewWho(){
+  if(!SEQ||TAB!=='people')return;
+  const c=choice();const ans=$('#pAns');const my=++WHO_N;WHO_C=c;
+  if(c.kind==='paste'&&!c.emails.includes('@')){ans.innerHTML='<div style="color:#9b91ac">Paste email addresses above - they are counted as you paste.</div>';ans.hidden=false;return}
+  if(c.kind==='tag'&&!c.tags.length){ans.innerHTML='<div style="color:#9b91ac">Type a tag above and press Enter - the people with it show here.</div>';ans.hidden=false;return}
+  if(c.kind==='joined_since'&&!c.since){ans.innerHTML='<div style="color:#9b91ac">Pick a date above - everyone who joined since then shows here.</div>';ans.hidden=false;return}
+  if(c.kind==='heat'&&!arr(c.heats).length){ans.innerHTML='<div style="color:#9b91ac">Tick at least one heat above - the readers with it show here.</div>';ans.hidden=false;return}
+  ans.innerHTML='<div style="color:#9b91ac">Counting…</div>';ans.hidden=false;
+  try{const r=await rpc('seq_audience_preview',{p_seq:SEQ.id,p:c});if(my!==WHO_N)return;
+    let h='';
+    if(!r.new)h='<b>Nobody new.</b> '+(r.already_in?plural(r.already_in,'person')+' from that '+(r.already_in===1?'is':'are')+' already in this sequence.':'Nobody on your list matches that.');
+    else{h='<div style="font-size:20px;font-weight:700">'+plural(r.new,'person')+' would go in.</div>';
+      if(r.already_in)h+='<div>'+plural(r.already_in,'more')+' already in it - they are left where they are.</div>';
+      if(r.gmail){const days=Math.ceil(r.gmail/Math.max(1,r.gmail_per_day));
+        h+='<div>'+r.gmail.toLocaleString()+' of them '+(r.gmail===1?'is':'are')+' on Gmail. While Gmail warms up to your sender, up to '+r.gmail_per_day.toLocaleString()+' Gmail addresses a day get one of these emails (that number goes up by 3,000 every week)'+
+          (days>1?', so the Gmail people start over about '+days+' days, most engaged first. Each person still gets every email, spaced the way you set.':'.')+'</div>'}
+      h+='<div style="margin-top:6px">'+(SEQ.status==='live'?'They start within a minute.':'Nothing happens until you make this sequence Live.')+'</div>';
+      h+='<div class="row" style="margin-top:10px"><button class="btn mint" type="button" id="pAdd">Put '+plural(r.new,'person')+' in</button></div>';
+      h+='<div style="margin-top:14px"><input id="pWhoFind" class="inp" style="max-width:320px" placeholder="Search them by email or name" aria-label="Search the people who would go in"></div><div id="pWho" style="margin-top:8px"><div style="color:#9b91ac">Listing them…</div></div>'}
+    if(r.not_on_list_count)h+='<div style="margin-top:8px;color:#9b91ac">'+plural(r.not_on_list_count,'address')+' you pasted '+(r.not_on_list_count===1?'is':'are')+' not subscribed to your list, so '+(r.not_on_list_count===1?'it stays':'they stay')+' out: '+r.not_on_list.map(esc).join(', ')+(r.not_on_list_count>r.not_on_list.length?'…':'')+'</div>';
+    ans.innerHTML=h;ans.hidden=false;
+    if(r.new){whoList(c,r.new);$('#pWhoFind').addEventListener('input',()=>{clearTimeout(WHO_FIND_T);WHO_FIND_T=setTimeout(()=>{WHO_N++;whoList(c,r.new)},350)})}
+    const add=$('#pAdd');if(add)add.onclick=async()=>{add.disabled=true;add.textContent='Putting them in…';
+      try{const x=await rpc('seq_add_people',{p_seq:SEQ.id,p:Object.assign({confirm:true},c)});WHO_N++;ans.innerHTML='<b>'+plural(x.added,'person')+' put in.</b>';if(c.kind==='paste')$('#paste').value='';loadPeople();toast(plural(x.added,'person')+' put in')}
+      catch(err){add.disabled=false;add.textContent='Try again';toast(msg(err))}}}
+  catch(e){if(my===WHO_N){ans.innerHTML='<div style="color:#9b91ac">Could not count that: '+esc(msg(e))+'</div>';ans.hidden=false}}
+}
+$('#pCheck').addEventListener('click',()=>previewWho());
+['#paste','#pKitTag'].forEach(s=>$(s).addEventListener('input',()=>whoSoon(600)));
+$('#since').addEventListener('change',()=>{whoSoon(0);whoCounts()});
+$('#pKitTag').addEventListener('change',()=>whoCounts(['kit_tag']));
+
+window.addEventListener('resize',()=>{if(TAB==='map'&&SEQ)applyView()});
+
+})();
+</script>
+</body>
+</html>

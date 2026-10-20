@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<title>Stop these emails — Wannabe Press</title>
+<style>
+ :root{--gold:#e8b53a;--ink:#ece3d0;--bg:#0e0b16;--card:#16121f;--line:#2e2742;--mute:#9b91ac}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Cormorant Garamond',serif;line-height:1.6}
+ .wrap{max-width:520px;margin:0 auto;padding:56px 22px 80px}
+ .brand{font-family:'Cinzel',Georgia,serif;color:var(--gold);letter-spacing:1px;font-size:15px;margin:0 0 26px}
+ h1{font-size:25px;margin:0 0 10px;color:var(--ink)}
+ p{margin:0 0 16px}
+ a{color:var(--gold)}
+ .who{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;margin:0 0 20px;word-break:break-all}
+ button{font:inherit}
+ .btn{display:block;width:100%;padding:14px 16px;border:2px solid var(--gold);border-radius:12px;background:transparent;cursor:pointer;font-size:16px;font-weight:600;text-align:center;margin:0 0 10px;color:var(--gold)}
+ .btn:hover{background:#241a33}
+ .btn.go{background:var(--gold);color:#1a1424}
+ .btn.go:hover{background:#f2c654}
+ .btn[disabled]{opacity:.5;cursor:default}
+ .small{font-size:14px;color:var(--mute)}
+ .err{color:#ff9a8a}
+ footer{margin-top:34px;font-size:13px;color:var(--mute)}
+ .boot{color:var(--mute);font-style:italic}
+ @media (max-width:640px){.wrap{padding-top:36px}}
+</style>
+</head><body>
+<div class="wrap">
+<div class="brand">WANNABE PRESS</div>
+<div id="app"><p class="boot">one sec...</p></div>
+<footer>Russell Nohelty &middot; Wannabe Press &middot; <a href="mailto:help@wannabepress.com">help@wannabepress.com</a></footer>
+</div>
+<script>
+(function(){
+  // 15 Oct 2026. The page behind "Stop these emails" at the bottom of every email in one of Russell's own sequences
+  // (Thread Weaver admin email pages, sent by nl-seq-send; ported from Joy Looper 20 Oct 2026). It takes the reader out of THAT sequence only - they stay on the
+  // newsletter. Signed out by design: ?t= is the reader's own key from their email and ?s= is the sequence.
+  // Nothing changes when the page opens (mail scanners open links); only the button does it (nl_seq_leave).
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  var q = new URLSearchParams(location.search), t = (q.get("t") || "").trim(), s = (q.get("s") || "").trim();
+  function call(action){
+    var c = { url: "https://nzkgurdmvgkizvzisqxt.supabase.co", anon: "sb_publishable_XhncOLTTqr5qTs_G9O3Ecw_m6m5fU0f" };
+    return fetch(c.url + "/rest/v1/rpc/nl_seq_leave", { method: "POST", headers: { "Content-Type": "application/json", apikey: c.anon },
+        body: JSON.stringify({ p_token: t, p_seq: s, p_action: action }) })
+      .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error((j && j.message) || "That link didn't work."); return j; }); });
+  }
+  function broken(m){ $("app").innerHTML = "<h1>That link didn't work</h1><p>" + esc(m) + "</p><p>Reply to any of Russell's emails and he'll take you off by hand.</p>"; }
+  function paint(d, just){
+    if (!d || d.ok === false) return broken(d && d.error || "We couldn't find you.");
+    var name = "<b>" + esc(d.sequence) + "</b>";
+    var h = '<div class="who">' + esc(d.email) + "</div>";
+    if (d.status === "in" || d.status === "done") {
+      h = "<h1>" + (just === "back" ? "You're back in" : d.status === "done" ? "You've had all of these" : "Stop these emails?") + "</h1>" + h +
+        "<p>" + (d.status === "done" ? "You've already had every email in " + name + ". Nothing more is coming from it." :
+          just === "back" ? "The " + name + " emails will keep coming." : "This takes you out of " + name + " - the emails about it stop. You'll still get Russell's other emails.") + "</p>" +
+        (d.status === "in" ? '<button class="btn go" id="leave">Stop these emails</button><p class="small">Changed your mind? Just close this page - nothing happens unless you press the button.</p>' : "");
+    } else if (d.status === "left") {
+      h = "<h1>" + (just === "left" ? "Done - those emails have stopped" : "You're out of these emails") + "</h1>" + h +
+        "<p>Nothing more from " + name + " is coming to you. You're still on Russell's list.</p>" +
+        '<button class="btn" id="back">That was a mistake - keep sending them</button>';
+    } else if (d.status === "stopped") {
+      h = "<h1>You're not getting these emails</h1>" + h + "<p>Nothing more from " + name + " is coming to you.</p>";
+    } else {
+      h = "<h1>You're not in this one</h1>" + h + "<p>You aren't getting the " + name + " emails, so there's nothing to stop.</p>";
+    }
+    h += '<p class="small" style="margin-top:24px">Want nothing from Russell at all? <a href="' + esc(d.unsub_url) + '">Unsubscribe from everything</a>.</p>';
+    $("app").innerHTML = h;
+    var l = $("leave"), b = $("back");
+    if (l) l.onclick = function(){ l.disabled = true; l.textContent = "One sec..."; call("leave").then(function(x){ paint(x, "left"); }).catch(function(e){ broken(e.message); }); };
+    if (b) b.onclick = function(){ b.disabled = true; b.textContent = "One sec..."; call("rejoin").then(function(x){ paint(x, "back"); }).catch(function(e){ broken(e.message); }); };
+  }
+  if (!/^[0-9a-f-]{36}$/i.test(t) || !/^[0-9a-f-]{36}$/i.test(s)) return broken("This link is missing a piece. Use the one at the bottom of the email.");
+  call("check").then(function(d){ paint(d); }).catch(function(e){ broken(e.message); });
+})();
+
+</script>
+</body></html>

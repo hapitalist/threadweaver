@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Newsletter · Thread Weaver Admin</title>
+<!-- /admin/newsletter.html - Thread Weaver, 20 Oct 2026. Ported from Joy Looper's /admin/newsletter.
+     The list: how many are on it, how the recent emails did, and putting a reader back who asked to be. Putting someone
+     back needs how they asked, written down (admin_nl_put_back refuses without it). A reader who bounced or complained
+     is also on Amazon's block list; putting them back asks Amazon to unblock them. Nothing on this page sends an email.
+     Data: admin_nl_overview, admin_nl_find, admin_nl_put_back. Joy's Ghost sync and Substack history are left out. -->
+<style>
+:root{--bg:#0e0a16;--panel:#16101f;--ink:#e9e1f6;--dim:#9b91ac;--gold:#e8b53a;--edge:#2e2742;--field:#1b1428;--red:#ff8a7a;--green:#7fd08a}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+body{font:400 16px/1.55 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif}
+#root{max-width:880px;margin:0 auto;padding:22px 16px 90px}
+h1{font-family:'Cinzel',Georgia,serif;font-weight:600;color:var(--gold);font-size:26px;margin:0 0 4px}
+h2{font-family:'Cinzel',Georgia,serif;font-weight:600;color:var(--gold);font-size:18px;margin:0 0 10px}
+.sub{color:var(--dim);margin:0 0 22px;font-size:15px}
+.card{border:1px solid var(--edge);border-radius:14px;background:var(--panel);padding:18px;margin:0 0 18px}
+.big{font-size:30px;font-family:'Cinzel',Georgia,serif;line-height:1.1;color:var(--ink)}
+.row{display:flex;gap:18px;flex-wrap:wrap}
+.stat{flex:1 1 140px}
+.stat .lab{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+input[type=text]{font:inherit;color:var(--ink);padding:10px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--field);width:100%;max-width:420px;min-height:44px}
+input::placeholder{color:#7d7891}
+.btn{padding:10px 16px;border:1px solid #3a3150;border-radius:10px;background:#241b33;font-weight:700;min-height:44px}
+.btn:hover{border-color:#6a5d8a}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.go{background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f;border:none}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.item{border:1px solid var(--edge);border-radius:12px;padding:13px;margin:0 0 11px;background:#1a1326}
+.item .addr{font-weight:700;word-break:break-all}
+.item .meta{font-size:14px;color:var(--dim);margin-top:3px}
+.warnbox{border:1px solid #8a3a30;border-radius:12px;background:#2a1515;padding:14px;margin:14px 0}
+.warnbox b{color:var(--red)}
+.okbox{border:1px solid #2f5a3a;border-radius:12px;background:#132219;padding:12px 14px;margin:10px 0 0}
+.muted{color:var(--dim);font-size:14px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;margin-left:6px;vertical-align:1px}
+.tag.on{background:#132219;color:var(--green)}
+.tag.off{background:#3a1a14;color:#ffb3a6}
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0 8px;font-size:15px}
+.check input{width:22px;height:22px;margin:2px 0 0;flex:0 0 auto;accent-color:var(--gold)}
+.err{color:var(--red);font-weight:700;margin-top:8px}
+a{color:var(--gold)}
+.tablewrap{overflow-x:auto;margin:0 -4px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+td,th{text-align:left;padding:7px 8px;border-bottom:1px solid #221a31;white-space:nowrap}
+td.subj{white-space:normal;min-width:180px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+@media (max-width:640px){h1{font-size:22px}.big{font-size:24px}}
+</style>
+</head>
+<body>
+<main id="root"><p class="muted">One moment…</p></main>
+<script src="/lib/supabase.js"></script>
+<script src="/admin/tw-admin.js"></script>
+<script>
+(function () {
+  var SB = null, D = null, FOUND = null, Q = '', JUST = null;
+  function $(id){ return document.getElementById(id); }
+  function el(t, c, txt){ var n=document.createElement(t); if(c)n.className=c; if(txt!=null)n.textContent=txt; return n; }
+  function n(x){ return (x==null?0:Number(x)).toLocaleString('en-US'); }
+  function when(s){ if(!s) return ''; try { return new Date(s).toLocaleString(undefined,{timeZone:'America/Los_Angeles',day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){ return s; } }
+  function day(s){ if(!s) return ''; try { return (/^\d{4}-\d{2}-\d{2}$/.test(String(s))?new Date(String(s)+'T12:00:00'):new Date(s)).toLocaleDateString(undefined,{timeZone:'America/Los_Angeles',day:'numeric',month:'short',year:'numeric'}); } catch(e){ return s; } }
+  var WORD = {subscribed:'on the list', unsubscribed:'left', bounced:'bounced', complained:'marked it as spam'};
+
+  function stat(lab, val, note){
+    var s = el('div','stat');
+    s.appendChild(el('div','lab',lab));
+    s.appendChild(el('div','big', val));
+    if (note) s.appendChild(el('div','muted',note));
+    return s;
+  }
+  function link(href, text){ var a = el('a', null, text); a.href = href; return a; }
+
+  function draw(){
+    var r=$('root'); r.textContent='';
+    r.appendChild(el('h1', null, 'Your newsletter list'));
+    var sub = el('p','sub');
+    sub.appendChild(document.createTextNode('Your Wannabe Press readers who can get email from russell@wannabepress.com. Nothing on this page sends email - one-off emails go out from '));
+    sub.appendChild(link('/admin/one-offs.html', 'One-off emails'));
+    sub.appendChild(document.createTextNode(', and sequences from '));
+    sub.appendChild(link('/admin/sequences.html', 'Sequences'));
+    sub.appendChild(document.createTextNode('. To see who is hot and who is not, open '));
+    sub.appendChild(link('/admin.html', 'Readers'));
+    sub.appendChild(document.createTextNode('.'));
+    r.appendChild(sub);
+
+    var c = D.counts || {};
+    var top = el('div','card');
+    var row = el('div','row');
+    row.appendChild(stat('On the list', n(c.subscribed)));
+    row.appendChild(stat('Left', n(c.unsubscribed)));
+    row.appendChild(stat('Bounced', n(c.bounced)));
+    row.appendChild(stat('Marked as spam', n(c.complained)));
+    top.appendChild(row);
+    if (D.last_sync && D.last_sync.at) top.appendChild(el('p','muted','Last checked against your Substack list ' + when(D.last_sync.at) + '.'));
+    r.appendChild(top);
+
+    if (D.unblock_refused > 0) {
+      var w = el('div','warnbox');
+      w.appendChild(el('b', null, n(D.unblock_refused) + (D.unblock_refused === 1 ? ' reader is' : ' readers are') + ' back on the list, but Amazon still blocks their address'));
+      w.appendChild(el('div', null, 'They bounced or marked an email as spam before, so Amazon put them on its block list. Amazon is asked to unblock them; it says no until the email key in Amazon is allowed to unblock addresses. Search for them below to see what Amazon said.'));
+      r.appendChild(w);
+    }
+
+    var s = el('div','card');
+    s.appendChild(el('h2', null, 'Recent emails'));
+    var sends = D.sends || [];
+    if (!sends.length) s.appendChild(el('p','muted','No email has gone out from here yet.'));
+    else {
+      var wrap = el('div','tablewrap'); var t = el('table');
+      var hr = el('tr'); ['When','Email','Sent','Opened','Clicked','Bounced','Spam','Left'].forEach(function(h){ hr.appendChild(el('th',null,h)); });
+      t.appendChild(hr);
+      sends.forEach(function(x){
+        var k = x.counts || x, tr = el('tr');
+        var st = !x.status || x.status === 'completed' || x.status === 'sent' ? '' : x.status === 'queued' || x.status === 'scheduled' ? ' (waiting - ' + when(x.send_at) + ')' : ' (' + x.status + ')';
+        tr.appendChild(el('td', null, day(x.at || x.sent_at || x.send_at)));
+        tr.appendChild(el('td', 'subj', (x.subject || x.name || x.slug || '(no subject)') + st + (x.qa ? ' [test list]' : '')));
+        [k.sent, k.opened, k.clicked, k.bounced, k.complained, k.unsubscribed].forEach(function(v){ tr.appendChild(el('td', null, n(v))); });
+        t.appendChild(tr);
+      });
+      wrap.appendChild(t); s.appendChild(wrap);
+      s.appendChild(el('p','muted','Opened counts people whose mail app showed the pictures - Apple Mail does that by itself, so clicks are the surer sign.'));
+    }
+    r.appendChild(s);
+
+    var f = el('div','card');
+    f.appendChild(el('h2', null, 'Put somebody back on the list'));
+    f.appendChild(el('p','muted','Only somebody who asked to be put back. Type part of their address, then say how they asked - that is kept with them.'));
+    var inp = el('input'); inp.type='text'; inp.id='q'; inp.placeholder='part of their email address';
+    inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; inp.value = Q;
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') find(); });
+    f.appendChild(inp);
+    var acts = el('div','acts'); var go = el('button','btn go','Find'); go.type='button'; go.id='find'; go.onclick = find; acts.appendChild(go);
+    f.appendChild(acts);
+    var res = el('div'); res.id = 'found'; res.style.marginTop = '14px'; f.appendChild(res);
+    r.appendChild(f);
+    drawFound();
+  }
+
+  function drawFound(){
+    var box = $('found'); if (!box) return; box.textContent = '';
+    if (!FOUND) return;
+    if (FOUND.error) { box.appendChild(el('div','err',FOUND.error)); return; }
+    var rows = FOUND.rows || [];
+    if (FOUND.erased) box.appendChild(el('div','warnbox','That address asked to be forgotten. It cannot be put back from here.'));
+    if (!rows.length) { box.appendChild(el('p','muted','Nobody on the list matches that.')); return; }
+    rows.forEach(function(x){ box.appendChild(item(x)); });
+  }
+
+  function item(x){
+    var it = el('div','item');
+    var a = el('div','addr', x.email);
+    a.appendChild(el('span','tag ' + (x.status === 'subscribed' ? 'on' : 'off'), WORD[x.status] || x.status));
+    it.appendChild(a);
+    var bits = [];
+    if (x.name) bits.push(x.name);
+    if (x.why) bits.push(x.why + (x.since ? ' (' + day(x.since) + ')' : ''));
+    if (x.last_click) bits.push('last clicked ' + day(x.last_click)); else if (x.last_open) bits.push('last opened ' + day(x.last_open));
+    if (bits.length) it.appendChild(el('div','meta', bits.join(' - ')));
+    if (JUST && JUST.email === x.email) {
+      var ok = el('div','okbox');
+      ok.appendChild(el('b', null, JUST.already ? 'They were already on the list.' : 'Back on the list.'));
+      if (!JUST.already && JUST.unblock) ok.appendChild(el('div', null, 'Amazon had blocked this address; Amazon is being asked to unblock it.'));
+      it.appendChild(ok);
+    }
+    if (x.status === 'subscribed' && x.unblock_note) it.appendChild(el('div','err', 'Amazon still blocks this address: ' + x.unblock_note));
+    else if (x.status === 'subscribed' && x.unblock_waiting) it.appendChild(el('div','meta', 'Asking Amazon to unblock this address (they bounced or complained before).'));
+    if (x.status !== 'subscribed') {
+      var open = el('button','btn','Put back on the list'); open.type='button';
+      var form = el('div'); form.hidden = true;
+      open.onclick = function(){ form.hidden = false; open.hidden = true; };
+      var lab = el('label','check'); var cb = el('input'); cb.type='checkbox';
+      lab.appendChild(cb); lab.appendChild(el('span', null, 'They asked to be put back on the list.'));
+      form.appendChild(lab);
+      var how = el('input'); how.type='text'; how.placeholder='How did they ask? e.g. replied to the 1 Oct email'; form.appendChild(how);
+      if (x.status === 'bounced' || x.status === 'complained') {
+        form.appendChild(el('p','muted', x.status === 'bounced'
+          ? 'Their address bounced before, so Amazon blocks it. Putting them back asks Amazon to unblock it.'
+          : 'They marked an email as spam before, so Amazon blocks their address. Putting them back asks Amazon to unblock it - only do this if they asked.'));
+      }
+      var row = el('div','acts'); var put = el('button','btn go','Put them back'); put.type='button'; put.disabled = true;
+      var cancel = el('button','btn','Cancel'); cancel.type='button';
+      cancel.onclick = function(){ form.hidden = true; open.hidden = false; cb.checked = false; how.value=''; put.disabled = true; };
+      row.appendChild(put); row.appendChild(cancel); form.appendChild(row);
+      var msg = el('div'); form.appendChild(msg);
+      function ready(){ put.disabled = !(cb.checked && how.value.trim().length >= 4); }
+      cb.onchange = ready; how.oninput = ready;
+      put.onclick = function(){
+        put.disabled = true; put.textContent = 'Putting them back...'; msg.textContent = '';
+        SB.rpc('admin_nl_put_back', { p_email: x.email, p_how: how.value.trim() }).then(function(r){
+          var d = (r && r.data) || {};
+          if (r.error || !d.ok) { put.textContent = 'Put them back'; ready(); msg.className = 'err'; msg.textContent = (r.error && r.error.message) || d.error || 'That did not work.'; return; }
+          JUST = { email: x.email, already: !!d.already, unblock: !!d.unblock };
+          x.status = 'subscribed'; x.why = d.already ? x.why : 'put back - they asked: ' + how.value.trim(); x.since = new Date().toISOString();
+          x.unblock_waiting = !!d.unblock; x.unblock_note = null;
+          return reload();
+        }, function(e){ put.textContent = 'Put them back'; ready(); msg.className = 'err'; msg.textContent = e && e.message ? e.message : String(e); });
+      };
+      it.appendChild(open); it.appendChild(form);
+    }
+    return it;
+  }
+
+  function find(){
+    var q = ($('q').value || '').trim().toLowerCase(); Q = q;
+    var b = $('find'); b.disabled = true; b.textContent = 'Looking...';
+    SB.rpc('admin_nl_find', { p_q: q }).then(function(r){
+      b.disabled = false; b.textContent = 'Find';
+      FOUND = (r && r.data) || { error: (r.error && r.error.message) || 'That did not work.' };
+      drawFound();
+    }, function(e){ b.disabled = false; b.textContent = 'Find'; FOUND = { error: e && e.message ? e.message : String(e) }; drawFound(); });
+  }
+
+  function reload(){
+    return SB.rpc('admin_nl_overview').then(function(r){
+      if (r && r.data) { D = r.data; draw(); }
+    });
+  }
+
+  TWAdmin.ready(function (sb) {
+    SB = sb;
+    SB.rpc('admin_nl_overview').then(function(r){
+      if (!r || r.error || !r.data) { $('root').textContent=''; $('root').appendChild(el('h1', null, 'Your newsletter list')); $('root').appendChild(el('p','muted','Could not load the list' + (r && r.error && r.error.message ? ' - ' + r.error.message : '') + '.')); return; }
+      D = r.data; draw();
+    }, function(e){
+      $('root').textContent=''; $('root').appendChild(el('p','muted','Could not load the list - ' + (e && e.message ? e.message : String(e)) + '.'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

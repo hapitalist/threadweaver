@@ -1,5 +1,6 @@
 // serial — Thread Weaver Serials (1.15.0), 12 Oct 2026. Moved to Thread Weaver's own project 13 Oct 2026
 // (only change: unsubscribe links point at this project).
+// 20 Oct 2026: chapter emails use SES configuration set "wannabepress-email" (events -> this project's nl-ses-events), not Joy's "hapitalist-newsletter".
 // 14 Oct 2026: paid serials can be read ahead one chapter at a time for $1 (serial_chapter_purchases).
 // Each paid chapter is a credit that moves that reader's serial one chapter ahead for good; the weekly
 // schedule continues from there, so a bought chapter is never "delivered" again for free.
@@ -357,7 +358,7 @@ async function resolveFrom(d: Deps, s: Serial, from: unknown): Promise<number> {
 function owns(ents: string[], b: Book) { return b.free || ents.includes("unlock_all") || (!!b.bundle && ents.includes(b.bundle)); }
 
 const MAIL_FROM = "Wannabe Press <stories@wannabepress.com>";
-const SES_REGION = "us-east-1", SES_CONFIG_SET = "hapitalist-newsletter", SES_FEEDBACK_TO = "my_dmarc_report@hapitalist.com";
+const SES_REGION = "us-east-1", SES_CONFIG_SET = "wannabepress-email", SES_FEEDBACK_TO = "my_dmarc_report@hapitalist.com";
 const SEND_RATE = 4;
 const RUN_BUDGET_MS = 100_000;
 let _ses: AwsClient | null = null;

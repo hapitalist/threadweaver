@@ -4,5 +4,8 @@
  "google-play-verify",
  "checkout",
  "library-url",
- "admin-readers"
+ "admin-readers",
+ "nl-unsubscribe",
+ "nl-seq-send",
+ "nl-ses-events"
 ]
