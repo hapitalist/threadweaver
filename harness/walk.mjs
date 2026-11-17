@@ -434,10 +434,12 @@ async function walkApp(dev, { persona = "new reader", native = true, storage = n
   }
 
   // free books (all books when everything is owned), three pages in
-  const books = LIB.filter((b) => all || b.free).slice(0, all ? 60 : 30);
+  // with everything owned, a different 10 books and 4 comics each night (every one of them is opened within a week), so a
+  // night's walk finishes inside GitHub's time limit; the free ones are opened every night
+  const day = Math.floor(Date.now() / 864e5), turn = (list, n) => list.length <= n ? list : Array.from({ length: n }, (_, i) => list[(day * n + i) % list.length]);
+  const books = all ? turn(LIB.filter((b) => !b.free), 10) : LIB.filter((b) => b.free);
   for (const b of books) await readBook(run, page, w, b, native);
-  // free comics (all when owned)
-  for (const c of COMICS.filter((c) => all || c.free)) await readComic(run, page, w, c);
+  for (const c of (all ? turn(COMICS.filter((c) => !c.free), 4) : COMICS.filter((c) => c.free))) await readComic(run, page, w, c);
 
   // the Weave
   {
