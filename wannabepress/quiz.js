@@ -139,6 +139,7 @@
       box.classList.add("qz-open");
     }
     function finish() {
+      if (window.hxGoal) window.hxGoal("quiz_done", path); // site-eyes: the funnel and A/B tests count a finished quiz
       if (path === "fic") ficResult(); else bizResult();
       try { box.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
     }

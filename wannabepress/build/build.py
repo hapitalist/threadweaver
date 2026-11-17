@@ -19,6 +19,7 @@ def page(path, title, desc, body, og="/img/og.jpg", home=False):
 <meta property="og:image" content="https://wannabepress.com{og}"><meta property="og:url" content="{canon}"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#720a09"><link rel="icon" href="/img/favicon.png" type="image/png"><link rel="apple-touch-icon" href="/img/icon-192.png">
 {FONTS}<link rel="stylesheet" href="/site.css?v={V}">
+<script src="https://fnioslsnlzyjpumdknva.supabase.co/functions/v1/site-eyes/eyes.js" data-k="1143830afdd94d31b0348e9fc5de3254" defer></script>
 </head><body>
 {header()}
 <main>
