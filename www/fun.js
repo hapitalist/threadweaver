@@ -236,6 +236,8 @@
   }
   function offerQuiz(){
     if(!isFirstRun()) return;
+    // 1.17.3: a reader who came from wannabepress.com for a specific series or book goes straight to it, no welcome pop-up
+    try{ if(/[?&](series|serial|book|buy)=/.test(location.search) || localStorage.getItem("tw_pending_link")){ localStorage.setItem("tw_seen_intro","1"); return; } }catch(e){}
     if(!libraryShowing()){ setTimeout(offerQuiz, 500); return; }
     if(document.getElementById("funWelcome")) return;
     try{ localStorage.setItem("tw_seen_intro","1"); }catch(e){}

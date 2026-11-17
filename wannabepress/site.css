@@ -295,3 +295,44 @@ footer .legal{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.2);padding
   .sticky{display:flex}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---- russellnohelty.com page layout, Wannabe colors ---- */
+.bkgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:26px 20px}
+.bk{text-decoration:none;display:block}
+.bk img,.bk .tcover{border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);aspect-ratio:2/3;object-fit:cover;width:100%;background:var(--paper2);transition:transform .12s,box-shadow .12s}
+.bk:hover img,.bk:hover .tcover{transform:translate(-2px,-3px) rotate(-1.2deg);box-shadow:7px 8px 0 var(--maroon)}
+.bk .k{display:block;margin-top:12px;font-size:11px}
+.bk b{display:block;font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.03em;color:var(--blood);line-height:1;margin-top:6px}
+.bk p{margin:6px 0 0;font-size:15px;line-height:1.4;color:var(--ink2)}
+.bk .price{display:inline-block;margin-top:8px;font-family:var(--mono);font-weight:700;font-size:13px;background:var(--bee);border:2px solid var(--ink);padding:3px 8px}
+.head h2{font-size:clamp(38px,5vw,60px)}
+.head .k{align-self:flex-end}
+.pill{display:inline-block;border:2px solid var(--ink);background:#fff;padding:2px 8px;font-size:11px;color:var(--ink)}
+.startwith{margin-top:24px;border-top:3px dashed var(--ink);padding-top:16px;max-width:560px}
+.startwith .k{display:block;margin-bottom:4px}
+.startwith b{display:block;font-family:var(--display);font-weight:400;font-size:30px;color:var(--blood);letter-spacing:.03em}
+.startwith p{margin:2px 0 10px;color:var(--ink2)}
+.where3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.where3 .wbox{padding:20px}
+.where3 .wbox .k{display:block}
+.where3 .wbox h3{font-size:28px;margin:8px 0 0}
+.where3 .wbox ul{margin:0;font-size:15px}
+.wbox .note{color:var(--ink2);font-size:15px;margin:6px 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip2{font-family:var(--mono);font-size:13px;font-weight:700;text-decoration:none;border:2px solid var(--ink);background:#fff;padding:7px 12px;box-shadow:2px 2px 0 var(--ink)}
+.chip2:hover{background:var(--bee)}
+.prevnext{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+section.dark{background:var(--blood);color:#fff}
+section.dark h2{color:#fff}
+section.dark .bk b{color:var(--bee)}
+section.dark .bk p,section.dark .bk .k{color:#f3d9d0}
+.phero .wrap{grid-template-columns:320px 1fr}
+.phero .tag{font-size:24px}
+.q figcaption a{color:var(--blood)}
+@media (max-width:1100px){.bkgrid{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:960px){.where3{grid-template-columns:1fr}.phero .wrap{grid-template-columns:220px 1fr}}
+@media (max-width:640px){.bkgrid{grid-template-columns:repeat(2,1fr);gap:22px 14px}.bk b{font-size:21px}.phero .wrap{grid-template-columns:1fr}.prevnext{flex-direction:column}}
+.pitem{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
+.pitem i{float:none;grid-column:2;grid-row:1;white-space:nowrap}
+.pitem b{grid-column:1;grid-row:1}
+.pitem span{grid-column:1/-1}

@@ -195,10 +195,22 @@
   var _authMode = "login"; // or "signup"
   // 1.17.0: someone arriving from the sales page with a buy or start-free button is (usually) new. They land on Sign Up, told
   // what happens next; after they are in, serials.js opens that purchase (/app?buy=...).
+  // 1.17.3: links from wannabepress.com (?series=, ?serial=, ?book=) say what opens after sign-up.
+  var WALL_NAMES = { "godsverse":"The Godsverse Chronicles", "obsidian-spindle":"The Obsidian Spindle Saga", "dragon-strife":"Dragon Strife",
+    "quest-girls":"Quest Girls", "wonderland":"The Wonderland Duology", "ichabod-jones":"Ichabod Jones: Monster Hunter", "standalones":"the standalone novels" };
+  function wallTarget(q) {
+    var id = q.get("series") || q.get("serial"), bk = q.get("book");
+    if (id && WALL_NAMES[id]) return WALL_NAMES[id];
+    var b = bk || id; if (!b) return null;
+    var hit = (window.BOOKS || []).filter(function (x) { return x.id === b; })[0];
+    return hit ? hit.title : "your book";
+  }
   function enterWall() {
-    var q = new URLSearchParams(location.search), buy = q.get("buy"), start = q.get("start");
-    if (!buy && !start) { showLoginWall("Sign in to enter Thread Weaver."); return; }
-    var say = buy ? "Make your free account (or log in) and checkout opens next." : "Make your free account to start reading.";
+    var q = new URLSearchParams(location.search), buy = q.get("buy"), start = q.get("start"), target = wallTarget(q);
+    if (!buy && !start && !target) { showLoginWall("Sign in to enter Thread Weaver."); return; }
+    var say = buy ? "Make your free account (or log in) and checkout opens next."
+      : target ? "Make your free account (or log in) and " + target + " opens next. Starting is free."
+      : "Make your free account to start reading.";
     showLoginWall(say);
     var t = document.getElementById("lwTabSignup"); if (t) { try { t.click(); } catch (e) {} }
     var m = document.getElementById("lwMsg"); if (m) { m.style.color = "#cdbfe6"; m.textContent = say; }
@@ -276,7 +288,7 @@
         if (_authMode === "signup") {
           var name = (nameEl.value || "").trim();
           // 1.16.0: Thread Weaver sends its own confirmation email (tw-auth), so the link is always right.
-          twAuth("signup", { email: email, password: pass, name: name }).then(function (r) {
+          twAuth("signup", { email: email, password: pass, name: name, next: twNextLink() }).then(function (r) {
             go.disabled = false;
             // setMode() clears the message line, so switch tabs FIRST, then say why.
             if (r.exists) {
@@ -287,7 +299,7 @@
             }
             if (!r.ok) { m.style.color = "#e0a0a0"; m.textContent = r.error || "Couldn't create the account. Try again."; return; }
             setMode("login");
-            m.style.color = "#9fe0b0"; m.textContent = "Account created. Check your email and tap the link to confirm \u2014 that signs you in.";
+            m.style.color = "#9fe0b0"; var tg = wallTarget(new URLSearchParams(location.search)); m.textContent = "Account created. Check your email and tap the link to confirm \u2014 that signs you in" + (tg ? " and opens " + tg + "." : ".");
           });
         } else {
           sb.auth.signInWithPassword({ email: email, password: pass }).then(function (res) {
@@ -307,7 +319,7 @@
         var m = msgEl();
         if (!email || email.indexOf("@") < 1) { m.style.color = "#e0a0a0"; m.textContent = "Enter your email above first, then tap the sign-in link."; return; }
         m.style.color = "#9b91ac"; m.textContent = "Sending\u2026";
-        twAuth("magic", { email: email }).then(function (r) {
+        twAuth("magic", { email: email, next: twNextLink() }).then(function (r) {
           if (!r.ok) { m.style.color = "#e0a0a0"; m.textContent = r.error || "Couldn't send the link. Try again."; }
           else { m.style.color = "#9fe0b0"; m.textContent = "Sign-in link sent \u2014 open it on this device and you\u2019re in. No password needed."; }
         });
@@ -433,6 +445,12 @@
   // .message (renders as "{}"); never show that. Detect common cases explicitly.
   // 1.16.0: sign-up, reset and sign-in-link emails go through Thread Weaver's own sender.
   // Always resolves to { ok, error?, exists? } - never rejects.
+  // where the confirmation / sign-in email should land: this same /app link (series, serial, book or buy)
+  function twNextLink() {
+    var keep = new URLSearchParams(), q = new URLSearchParams(location.search);
+    ["series","serial","book","buy","from"].forEach(function (k) { var v = q.get(k); if (v && /^[\w.-]{1,80}$/.test(v)) keep.set(k, v); });
+    var s = keep.toString(); return "/app" + (s ? "?" + s : "");
+  }
   function twAuth(action, body) {
     return fetch(FN + "/tw-auth", {
       method: "POST", headers: { "Content-Type": "application/json" },

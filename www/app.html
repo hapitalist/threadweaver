@@ -380,11 +380,12 @@ body.is-native.pre-auth #shell{display:block !important}
 /* Apple 5.1.1(v): free content must be usable WITHOUT an account. The shell is
    always visible; only paid actions require sign-in (see promptSignin in store.js). */
 </style>
-<div id="boot"><img src="img/mascot.png" alt="loading"><div class="bt">WEAVE THREADER</div><div class="bs">pulling the threads…</div></div>
+<style>.ser.sr-focus{box-shadow:0 0 0 2px #e8b53a,0 0 24px rgba(232,181,58,.35);scroll-margin-top:16px}</style>
+<div id="boot"><img src="img/mascot.png" alt="loading"><div class="bt">THREAD WEAVER</div><div class="bs">pulling the threads…</div></div>
 <div id="shell">
   <div class="brand" style="position:relative;z-index:52">
-    <div class="kicker">WEAVE THREADER</div>
-    <h1>WEAVE THREADER</h1>
+    <div class="kicker">WANNABE PRESS</div>
+    <h1>THREAD WEAVER</h1>
     <div class="welcome" id="welcome">Your library of worlds — read them, play them, weave them together.</div>
     <!-- Apple 2.1(b): App Review could not LOCATE the in-app purchases because the only
          route to them was tapping a locked item. This is an always-visible, obvious
@@ -1087,7 +1088,7 @@ function renderBooks(){
         '<span class="row-title" style="color:'+col+'">'+(isStd?"Follow a novel as a weekly serial":"Follow as a weekly serial")+'</span>'+
         '<span class="row-stat" style="color:'+col+'">FREE</span></div>';
     }
-    html+='<div class="ser'+openCls+'" style="border-left-color:'+col+'">'+
+    html+='<div class="ser'+openCls+(window.__twFocus===label?' open sr-focus':'')+'" data-series="'+label+'" style="border-left-color:'+col+'">'+
       '<div class="ser-head" onclick="toggleSeries(this)">'+
         '<span class="ser-dot" style="background:'+col+';color:'+col+'"></span>'+
         '<span class="ser-name">'+label+'</span>'+
@@ -1242,7 +1243,7 @@ function renderComics(){
         '<span class="row-title">'+(c.title||c.id)+'<span class="row-sub"> · '+c.pages.length+'pp</span></span>'+
         '<span class="'+cls+'">'+stat+'</span></div>';
     });
-    html+='<div class="ser'+openCls+'" style="border-left-color:'+col+'">'+
+    html+='<div class="ser'+openCls+(window.__twFocus===s?' open sr-focus':'')+'" data-series="'+s+'" style="border-left-color:'+col+'">'+
       '<div class="ser-head" onclick="toggleSeries(this)">'+
         '<span class="ser-dot" style="background:'+col+';color:'+col+'"></span>'+
         '<span class="ser-name">'+s+'</span>'+
@@ -1893,7 +1894,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){ var b=document.getElementById('boot'); if(b){ b.classList.add('gone'); setTimeout(function(){ b.style.display='none'; },600); } }, 900);
   // in-app version stamp (confirms which build is live after a deploy)
   try{
-    var TW_APP_VERSION=window.TW_APP_VERSION="1.17.2";
+    var TW_APP_VERSION=window.TW_APP_VERSION="1.17.3";
     if(!document.getElementById('twVer')){
       var v=document.createElement('div'); v.id='twVer';
       v.textContent='v'+TW_APP_VERSION;

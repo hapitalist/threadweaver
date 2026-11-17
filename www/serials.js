@@ -329,6 +329,27 @@
   function refresh(){ loadMine().then(render); }
   window.twSerialsRefresh = refresh;
 
+  /* 1.17.3: /app?series=<id> opens that series right in the library (no pop-up), ready to read. */
+  var SERIES_LABEL = { "godsverse":"Godsverse Chronicles", "obsidian-spindle":"Obsidian Spindle Saga", "dragon-strife":"Dragon Strife",
+    "quest-girls":"Quest Girls", "wonderland":"Wonderland", "ichabod-jones":"Ichabod Jones", "standalones":"Standalone Novels" };
+  window.twSeriesLabels = SERIES_LABEL;
+  function twNative(){
+    var pr=(location.protocol||"").toLowerCase();
+    return pr==="file:"||pr==="capacitor:"||pr==="ionic:"||pr==="app:"||!!window.cordova||!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  }
+  window.twShowSeries = function(id){
+    var label = SERIES_LABEL[id]; if (!label) return;
+    window.__twFocus = label;
+    var tries = 0;
+    (function find(){
+      var el = document.querySelector('.ser[data-series="'+label+'"]');
+      if (!el) { if (tries++ < 60) setTimeout(find, 250); return; }
+      el.classList.add("open"); el.classList.add("sr-focus");
+      try { el.scrollIntoView({ behavior:"smooth", block:"start" }); } catch(e) { el.scrollIntoView(); }
+      setTimeout(function(){ window.__twFocus = null; var x=document.querySelector('.ser.sr-focus'); if (x) x.classList.remove("sr-focus"); }, 6000);
+    })();
+  };
+
   /* -------------------------------------------------------- share links */
   function handleLink(){
     var q = new URLSearchParams(location.search), p = location.pathname.replace(/\/+$/,"");
@@ -339,7 +360,19 @@
     if (!kind) pick();
     // a link that had to wait for sign-in: replay it in full (1.16.3: incl. &unlock=next)
     if (!kind) { try{ var pend=sessionStorage.getItem("tw_pending_link"); if(pend && token()){ sessionStorage.removeItem("tw_pending_link"); q=new URLSearchParams(pend); pick(); } }catch(e){} }
+    // 1.17.3: a link saved before sign-up (kept a day) - e.g. from wannabepress.com -> sign up -> confirm email -> /app
+    if (!kind && !q.get("series")) { try{ var lp=JSON.parse(localStorage.getItem("tw_pending_link")||"null"); if(lp && token()){ localStorage.removeItem("tw_pending_link"); if(Date.now()-lp.t < 864e5){ q=new URLSearchParams(lp.q); pick(); } } }catch(e){} }
+    function pickSeries(){ if (q.get("series")) { kind = "series"; id = q.get("series"); } }
+    if (!kind) pickSeries();
     if (!kind) return;
+    // 1.17.3: on the website a signed-out reader sees the sign-up wall first. Keep the link and
+    // replay it once they are in (same tab, or after the confirmation email brings them back).
+    if (!token() && !twNative() && kind !== "open") {
+      try{ localStorage.setItem("tw_pending_link", JSON.stringify({ q: location.search, t: Date.now() })); }catch(e){}
+      try{ var bt=(window.BOOKS||[]).filter(function(x){ return x.id===id; })[0], lm=document.getElementById("lwMsg");
+        if (bt && lm && /your book/.test(lm.textContent)) lm.textContent = lm.textContent.replace("your book", bt.title); }catch(e){}
+      return;
+    }
     var from = q.get("from");
     var readG = q.get("read");
     // back from a $1 chapter checkout: the Stripe webhook lands within seconds - wait for it, then open the chapter
@@ -365,6 +398,7 @@
       if (b && window.openBook) window.openBook(b.file, b.title, b.id);
     }
     else if (kind === "buy") window.twSerialBuy(id === "everything" ? "unlock_all" : id);
+    else if (kind === "series") { try{ localStorage.removeItem("tw_pending_link"); }catch(e){} window.twShowSeries(id); }
     else if (kind === "open" && id === "codex" && window.openWeave) window.openWeave();
     else if (kind === "open" && id === "quiz" && window.openDiscover) window.openDiscover();
   }
