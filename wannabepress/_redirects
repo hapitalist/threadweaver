@@ -6,7 +6,6 @@
 /s/*          https://wannabepress.substack.com/s/:splat        301!
 /archive      https://wannabepress.substack.com/archive         301!
 /subscribe    https://wannabepress.substack.com/subscribe       301!
-/about        https://wannabepress.substack.com/about           301!
 /podcast      https://wannabepress.substack.com/podcast         301!
 /feed         https://wannabepress.substack.com/feed            301!
 /account      https://wannabepress.substack.com/account         301!
@@ -15,3 +14,6 @@
 /t/*          https://wannabepress.substack.com/t/:splat        301!
 /i/*          https://wannabepress.substack.com/i/:splat        301!
 /action/*     https://wannabepress.substack.com/action/:splat   301!
+
+# build scripts are not part of the site
+/build/*  /404.html  404!
