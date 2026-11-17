@@ -15,7 +15,8 @@
        - the hero says what this is and who it is for, shows the offer, and has ONE big buy button - all before the scroll on a phone
        - one or two buttons, max: Get Everything (the sale) and Start free (the free taste); nothing else competes up top
        - the offer is spelled out at once: what it is, what is in it, what it is worth ($165 bought separately, $99.99 here)
-       - a few trust builders, kept small: readers on the list, Kickstarters funded, secure checkout
+       - a few trust builders, kept small: the Goodreads rating, one reader's words, readers on the list, Kickstarters, secure checkout;
+         six short five-star Goodreads quotes below (Hapitalist's own reviews table, Cohortz: reviews / review_books, 17 Nov 2026)
        - trust at the bottom: a short FAQ that answers "how do I get it" before someone has to ask
        - no menu, no clutter, a fast page (no images to wait on above the scroll), the main button repeated at the end and
          in a bar that stays on screen once the hero is gone
@@ -56,6 +57,14 @@ h1 em{font-style:normal;color:var(--gold)}
 .proof{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin-top:12px;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--dim);letter-spacing:.3px}
 .proof b{color:var(--ink);font-weight:500}
 
+.hq{max-width:620px;margin:12px auto 0;text-align:center;font-style:italic;font-size:17px;color:var(--ink);line-height:1.35}
+.hq cite{display:block;font-style:normal;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--dim);margin-top:4px;letter-spacing:.3px}
+.hq cite i{font-style:italic}
+.quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.q{margin:0;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:14px 15px}
+.q blockquote{font-size:18px;font-style:italic;color:var(--ink);line-height:1.35}
+.q figcaption{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--gold);margin-top:8px;letter-spacing:.3px}
+.q figcaption a{color:var(--dim)}
 /* ---------- below the scroll ---------- */
 section{padding:34px 0 6px}
 .eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);text-align:center}
@@ -102,7 +111,7 @@ h2{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(21px,4.6vw,27px);t
   .stick{display:none}
   .foot{padding-bottom:40px}
 }
-@media (max-width:370px),(max-height:620px){h1{font-size:21px}.promise{font-size:15px}.grid{gap:12px;margin-top:10px}.offer{padding:13px}.offer .t{font-size:19px}.price .now{font-size:28px}.incl{font-size:14px;margin:6px 0 10px}.buy{padding:14px 12px;min-height:50px}.proof{display:none}}
+@media (max-width:370px),(max-height:620px){h1{font-size:21px}.promise{font-size:15px}.grid{gap:12px;margin-top:10px}.offer{padding:13px}.offer .t{font-size:19px}.price .now{font-size:28px}.incl{font-size:14px;margin:6px 0 10px}.buy{padding:14px 12px;min-height:50px}.proof,.hq{display:none}}
 </style>
 <script>/* 1.16.2: this is the WEBSITE landing page. Inside the packaged app go straight to the library
    (its "/app" links only exist on the website). The app starts on app.html; this is the backstop. */
@@ -136,7 +145,8 @@ h2{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(21px,4.6vw,27px);t
         <a class="free" href="/app?start=free" data-cta="hero-free">Or start free: 16 books &amp; 5 comics &rarr;</a>
       </div>
     </div>
-    <div class="proof"><span><b>15,000+</b> readers on the Wannabe Press list</span><span><b>50+</b> Kickstarter campaigns</span></div>
+    <div class="proof"><span><b>&#9733; 4.3</b> across 632 Goodreads reviews</span><span><b>15,000+</b> readers on the Wannabe Press list</span><span><b>50+</b> Kickstarter campaigns</span></div>
+    <blockquote class="hq">&ldquo;How can a book be so violent and hilarious and brilliant at the same time?&rdquo;<cite>&#9733;&#9733;&#9733;&#9733;&#9733; S.E. Anderson on <i>Katrina Hates the Dead</i>, Goodreads</cite></blockquote>
   </div>
 </header>
 
@@ -152,6 +162,20 @@ h2{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(21px,4.6vw,27px);t
       <div class="card"><div class="ic">&#9876;</div><h3>7 story games</h3><p>Choose-your-path RPGs set inside the books. Your choices shape the story.</p></div>
       <div class="card"><div class="ic">&#10022;</div><h3>The Weave</h3><p>A lore codex that unlocks as you read: gods, worlds, relics and a timeline of everything.</p></div>
     </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">WHAT READERS SAY</div>
+    <h2>Five stars, in their words.</h2>
+    <div class="quotes">
+      <figure class="q"><blockquote>&ldquo;This is definitely more Hannibal than Buffy.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Ken G. · <a href="https://www.goodreads.com/book/show/25052119-ichabod-jones" target="_blank" rel="noopener">Ichabod Jones: Monster Hunter</a></figcaption></figure>
+      <figure class="q"><blockquote>&ldquo;This story keeps you glued to the pages.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Kaye · <a href="https://www.goodreads.com/book/show/25052119-ichabod-jones" target="_blank" rel="noopener">Ichabod Jones: Monster Hunter</a></figcaption></figure>
+      <figure class="q"><blockquote>&ldquo;Dark, dirty, grimy. That&rsquo;s the Wonderland Nohelty shows.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Brandon · <a href="https://www.goodreads.com/book/show/36465661-white-rabbit" target="_blank" rel="noopener">White Rabbit</a></figcaption></figure>
+      <figure class="q"><blockquote>&ldquo;It provided EVERYTHING I look for in an SF story.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Aurora · <a href="https://www.goodreads.com/book/show/51010124-invasion" target="_blank" rel="noopener">Invasion</a></figcaption></figure>
+      <figure class="q"><blockquote>&ldquo;It had everything a great read should have.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Leah S. · <a href="https://www.goodreads.com/book/show/45307897-the-vessel" target="_blank" rel="noopener">The Vessel</a></figcaption></figure>
+      <figure class="q"><blockquote>&ldquo;Great story! Really loved everything about it.&rdquo;</blockquote><figcaption>&#9733;&#9733;&#9733;&#9733;&#9733; Dennis · <a href="https://www.goodreads.com/book/show/220487313-the-sleeping-beauty" target="_blank" rel="noopener">The Sleeping Beauty</a></figcaption></figure>
+    </div>
+    <p class="fine" style="margin-top:12px">Goodreads reviews of books in Thread Weaver</p>
   </section>
 
   <section>
