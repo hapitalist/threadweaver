@@ -1,0 +1,241 @@
+magic|Amazon|https://www.amazon.com/dp/B0D7K97121/
+magic|Kobo|https://www.kobo.com/us/en/ebook/magic-107
+magic|Barnes & Noble|https://www.barnesandnoble.com/w/magic-russell-p-nohelty/1145109249?ean=2940179764977
+magic|Google Play|https://play.google.com/store/books/details?id=8KF-EAAAQBAJ
+magic|Apple Books|https://books.apple.com/us/book/magic/id6479644365
+magic|Smashwords|https://www.smashwords.com/books/view/1538619
+evil|Amazon|https://www.amazon.com/gp/product/B0D7JQYTML
+evil|Kobo|https://www.kobo.com/us/en/ebook/evil-41
+evil|Barnes & Noble|https://www.barnesandnoble.com/w/evil-russell-nohelty/1145091930?ean=2940179509738
+evil|Google Play|https://play.google.com/store/books/details?id=9KF-EAAAQBAJ
+evil|Apple Books|https://books.apple.com/us/book/evil/id6479617077
+evil|Smashwords|https://www.smashwords.com/books/view/1538335
+time|Amazon|https://www.amazon.com/gp/product/B0D7K6B9DB
+time|Kobo|https://www.kobo.com/us/en/ebook/time-100
+time|Barnes & Noble|https://www.barnesandnoble.com/w/time-russell-p-nohelty/1145091942?ean=2940179476474
+time|Google Play|https://play.google.com/store/books/details?id=-KF-EAAAQBAJ
+time|Apple Books|https://books.apple.com/us/book/time/id6479617393
+time|Smashwords|https://www.smashwords.com/books/view/1538341
+heaven|Amazon|https://www.amazon.com/gp/product/B0CW5HVC8C
+heaven|Kobo|https://www.kobo.com/us/en/ebook/heaven-175
+heaven|Barnes & Noble|https://www.barnesandnoble.com/w/heaven-russell-nohelty/1145091960?ean=2940179667230
+heaven|Google Play|https://play.google.com/store/books/details?id=AKJ-EAAAQBAJ
+heaven|Apple Books|https://books.apple.com/us/book/heaven/id6479617415
+heaven|Smashwords|https://www.smashwords.com/books/view/1538346
+death|Amazon|https://www.amazon.com/Death-Followed-Behind-Godsverse-Chronicles-ebook/dp/B07QC3PL8K
+death|Barnes & Noble|https://www.barnesandnoble.com/w/death-russell-nohelty/1146343405?ean=2940179982838
+death|Apple Books|https://books.apple.com/us/book/death/id6723897559
+death|Google Play|https://play.google.com/store/books/details/Russell_Nohelty_Death?id=BKJ-EAAAQBAJ
+death|Kobo|https://www.kobo.com/us/en/ebook/death-98
+doom|Amazon|https://www.amazon.com/Lobdell-Chronicles-Russell-Nohelty-ebook/dp/B07Q76B4RL
+doom|Barnes & Noble|https://www.barnesandnoble.com/w/doom-russell-nohelty/1146343431?ean=2940180084927
+doom|Apple Books|https://books.apple.com/us/book/doom/id6723897432
+doom|Google Play|https://play.google.com/store/books/details/Russell_Nohelty_Doom?id=CKJ-EAAAQBAJ
+doom|Kobo|https://www.kobo.com/us/en/ebook/doom-22
+hell|Amazon|https://www.amazon.com/Hell-Followed-Behind-Godsverse-Chronicles-ebook/dp/B084CY2G2G
+hell|Barnes & Noble|https://www.barnesandnoble.com/w/hell-russell-nohelty/1146343433?ean=2940180324887
+hell|Apple Books|https://books.apple.com/us/book/hell/id6723897681
+hell|Google Play|https://play.google.com/store/books/details/Russell_Nohelty_Hell?id=CqJ-EAAAQBAJ
+hell|Kobo|https://www.kobo.com/us/en/ebook/hell-77
+ruin|Amazon|https://www.amazon.com/Ruin-Followed-Behind-Godsverse-Chronicles-ebook/dp/B084D4GPJ5
+ruin|Barnes & Noble|https://www.barnesandnoble.com/w/ruin-russell-nohelty/1146343437?ean=2940179981138
+ruin|Apple Books|https://books.apple.com/us/book/ruin/id6723897670
+ruin|Google Play|https://play.google.com/store/books/details/Russell_Nohelty_Ruin?id=DKJ-EAAAQBAJ
+ruin|Kobo|https://www.kobo.com/us/en/ebook/ruin-65
+conquest|Amazon|https://www.amazon.com/gp/product/B0DHV6FWBK
+conquest|Apple Books|https://books.apple.com/us/book/conquest/id6714482420
+conquest|Barnes & Noble|https://www.barnesandnoble.com/w/conquest-russell-nohelty/1146329768?ean=9781942350668
+conquest|Kobo|https://www.kobo.com/us/en/ebook/conquest-79
+conquest|Google Play|https://play.google.com/store/books/details?id=EqJ-EAAAQBAJ
+darkness|Google Play|https://play.google.com/store/books/details?id=FqJ-EAAAQBAJ
+darkness|Kobo|https://www.kobo.com/us/en/ebook/darkness-142
+darkness|Apple Books|https://books.apple.com/us/book/darkness/id6714482404
+darkness|Barnes & Noble|https://www.barnesandnoble.com/w/darkness-russell-nohelty/1146329811?ean=2940179981015&st=AFF&2sid=Draft2Digital_7968444_NA&sourceId=AFFDraft2Digital
+darkness|Amazon|https://www.amazon.com/gp/product/B0DHV4MSVN
+chaos|Amazon|https://www.amazon.com/Chaos-Godsverse-Chronicles-Book-11-ebook/dp/B0DHV4NLY8
+chaos|Google Play|https://play.google.com/store/books/details?id=GKJ-EAAAQBAJ
+chaos|Apple Books|https://books.apple.com/us/book/chaos/id6714482292
+chaos|Barnes & Noble|https://www.barnesandnoble.com/w/chaos-russell-nohelty/1146329841?ean=2940179973386
+chaos|Kobo|https://www.kobo.com/us/en/ebook/chaos-212
+eternity|Amazon|https://www.amazon.com/dp/B0DFCDP92G
+eternity|Google Play|https://play.google.com/store/books/details?id=A6otEQAAQBAJ
+eternity|Apple Books|https://books.apple.com/us/book/eternity/id6737809743
+eternity|Barnes & Noble|https://www.barnesandnoble.com/w/eternity-russell-nohelty/1146515523?ean=2940180573483
+eternity|Kobo|https://www.kobo.com/us/en/ebook/eternity-105
+katrinahatesthedead|Amazon|https://www.amazon.com/product-reviews/B01BXS8EQ4
+katrinahatesthedead|Global Comix|https://globalcomix.com/c/katrina-hates-the-dead
+katrinahatesthedead|DriveThru Comics|https://www.drivethrucomics.com/product/275539/Katrina-Hates-the-Dead-Trade
+katrinahatesthedead|Spinwhiz Comics|https://www.spinwhizcomics.com/site/comics/wannabe-press/katrina
+blackmarketheroine|DriveThru Comics|https://www.drivethrucomics.com/product/376416/Black-Market-Heroine
+blackmarketheroine|Global Comix|https://globalcomix.com/c/black-market-heroine/chapters/en/1/1
+blackmarketheroine|Amazon|https://www.amazon.com/dp/B09L38X2QH
+pixiedust|Amazon|https://www.amazon.com/gp/product/B079DCY5KB
+pixiedust|Global Comix|https://globalcomix.com/c/pixie-dust?lang=en
+pixiedust|DriveThru Comics|https://www.drivethrucomics.com/product/275540/Pixie-Dust
+pixiedust|Spinwhiz Comics|https://www.spinwhizcomics.com/site/comics/wannabe-press/pixie-dust
+bulletins|SHOP|https://www.kickstarter.com/projects/russellnohelty/bulletins/rewards
+thesleepingbeauty|Amazon|https://www.amazon.com/dp/B0DK69PQB8
+thesleepingbeauty|Barnes & Noble|https://www.barnesandnoble.com/w/the-sleeping-beauty-russell-nohelty/1144286081?ean=2940168190565
+thesleepingbeauty|Apple Books|https://books.apple.com/us/book/the-sleeping-beauty/id6737143265
+thesleepingbeauty|Google Play|https://play.google.com/store/books/details?id=65K1EAAAQBAJ
+thesleepingbeauty|Kobo|https://www.kobo.com/us/en/ebook/the-sleeping-beauty-32
+thewickedwitch|Amazon|https://www.amazon.com/dp/B0DK6B7VW4
+thewickedwitch|Barnes & Noble|https://www.barnesandnoble.com/w/the-wicked-witch-russell-nohelty/1146441344?ean=2940168190503
+thewickedwitch|Apple Books|https://books.apple.com/us/book/the-wicked-witch/id6737143368
+thewickedwitch|Google Play|https://play.google.com/store/books/details?id=b5O1EAAAQBAJ
+thewickedwitch|Kobo|https://www.kobo.com/us/en/ebook/the-wicked-witch-1
+thefairyqueen|Amazon|https://www.amazon.com/dp/B0DK69XX4L
+thefairyqueen|Barnes & Noble|https://www.barnesandnoble.com/w/the-fairy-queen-russell-nohelty/1146441385?ean=2940168190473
+thefairyqueen|Apple Books|https://books.apple.com/us/book/the-fairy-queen/id6737143063
+thefairyqueen|Google Play|https://play.google.com/store/books/details?id=cZO1EAAAQBAJ
+thefairyqueen|Kobo|https://www.kobo.com/us/en/ebook/the-fairy-queen-6
+theredrider|Amazon|https://www.amazon.com/dp/B0DK89K67M
+theredrider|Barnes & Noble|https://www.barnesandnoble.com/w/the-red-rider-russell-nohelty/1146441386?ean=2940168190480
+theredrider|Apple Books|https://books.apple.com/us/book/the-red-rider/id6737143145
+theredrider|Google Play|https://play.google.com/store/books/details/Russell_Nohelty_The_Red_Rider?id=85O1EAAAQBAJ
+theredrider|Kobo|https://www.kobo.com/us/en/ebook/the-red-rider-4
+theswordwielder|Amazon|https://www.amazon.com/dp/B0DK88Z6NS
+theswordwielder|Barnes & Noble|https://www.barnesandnoble.com/w/the-sword-wielder-russell-nohelty/1146441365?ean=2940168190497
+theswordwielder|Apple Books|https://books.apple.com/us/book/the-sword-wielder/id6737143231
+theswordwielder|Google Play|https://play.google.com/store/books/details?id=PZS1EAAAQBAJ
+theswordwielder|Kobo|https://www.kobo.com/us/en/ebook/the-sword-wielder
+thedarkprince|Amazon|https://www.amazon.com/dp/B0DK9VPJ8Y
+thedarkprince|Barnes & Noble|https://www.barnesandnoble.com/w/the-dark-prince-russell-p-nohelty/1146434057?ean=2940168188388
+thedarkprince|Apple Books|https://books.apple.com/us/book/the-dark-prince/id6737030948
+thedarkprince|Google Play|https://play.google.com/store/books/details?id=Q5S1EAAAQBAJ
+thedarkprince|Kobo|https://www.kobo.com/us/en/ebook/the-dark-prince-17
+thedragonwarrior|Amazon|https://www.amazon.com/dp/B0DK9ZGTM5
+thedragonwarrior|Barnes & Noble|https://www.barnesandnoble.com/w/the-dragon-warrior-russell-p-nohelty/1146441387?ean=2940168190510
+thedragonwarrior|Apple Books|https://books.apple.com/us/book/the-dragon-warrior/id6737143339
+thedragonwarrior|Google Play|https://play.google.com/store/books/details?id=SZS1EAAAQBAJ
+thedragonwarrior|Kobo|https://www.kobo.com/us/en/ebook/the-dragon-warrior-2
+thesunkenkingdom|Amazon|https://www.amazon.com/dp/B0D9HXMXZJ
+thesunkenkingdom|Barnes & Noble|https://www.barnesandnoble.com/w/the-sunken-kingdom-russell-nohelty/1146441366?ean=2940168190527
+thesunkenkingdom|Apple Books|https://books.apple.com/us/book/the-sunken-kingdom/id6737143064
+thesunkenkingdom|Google Play|https://play.google.com/store/books/details?id=S5S1EAAAQBAJ
+thesunkenkingdom|Kobo|https://www.kobo.com/us/en/ebook/the-sunken-kingdom
+thefacelesswoman|Amazon|https://www.amazon.com/dp/B0DKC5WD9C
+thefacelesswoman|Barnes & Noble|https://www.barnesandnoble.com/w/the-faceless-woman-russell-nohelty/1146441345?ean=2940168190534
+thefacelesswoman|Apple Books|https://books.apple.com/us/book/the-faceless-woman/id6737143320
+thefacelesswoman|Google Play|https://play.google.com/store/books/details?id=UZS1EAAAQBAJ
+thefacelesswoman|Kobo|https://www.kobo.com/us/en/ebook/the-faceless-woman
+thedrownedprincess|Amazon|https://www.amazon.com/dp/B0DKC7KJV4
+thedrownedprincess|Barnes & Noble|https://www.barnesandnoble.com/w/the-drowned-princess-russell-nohelty/1146441388?ean=2940168190541
+thedrownedprincess|Apple Books|https://books.apple.com/us/book/the-drowned-princess/id6737143065
+thedrownedprincess|Google Play|https://play.google.com/store/books/details?id=FeK-EAAAQBAJ
+thedrownedprincess|Kobo|https://www.kobo.com/us/en/ebook/the-drowned-princess
+thegoldenamulet|Amazon|https://www.amazon.com/dp/B0DKBS39F6
+thegoldenamulet|Barnes & Noble|https://www.barnesandnoble.com/w/the-golden-locket-russell-nohelty/1146434067?ean=2940168188395
+thegoldenamulet|Apple Books|https://books.apple.com/us/book/the-golden-locket/id6737031334
+thegoldenamulet|Google Play|https://play.google.com/store/books/details?id=E-K-EAAAQBAJ
+thegoldenamulet|Kobo|https://www.kobo.com/us/en/ebook/the-golden-locket-3
+thedarkplanet|Amazon|https://www.amazon.com/dp/B0DKCL9SQH
+thedarkplanet|Barnes & Noble|https://www.barnesandnoble.com/w/the-dark-planet-russell-p-nohelty/1146441346?ean=2940168190558
+thedarkplanet|Apple Books|https://books.apple.com/us/book/the-dark-planet/id6737143264
+thedarkplanet|Google Play|https://play.google.com/store/books/details?id=G-bFEAAAQBAJ
+thedarkplanet|Kobo|https://www.kobo.com/us/en/ebook/the-dark-planet-4
+thedarkplanet|SHOP|https://store.russellnohelty.com/l/dbptdz
+thedragonscourge|Amazon|https://www.amazon.com/Dragon-Scourge-Strife-Book-ebook/dp/B0DHPLS3BZ
+thedragonscourge|Barnes & Noble|https://www.barnesandnoble.com/w/the-dragon-scourge-russell-nohelty/1146321434?ean=2940180219800
+thedragonscourge|Kobo|https://www.kobo.com/us/en/ebook/the-dragon-scourge
+thedragonscourge|Apple Books|https://books.apple.com/us/book/the-dragon-scourge/id6705137201
+thedragonscourge|Google Play|https://play.google.com/store/books/details?id=eNgnEQAAQBAJ
+thedragonchampion|Amazon|https://www.amazon.com/Dragon-Champion-Strife-Book-ebook/dp/B0DHPKP798
+thedragonchampion|Apple Books|https://books.apple.com/us/book/the-dragon-champion/id6705135199
+thedragonchampion|Kobo|https://www.kobo.com/us/en/ebook/the-dragon-champion
+thedragonchampion|Barnes & Noble|https://www.barnesandnoble.com/w/the-dragon-champion-russell-nohelty/1146321152?ean=2940180226297
+thedragonchampion|Google Play|https://play.google.com/store/books/details?id=btgnEQAAQBAJ
+thedragongoddess|Amazon|https://www.amazon.com/Dragon-Goddess-Strife-Book-ebook/dp/B0DHPKH3GB/
+thedragongoddess|Apple Books|https://books.apple.com/us/book/the-dragon-goddess/id6705137257
+thedragongoddess|Kobo|https://www.kobo.com/us/en/ebook/the-dragon-goddess
+thedragongoddess|Barnes & Noble|https://www.barnesandnoble.com/w/the-dragon-goddess-russell-p-nohelty/1146320536?ean=9781942350774
+thedragongoddess|Google Play|https://play.google.com/store/books/details?id=atgnEQAAQBAJ
+wickedbodies|Barnes & Noble|https://www.barnesandnoble.com/w/wicked-bodies-russell-nohelty/1146321149?ean=9781942350019
+wickedbodies|Kobo|https://www.kobo.com/us/en/ebook/wicked-bodies
+wickedbodies|Apple Books|https://books.apple.com/us/book/wicked-bodies/id6705135081
+wickedbodies|Amazon|https://www.amazon.com/Wicked-Bodies-Russell-Nohelty/dp/1942350015
+wickedbodies|Google Play|https://play.google.com/store/books/details?id=StgnEQAAQBAJ
+wickedminds|Barnes & Noble|https://www.barnesandnoble.com/w/wicked-minds-russell-nohelty/1146321150?ean=9781942350187
+wickedminds|Kobo|https://www.kobo.com/us/en/ebook/wicked-minds
+wickedminds|Apple Books|https://books.apple.com/us/book/wicked-minds/id6705135176
+wickedminds|Amazon|https://www.amazon.com/Wicked-Minds-Witch-Academy-Book-ebook/dp/B0DHR2KHCK
+wickedminds|Google Play|https://play.google.com/store/books/details?id=XNgnEQAAQBAJ
+ichabodjonesvolume1|Amazon|https://www.amazon.com/Ichabod-Jones-Monster-Hunter-psychopaths-ebook/dp/B00S9ZYO14
+ichabodjonesvolume1|Comixology|https://www.comixology.com/Ichabod-Jones-Monster-Hunter/comics-series/69567
+ichabodjonesvolume1|Global Comix|https://globalcomix.com/c/ichabod-jones-1
+ichabodjonesvolume1|DriveThru Comics|https://www.drivethrucomics.com/product/275530/Ichabod-Jones-Monster-Hunter-Volume-1
+ichabodjonesvolume1|Spinwhiz Comics|https://www.spinwhizcomics.com/site/comics/wannabe-press/ichabod
+ichabodjonesvolume2|Amazon|https://www.amazon.com/Ichabod-Jones-Monster-Welcome-Nightmare-ebook/dp/B08VW3T75X
+ichabodjonesvolume2|Global Comix|https://globalcomix.com/c/ichabod-jones-1
+ichabodjonesvolume2|DriveThru Comics|https://www.drivethrucomics.com/product/345991/Ichabod-Jones-Monster-Hunter
+ichabodjonesvolume3|Amazon|https://www.amazon.com/gp/product/B09F7M6DV1
+ichabodjonesvolume3|Global Comix|https://globalcomix.com/c/ichabod-jones-1
+ichabodjonesvolume3|Spinwhiz Comics|https://www.spinwhizcomics.com/site/comics/wannabe-press/ichabod-graphic-novel-volume-3
+ichabodjonesvolume3|DriveThru Comics|https://www.drivethrucomics.com/product/366638/Ichabod-Jones-Monster-Hunter-volume-3
+ichabodjonesvolume4|Amazon|https://www.amazon.com/dp/B0BKWP658Q
+ichabodjonesvolume4|DriveThru Comics|https://www.drivethrucomics.com/product/414957/Ichabod-Jones-Monster-Hunter-volume-4
+ichabodjonesvolume4|Global Comix|https://globalcomix.com/c/ichabod-jones-1
+cthulhuishardtospell|Amazon|https://www.amazon.com/Cthulhu-Hard-Spell-Russell-Nohelty-ebook/dp/B0811RXTR6
+cthulhuishardtospell|Global Comix|https://globalcomix.com/c/cthulhu-is-hard-to-spell
+cthulhuishardtospell|DriveThru Comics|https://www.drivethrucomics.com/product/275541/Cthulhu-is-Hard-to-Spell
+cthulhuishardtospell|Spinwhiz Comics|https://www.spinwhizcomics.com/site/comics/wannabe-press/cthulhu-is-hard-to-spell
+theterribletwos|Amazon|https://www.amazon.com/gp/product/B08HDP5BL9
+theterribletwos|Global Comix|https://globalcomix.com/c/cthulhu-is-hard-to-spell
+theterribletwos|DriveThru Comics|https://www.drivethrucomics.com/product/342264/Cthulhu-is-Hard-to-Spell-The-Terrible-Twos
+battleroyale|Amazon|https://www.amazon.com/dp/B0BGCJM6LQ
+battleroyale|Global Comix|https://globalcomix.com/c/cthulhu-is-hard-to-spell/chapters/en/3/1
+battleroyale|DriveThru Comics|https://www.drivethrucomics.com/product/411351/Cthulhu-is-Hard-to-Spell-Battle-Royale
+invasion|Amazon|https://www.amazon.com/gp/product/B07TVPXF3M
+invasion|Apple Books|https://books.apple.com/ca/book/invasion/id6445177590
+invasion|Barnes & Noble|https://www.barnesandnoble.com/w/invasion-russell-nohelty/1132343947?ean=2940161490129
+invasion|Kobo|https://www.kobo.com/us/en/ebook/invasion-102
+invasion|Google Play|https://play.google.com/store/books/details?id=Y5mgDwAAQBAJ
+markedones|Amazon|https://www.amazon.com/dp/B08CNKVRM7
+markedones|Apple Books|https://books.apple.com/us/book/the-marked-ones/id1523048560
+markedones|Barnes & Noble|https://www.barnesandnoble.com/w/the-marked-ones-russell-nohelty/1137317110?ean=2940162697251
+markedones|Kobo|https://www.kobo.com/us/en/ebook/the-marked-ones-3
+thevessel|Amazon|https://www.amazon.com/gp/product/B07QNYXLVY
+thevessel|Apple Books|https://books.apple.com/ca/book/the-vessel/id6497334788
+thevessel|Kobo|https://www.kobo.com/us/en/ebook/the-vessel-18
+thevessel|Google Play|https://play.google.com/store/books/details?id=VsaSDwAAQBAJ
+thevessel|Barnes & Noble|https://www.barnesandnoble.com/w/the-vessel-leah-lederman/1131661669?ean=2940161264799
+thevoid|Amazon|https://www.amazon.com/dp/B08CR8GHPB
+thevoid|Apple Books|https://books.apple.com/us/book/the-void-calls-us-home/id1523101864
+thevoid|Barnes & Noble|https://www.barnesandnoble.com/w/the-void-calls-us-home-russell-nohelty/1137319873?ean=2940162725367
+thevoid|Kobo|https://www.kobo.com/us/en/ebook/the-void-calls-us-home
+anna|Amazon|https://www.amazon.com/dp/B0CW1L7Z6K
+anna|Apple Books|https://books.apple.com/us/book/anna-and-the-dark-place/id6478230643
+anna|Barnes & Noble|https://www.barnesandnoble.com/w/anna-and-the-dark-place-russell-nohelty/1144935174?ean=2940179510901
+worstthing|Amazon|https://www.amazon.com/dp/B08CR7FFTH
+worstthing|Apple Books|https://books.apple.com/us/book/worst-thing-in-the-universe/id1523101944
+worstthing|Barnes & Noble|https://www.barnesandnoble.com/w/worst-thing-in-the-universe-russell-nohelty/1137319886?ean=2940164182113
+worstthing|Kobo|https://www.kobo.com/us/en/ebook/worst-thing-in-the-universe
+skritchsrevenge|Amazon|https://www.amazon.com/dp/B0DM6PVFNH
+skritchsrevenge|Apple Books|https://books.apple.com/us/book/skritchs-revenge/id6737902501
+skritchsrevenge|Barnes & Noble|https://www.barnesandnoble.com/w/skritchs-revenge-russell-nohelty/1146524493?ean=2940180950727
+skritchsrevenge|Kobo|https://www.kobo.com/ww/en/ebook/skritch-s-revenge
+skritchsrevenge|Google Play|https://play.google.com/store/books/details?id=frovEQAAQBAJ
+skritchsrevenge|Smashwords|https://www.smashwords.com/books/view/1645723
+vengeance|Amazon|https://www.amazon.com/dp/B0CW1KQX9T
+vengeance|Apple Books|https://books.apple.com/us/book/vengeance/id6738374780
+vengeance|Barnes & Noble|https://www.barnesandnoble.com/w/vengeance-russell-nohelty/1146575632?ean=2940180956538
+vengeance|Kobo|https://www.kobo.com/ww/en/ebook/vengeance-279
+vengeance|Google Play|https://play.google.com/store/books/details?id=pzwyEQAAQBAJ
+vengeance|Smashwords|https://www.smashwords.com/books/view/1650999
+sorryforexisting|Amazon|https://www.amazon.com/gp/product/B01M1YBTT4
+sorryforexisting|Barnes & Noble|https://www.barnesandnoble.com/w/sorry-for-existing-russell-nohelty/1130728386?ean=2940161453360
+sorryforexisting|Kobo|https://www.kobo.com/us/en/ebook/sorry-for-existing-1
+sorryforexisting|Google Play|https://play.google.com/store/books/details?id=AZ2SDwAAQBAJ
+mfdkh|Amazon|https://www.amazon.com/gp/product/B01CKUZR0A
+mfdkh|Apple Books|https://books.apple.com/us/book/my-father-didnt-kill-himself/id1338924971
+mfdkh|Barnes & Noble|https://www.barnesandnoble.com/w/my-father-didnt-kill-himself-russell-nohelty/1125540170?ean=9781942350217
+mfdkh|Kobo|https://www.kobo.com/us/en/ebook/my-father-didn-t-kill-himself
+mfdkh|Google Play|https://play.google.com/store/books/details?id=g52SDwAAQBAJ
+gumshoes|Amazon|https://www.amazon.com/gp/product/B00SA7U56O
+gumshoes|Apple Books|https://books.apple.com/us/book/gumshoes-the-case-of-madisons-father/id1458127164
+gumshoes|Barnes & Noble|https://www.barnesandnoble.com/w/gumshoes-russell-nohelty/1119687337?ean=2940156030996
+gumshoes|Kobo|https://www.kobo.com/us/en/ebook/gumshoes-the-case-of-madison-s-father
+gumshoes|Google Play|https://play.google.com/store/books/details?id=dZ2SDwAAQBAJ
+the-little-bird-and-the-little-worm|Amazon|https://www.amazon.com/gp/product/B00SA2YNAI
+deathskiss|Laguna Comics|https://lagunastudios.net/products/deaths-kiss
+luciferlicorice1|Kickstarter|https://www.kickstarter.com/projects/uhstudiostoo/lucifer-licorice

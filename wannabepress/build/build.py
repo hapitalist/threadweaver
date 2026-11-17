@@ -228,9 +228,16 @@ RET_URL = {
  "Kobo": "https://www.kobo.com/us/en/search?query={q}", "Google Play": "https://play.google.com/store/search?q={q}&c=books",
  "Smashwords": "https://www.smashwords.com/books/search?query={q}", "Global Comix": "https://globalcomix.com/search?q={q}",
  "DriveThru Comics": "https://www.drivethrucomics.com/browse.php?keywords={q}", "Spinwhiz Comics": "https://spinwhiz.com/"}
-def rets_html(title, rets):
-    q = quote_plus(f"{title} Russell Nohelty")
-    return "".join(f'<a class="chip2" href="{RET_URL[r].format(q=q)}" rel="noopener">{E(r)}</a>' for r in rets if r in RET_URL)
+# Exact store links, copied from each book's page on russellnohelty.com
+STORE = {}; SHOP_OVERRIDE = {}
+for line in open(os.path.join(os.path.dirname(__file__), "store_links.txt"), encoding="utf-8"):
+    line = line.strip()
+    if not line: continue
+    slug, name, url = line.split("|", 2)
+    if name == "SHOP": SHOP_OVERRIDE[slug] = url
+    else: STORE.setdefault(slug, []).append((name, url))
+def rets_html(slug):
+    return "".join(f'<a class="chip2" href="{E(u)}" rel="noopener">{E(n)}</a>' for n, u in STORE.get(slug, []))
 def shop_url(u): return "https://" + u
 def book_tw_link(slug):
     c = CAT[slug]
@@ -294,8 +301,8 @@ def series_page(s):
         boxes.append(f'<div class="wbox"><span class="k">Only in the app</span><p>{E(s.get("shop_note",""))}</p></div>')
     if sl in SERIES_BOOKS:
         b1 = SERIES_BOOKS[sl][0 if sl != "godsverse" else 1]
-        if CAT[b1]["rets"]:
-            boxes.append(f'<div class="wbox"><span class="k">{E(CAT[b1]["title"])} ({"Volume 1" if sl in ("ichabod-jones","cthulhu") else "Book 1"}) is also at</span><div class="chips">{rets_html(CAT[b1]["title"], CAT[b1]["rets"])}</div></div>')
+        if STORE.get(b1):
+            boxes.append(f'<div class="wbox"><span class="k">{E(CAT[b1]["title"])} ({"Volume 1" if sl in ("ichabod-jones","cthulhu") else "Book 1"}) is also at</span><div class="chips">{rets_html(b1)}</div></div>')
     where = f'<section><div class="wrap"><div class="head"><h2>Where to get it</h2></div><div class="where3">{"".join(boxes)}</div>'
     if sl == "godsverse":
         where += '<div class="head" style="margin-top:50px"><h2>Also set in the Godsverse</h2></div><div class="bkgrid">' + cover_card("bulletins", "Cosmic Weave", "Short stories · Fantasy · Horror") + '</div>'
@@ -319,6 +326,7 @@ def book_page(slug):
     boxes = []
     free = [u for u in c["shops"] if "bookfunnel" in u]
     paid = [u for u in c["shops"] if "bookfunnel" not in u]
+    if slug in SHOP_OVERRIDE: paid = [SHOP_OVERRIDE[slug].replace("https://", "")] + paid
     if free:
         boxes.append(f'<div class="wbox tw"><span class="k">Free</span><a class="btn red" style="width:100%;margin-top:10px" href="{shop_url(free[0])}">▸ Get it free</a></div>')
     if in_app(slug):
@@ -327,9 +335,11 @@ def book_page(slug):
     if paid:
         pr = c.get("price")
         is_series_bundle = any(x in paid[0] for x in ("complete","dbptdz","dragonstrife","wtmdih","cthulhuishardtospell"))
-        boxes.append(f'<div class="wbox"><span class="k">Buy direct from me</span>{"<h3>"+E(pr)+"</h3>" if pr else ""}<a class="btn alt" style="width:100%;margin-top:10px" href="{shop_url(paid[0])}">▸ {"Get the whole series from my shop" if is_series_bundle else "Get it from my shop"}</a></div>')
-    if c["rets"]:
-        boxes.append(f'<div class="wbox"><span class="k">Available at</span><div class="chips">{rets_html(c["title"], c["rets"])}</div></div>')
+        whole = f'<a class="link" style="display:inline-block;margin-top:12px" href="{shop_url(paid[1])}">▸ Get the whole series</a>' if len(paid) > 1 else ""
+        label = "Back it on Kickstarter" if "kickstarter" in paid[0] else ("Get the whole series from my shop" if is_series_bundle else "Get it from my shop")
+        boxes.append(f'<div class="wbox"><span class="k">Buy direct from me</span>{"<h3>"+E(pr)+"</h3>" if pr else ""}<a class="btn alt" style="width:100%;margin-top:10px" href="{shop_url(paid[0])}">▸ {label}</a>{whole}</div>')
+    if STORE.get(slug):
+        boxes.append(f'<div class="wbox"><span class="k">{"Also at" if slug in STD_WEAVE + STD_OUT else "Available at"}</span><div class="chips">{rets_html(slug)}</div></div>')
     pn = ""
     if lst and slug in lst:
         i = lst.index(slug)
