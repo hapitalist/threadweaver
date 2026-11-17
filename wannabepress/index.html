@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wannabe Press — Stories for the rebels, by Russell Nohelty</title>
+<meta name="description" content="Dark fantasy, myth, horror and comics from USA Today bestselling author Russell Nohelty. Read free in Thread Weaver, get a new chapter every Saturday, or build your creative business with Hapitalist.">
+<meta property="og:title" content="Wannabe Press — Stories for the rebels">
+<meta property="og:description" content="Dark fantasy, myth, horror and comics by Russell Nohelty. A new chapter every Saturday, free.">
+<meta property="og:image" content="https://wannabepress.com/img/og.jpg">
+<meta property="og:url" content="https://wannabepress.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3ede0">
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3ede0; --paper2:#ebe3d2; --ink:#17130f; --ink2:#4a4239;
+  --pink:#ff3d8b; --blue:#2b4fe0; --pinkSoft:#ffd3e4; --blueSoft:#d6ddff;
+  --display:'Anton',Impact,'Arial Narrow',sans-serif;
+  --mono:'Space Mono',ui-monospace,Menlo,monospace;
+  --serif:'Source Serif 4',Georgia,serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 var(--serif);
+  background-image:radial-gradient(rgba(23,19,15,.07) 1px,transparent 1.2px);background-size:5px 5px}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.mono{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.stamp{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px;border:2px solid currentColor;transform:rotate(-2deg)}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:.95;letter-spacing:.01em;margin:0;text-transform:uppercase}
+h2{font-size:clamp(40px,6vw,68px)}
+h3{font-size:28px}
+p{margin:0 0 1em}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 24px;
+  font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+  background:var(--pink);color:var(--ink);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
+  transition:transform .08s,box-shadow .08s;cursor:pointer}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink)}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.plain{background:var(--paper);box-shadow:4px 4px 0 var(--ink)}
+.link{font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;border-bottom:3px solid var(--pink);padding-bottom:2px}
+.link:hover{background:var(--pinkSoft)}
+
+/* top bar */
+.top{border-bottom:3px solid var(--ink);background:var(--paper)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.mark{font-family:var(--display);font-size:26px;text-decoration:none;letter-spacing:.02em;line-height:1}
+.mark b{font-weight:400;color:var(--paper);background:var(--ink);padding:2px 6px 0;margin-right:4px}
+.nav{display:flex;gap:22px;align-items:center}
+.nav a{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none}
+.nav a:hover{color:var(--blue)}
+.nav .navcta{background:var(--ink);color:var(--paper);padding:8px 12px}
+.nav .navcta:hover{color:var(--paper);background:var(--blue)}
+
+/* hero */
+.hero{padding:44px 0 56px;border-bottom:3px solid var(--ink);overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.hero .stamp{color:var(--blue);margin-bottom:18px}
+.hero h1{font-size:clamp(58px,9.5vw,124px);margin-bottom:18px}
+.hero h1 em{font-style:normal;color:var(--pink);text-shadow:3px 3px 0 var(--ink);-webkit-text-stroke:2px var(--ink)}
+.lede{font-size:21px;max-width:34em;color:var(--ink2);margin-bottom:24px}
+.lede strong{color:var(--ink)}
+.ctas{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:22px}
+.proof{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+.proof span{white-space:nowrap}
+.proof b{color:var(--blue)}
+.fan{position:relative;height:470px;max-width:460px;justify-self:end;width:100%}
+.fan a{position:absolute;width:47%;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--pink);background:#fff;transition:transform .15s}
+.fan a:hover{z-index:9;transform:rotate(0) scale(1.04)!important}
+.fan a:nth-child(1){left:0;top:30px;transform:rotate(-7deg);z-index:2}
+.fan a:nth-child(2){left:27%;top:0;transform:rotate(2deg);z-index:3;box-shadow:8px 8px 0 var(--blue)}
+.fan a:nth-child(3){right:0;top:46px;transform:rotate(8deg);z-index:1}
+.fan .tag{position:absolute;bottom:4px;left:50%;transform:translateX(-50%) rotate(-3deg);z-index:5;background:var(--ink);color:var(--paper);
+  font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
+
+/* section frame */
+section{padding:72px 0;border-bottom:3px solid var(--ink)}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+.head .kick{color:var(--pink);margin-bottom:10px;display:block}
+.head p{max-width:34em;color:var(--ink2);margin:10px 0 0}
+
+/* doors */
+.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.door{border:3px solid var(--ink);background:var(--paper);padding:26px 24px 24px;display:flex;flex-direction:column;box-shadow:6px 6px 0 var(--ink);position:relative}
+.door .num{font-family:var(--display);font-size:64px;line-height:.8;color:var(--pink);-webkit-text-stroke:2px var(--ink);position:absolute;top:-22px;right:16px}
+.door .mono{color:var(--blue);margin-bottom:8px}
+.door h3{margin-bottom:12px}
+.door p{color:var(--ink2);font-size:17px;flex:1}
+.door .btn{align-self:flex-start;min-height:46px;font-size:13px;padding:0 18px}
+.door.d2{background:var(--pinkSoft)} .door.d3{background:var(--blueSoft)}
+
+/* this week */
+.week{background:var(--ink);color:var(--paper);background-image:radial-gradient(rgba(243,237,224,.08) 1px,transparent 1.2px);background-size:5px 5px}
+.week .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;align-items:center}
+.week .stamp{color:var(--pink);margin-bottom:16px}
+.week h2{color:var(--paper)}
+.week h2 span{color:var(--pink)}
+.week .from{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#bdb4a6;margin:14px 0 0}
+.page{background:var(--paper);color:var(--ink);border:3px solid var(--paper);padding:30px 30px 26px;transform:rotate(1deg);box-shadow:10px 10px 0 var(--pink)}
+.page .chap{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;display:block}
+.page blockquote{margin:0 0 22px;font-size:22px;line-height:1.45;font-style:italic}
+.page blockquote:first-letter{font-family:var(--display);font-style:normal;font-size:64px;float:left;line-height:.8;padding:6px 10px 0 0;color:var(--pink);-webkit-text-stroke:1.5px var(--ink)}
+.page .row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+
+/* start here */
+.covers{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+.cover{text-decoration:none;display:block}
+.cover img{border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);aspect-ratio:2/3;object-fit:cover;width:100%;background:var(--paper2);transition:transform .12s,box-shadow .12s}
+.cover:hover img{transform:translate(-2px,-3px) rotate(-1.5deg);box-shadow:7px 8px 0 var(--pink)}
+.cover .t{display:block;font-weight:600;font-size:16px;line-height:1.25;margin-top:12px}
+.cover .s{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-top:4px}
+.quizbar{margin-top:34px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 22px;border:3px dashed var(--ink);background:var(--paper)}
+.quizbar p{margin:0;flex:1;min-width:220px;font-size:19px}
+
+/* series */
+.series{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.ser{display:grid;grid-template-columns:130px 1fr;gap:20px;border:3px solid var(--ink);background:var(--paper);padding:18px;text-decoration:none;box-shadow:6px 6px 0 var(--ink);transition:transform .1s}
+.ser:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--blue)}
+.ser img{border:2px solid var(--ink);aspect-ratio:2/3;object-fit:cover;width:100%}
+.ser .mono{color:var(--blue);font-size:12px}
+.ser h3{font-size:30px;margin:6px 0 8px}
+.ser .hook{font-style:italic;font-size:19px;margin-bottom:8px}
+.ser .go{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--pink)}
+.ser .typecover{aspect-ratio:2/3;border:2px solid var(--ink);background:var(--blue);color:var(--paper);display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--display);font-size:24px;line-height:1;padding:10px;text-transform:uppercase}
+.subhead{margin:46px 0 18px;display:flex;align-items:center;gap:14px}
+.subhead:after{content:"";flex:1;height:3px;background:var(--ink)}
+.subhead .mono{font-weight:700}
+
+/* offer */
+.offer{background:var(--pink);background-image:radial-gradient(rgba(23,19,15,.13) 1px,transparent 1.3px);background-size:6px 6px}
+.offer .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.offer h2{font-size:clamp(44px,6.5vw,80px)}
+.offer .lede{color:var(--ink)}
+.ticket{background:var(--paper);border:3px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:28px;transform:rotate(-1.2deg)}
+.ticket .price{font-family:var(--display);font-size:84px;line-height:.9}
+.ticket .was{font-family:var(--mono);font-size:13px;text-decoration:line-through;color:var(--ink2)}
+.ticket ul{list-style:none;padding:0;margin:16px 0 22px;font-size:17px}
+.ticket li{padding:7px 0;border-bottom:2px dotted rgba(23,19,15,.3)}
+.ticket li:before{content:"✶ ";color:var(--blue)}
+.ticket .btn{width:100%}
+.ticket .fine{font-family:var(--mono);font-size:12px;margin:14px 0 0;text-align:center;letter-spacing:.03em}
+.badges{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.badges a{font-family:var(--mono);font-size:13px;font-weight:700;text-decoration:none;border:2px solid var(--ink);padding:9px 14px;background:var(--paper)}
+.badges a:hover{background:var(--ink);color:var(--paper)}
+
+/* reviews */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.q{background:var(--paper);border:3px solid var(--ink);padding:22px 22px 18px;margin:0}
+.q:nth-child(3n+2){transform:rotate(.8deg);background:var(--blueSoft)}
+.q:nth-child(3n){transform:rotate(-.8deg);background:var(--pinkSoft)}
+.q blockquote{margin:0 0 14px;font-size:20px;line-height:1.4}
+.q figcaption{font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+.q .stars{color:var(--pink);-webkit-text-stroke:.5px var(--ink);letter-spacing:2px}
+.q a{text-decoration:underline;text-decoration-color:var(--pink);text-decoration-thickness:2px}
+.srcnote{font-family:var(--mono);font-size:12px;margin-top:22px;color:var(--ink2)}
+
+/* shelf */
+.shelf{display:flex;gap:18px;overflow-x:auto;padding:6px 6px 18px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.shelf .cover{flex:0 0 138px;scroll-snap-align:start}
+.shelf .cover .t{font-size:14px}
+
+/* creators */
+.creators{background:var(--blue);color:#fff;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1.2px);background-size:5px 5px}
+.creators .head .kick{color:var(--pinkSoft)}
+.creators .head p{color:#e3e7ff}
+.creators .cover .t{color:#fff}.creators .cover .s{color:#cdd5ff}
+.creators .cover img{box-shadow:5px 5px 0 var(--ink)}
+.creators .cover:hover img{box-shadow:7px 8px 0 var(--pink)}
+.joy{margin-top:36px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;background:var(--paper);color:var(--ink);border:3px solid var(--ink);padding:24px 26px;box-shadow:8px 8px 0 var(--ink)}
+.joy h3{font-size:32px;margin-bottom:6px}
+.joy p{margin:0;color:var(--ink2)}
+.joy .btns{display:flex;gap:12px;flex-wrap:wrap}
+
+/* about */
+.about .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center}
+.polaroid{background:#fff;border:3px solid var(--ink);padding:14px 14px 50px;transform:rotate(-2.5deg);box-shadow:8px 8px 0 var(--blue);position:relative}
+.polaroid:after{content:"SDCC panel";position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.polaroid:before{content:"";position:absolute;top:-14px;left:50%;width:110px;height:28px;margin-left:-55px;background:rgba(255,61,139,.55);transform:rotate(3deg)}
+.facts{list-style:none;padding:0;margin:20px 0 26px;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.facts li{font-family:var(--mono);font-size:13px;letter-spacing:.03em;padding-left:18px;position:relative}
+.facts li:before{content:"→";position:absolute;left:0;color:var(--pink);font-weight:700}
+.links{display:flex;flex-wrap:wrap;gap:12px 22px}
+
+/* signup */
+.signup{background:var(--paper2)}
+.signup .wrap{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.formcard{border:3px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--pink);padding:10px}
+.formcard iframe{width:100%;height:290px;border:0;display:block;background:#fff}
+.freebook{display:flex;gap:16px;align-items:center;margin-top:24px}
+.freebook img{width:74px;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.freebook p{margin:0;font-size:17px}
+
+/* footer */
+footer{background:var(--ink);color:var(--paper);padding:48px 0 110px}
+footer .wrap{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:28px}
+footer .mark b{background:var(--paper);color:var(--ink)}
+footer h4{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);margin:0 0 12px}
+footer ul{list-style:none;padding:0;margin:0}
+footer li{margin:0 0 8px;font-size:16px}
+footer a{text-decoration:none;color:#e8e1d3}
+footer a:hover{color:var(--pink)}
+footer .legal{grid-column:1/-1;border-top:1px solid #3a332c;padding-top:20px;font-family:var(--mono);font-size:12px;color:#a59c8e;display:flex;gap:18px;flex-wrap:wrap}
+
+/* sticky bar (phones) */
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--ink);color:var(--paper);display:none;align-items:center;gap:12px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .2s;border-top:3px solid var(--pink)}
+.sticky.on{transform:none}
+.sticky p{margin:0;flex:1;font-family:var(--mono);font-size:12px;letter-spacing:.04em;line-height:1.35}
+.sticky .btn{min-height:44px;font-size:13px;padding:0 16px;box-shadow:3px 3px 0 var(--paper);border-color:var(--paper)}
+
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+@media (max-width:960px){
+  .hero .wrap,.week .wrap,.offer .wrap,.about .wrap,.signup .wrap{grid-template-columns:1fr}
+  .fan{height:400px;justify-self:center}
+  .covers{grid-template-columns:repeat(3,1fr)}
+  .doors,.quotes{grid-template-columns:1fr}
+  .series{grid-template-columns:1fr}
+  .joy{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  .wrap{padding:0 16px}
+  .nav a:not(.navcta){display:none}
+  .top .wrap{height:54px}
+  .mark{font-size:22px}
+  .hero{padding:22px 0 36px}
+  .hero .stamp{margin-bottom:12px;font-size:11px}
+  .hero .stamp .nm{display:none}
+  .hero h1{font-size:62px;margin-bottom:12px}
+  .lede{font-size:17px;margin-bottom:18px}
+  .ctas{gap:12px;margin-bottom:16px}
+  .ctas .btn{width:100%}
+  .ctas .link{margin:2px auto 0}
+  .proof{font-size:12px;gap:4px 12px}
+  .fan{height:330px;margin-top:6px;justify-self:center}
+  section{padding:52px 0}
+  .doors{gap:30px}
+  .page{padding:22px 20px;transform:none}
+  .page blockquote{font-size:19px}
+  .covers{grid-template-columns:repeat(2,1fr);gap:18px}
+  .ser{grid-template-columns:96px 1fr;gap:14px;padding:14px}
+  .ser h3{font-size:25px}
+  .ser .hook{font-size:17px}
+  .ticket{transform:none;padding:22px}
+  .ticket .price{font-size:68px}
+  .facts{grid-template-columns:1fr}
+  .q,.q:nth-child(n){transform:none}
+  footer .wrap{grid-template-columns:1fr}
+  .sticky{display:flex}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/"><b>WANNABE</b>PRESS</a>
+    <nav class="nav" aria-label="Main">
+      <a href="#read">Read</a>
+      <a href="#weekly">Every Saturday</a>
+      <a href="#creators">For creators</a>
+      <a href="#about">About</a>
+      <a class="navcta" href="https://thread.wannabepress.com/app?start=free">Read free</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-labelledby="h1">
+  <div class="wrap">
+    <div>
+      <span class="stamp">Books, comics &amp; story games<span class="nm"> by Russell Nohelty</span></span>
+      <h1 id="h1">Stories for <em>the rebels.</em></h1>
+      <p class="lede">Dark fantasy, myth, horror and comics from <strong>USA Today bestselling author Russell Nohelty</strong>. Gods who are jerks, fairy tales with teeth, and a new chapter every Saturday.</p>
+      <div class="ctas">
+        <a class="btn" href="https://thread.wannabepress.com/app?start=free">Start reading free →</a>
+        <a class="link" href="#signup">Get Saturday's chapter by email</a>
+      </div>
+      <div class="proof">
+        <span><b>★ 4.3</b> on 632 Goodreads reviews</span>
+        <span><b>14,000+</b> readers</span>
+        <span><b>50+</b> Kickstarters</span>
+      </div>
+    </div>
+    <div class="fan" aria-label="Three places to start">
+      <a href="https://dl.bookfunnel.com/zdyn1info6"><img src="/img/change.webp" alt="Change, the Godsverse prequel" width="420" height="630" fetchpriority="high"></a>
+      <a href="https://www.russellnohelty.com/series/obsidian-spindle/"><img src="/img/sleeping-beauty.webp" alt="The Sleeping Beauty" width="420" height="630"></a>
+      <a href="https://www.russellnohelty.com/series/dragon-strife/"><img src="/img/dragon-scourge.webp" alt="The Dragon Scourge" width="420" height="671"></a>
+      <span class="tag">16 books &amp; 5 comics free</span>
+    </div>
+  </div>
+</section>
+
+<section id="doors" aria-labelledby="doors-h">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="mono kick">Home base</span><h2 id="doors-h">Pick your door.</h2></div>
+      <p>Everything Russell makes lives in one of three places. Start with the one that sounds like you.</p>
+    </div>
+    <div class="doors">
+      <div class="door d1">
+        <span class="num">1</span>
+        <span class="mono">Thread Weaver app</span>
+        <h3>Read everything</h3>
+        <p>Every book, comic and story game in one app on your phone, tablet and computer. 16 books and 5 comics are free to start.</p>
+        <a class="btn" href="https://thread.wannabepress.com/app?start=free">Open Thread Weaver</a>
+      </div>
+      <div class="door d2">
+        <span class="num">2</span>
+        <span class="mono">The Wannabe Press newsletter</span>
+        <h3>Read along, free</h3>
+        <p>A new chapter lands in your inbox every Saturday. Right now: <em>Time</em>, the newest Godsverse novel.</p>
+        <a class="btn plain" href="#signup">Get Saturday's chapter</a>
+      </div>
+      <div class="door d3">
+        <span class="num">3</span>
+        <span class="mono">Hapitalist</span>
+        <h3>Build your thing</h3>
+        <p>Business clarity for chaotic creators: Russell's frameworks, courses, kits, and Joy, a coach built on his methods.</p>
+        <a class="btn blue" href="https://www.hapitalist.com/">Enter Hapitalist</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="week" id="weekly" aria-labelledby="week-h">
+  <div class="wrap">
+    <div>
+      <span class="stamp">New every Saturday · free</span>
+      <h2 id="week-h">This week's <span>chapter.</span></h2>
+      <p class="from" id="weekFrom">From The Godsverse Chronicles</p>
+    </div>
+    <article class="page">
+      <span class="chap" id="weekTitle">Time — Chapter 37</span>
+      <blockquote id="weekLine">“What do you mean you’re Christopher Bencze?” I asked Professor Tina, confused. “You’re a woman.”</blockquote>
+      <div class="row">
+        <a class="btn" id="weekLink" href="https://wannabepress.substack.com/p/time-chapter-37">Keep reading →</a>
+        <a class="link" href="https://wannabepress.substack.com/p/time-chapter-1">Start at Chapter 1</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="read" aria-labelledby="read-h">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="mono kick">Where to start</span><h2 id="read-h">Six good first reads.</h2></div>
+      <p>Each one is a clean way in. The first is free, right now.</p>
+    </div>
+    <div class="covers">
+      <a class="cover" href="https://dl.bookfunnel.com/zdyn1info6"><img src="/img/change.webp" alt="" width="420" height="630" loading="lazy"><span class="t">Change</span><span class="s">Godsverse prequel · free</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/series/obsidian-spindle/"><img src="/img/sleeping-beauty.webp" alt="" width="420" height="630" loading="lazy"><span class="t">The Sleeping Beauty</span><span class="s">Obsidian Spindle 1</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/series/dragon-strife/"><img src="/img/dragon-scourge.webp" alt="" width="420" height="671" loading="lazy"><span class="t">The Dragon Scourge</span><span class="s">Dragon Strife 1</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/series/ichabod-jones/"><img src="/img/ichabod-1.webp" alt="" width="420" height="678" loading="lazy"><span class="t">Ichabod Jones</span><span class="s">Comic · Monster hunter</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/worstthing/"><img src="/img/worst-thing-in-the-universe.webp" alt="" width="420" height="616" loading="lazy"><span class="t">Worst Thing in the Universe</span><span class="s">Standalone</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/thevoid/"><img src="/img/the-void-calls-us-home.webp" alt="" width="420" height="672" loading="lazy"><span class="t">The Void Calls Us Home</span><span class="s">Standalone</span></a>
+    </div>
+    <div class="quizbar">
+      <p><strong>Still not sure?</strong> Answer a few questions and get matched with your first Russell Nohelty book.</p>
+      <a class="btn plain" href="https://www.russellnohelty.com/quiz/">Take the quiz</a>
+    </div>
+
+    <div class="subhead"><span class="mono">The Cosmic Weave · one shared universe</span></div>
+    <div class="series">
+      <a class="ser" href="https://www.russellnohelty.com/series/godsverse/"><img src="/img/change.webp" alt="" loading="lazy" width="420" height="630"><div><span class="mono">13 novels · 4 comics · story game</span><h3>The Godsverse Chronicles</h3><p class="hook">All gods are real… they're just dicks.</p><span class="go">Explore the series →</span></div></a>
+      <a class="ser" href="https://www.russellnohelty.com/series/obsidian-spindle/"><img src="/img/sleeping-beauty.webp" alt="" loading="lazy" width="420" height="630"><div><span class="mono">12 novels · story game</span><h3>The Obsidian Spindle Saga</h3><p class="hook">Fairy tales are real.</p><span class="go">Explore the series →</span></div></a>
+      <a class="ser" href="https://www.russellnohelty.com/series/dragon-strife/"><img src="/img/dragon-scourge.webp" alt="" loading="lazy" width="420" height="671"><div><span class="mono">5 books · story game</span><h3>Dragon Strife</h3><p class="hook">Gilda will die today.</p><span class="go">Explore the series →</span></div></a>
+      <a class="ser" href="https://www.russellnohelty.com/series/ichabod-jones/"><img src="/img/ichabod-1.webp" alt="" loading="lazy" width="420" height="678"><div><span class="mono">4 comics · story game</span><h3>Ichabod Jones: Monster Hunter</h3><p class="hook">“More Hannibal than Buffy.”</p><span class="go">Explore the series →</span></div></a>
+    </div>
+
+    <div class="subhead"><span class="mono">Outside the Weave</span></div>
+    <div class="series">
+      <a class="ser" href="https://www.russellnohelty.com/series/cthulhu/"><div class="typecover">Cthulhu Is Hard to Spell</div><div><span class="mono">3 hardcover anthologies</span><h3>Cthulhu Is Hard to Spell</h3><p class="hook">Cosmic horror anthologies.</p><span class="go">Explore the series →</span></div></a>
+      <a class="ser" href="https://www.russellnohelty.com/series/wonderland/"><img src="/img/white-rabbit.webp" alt="" loading="lazy" width="420" height="672"><div><span class="mono">2 noir novels</span><h3>The Wonderland Duology</h3><p class="hook">“Dark, dirty, grimy. That's the Wonderland Nohelty shows.”</p><span class="go">Explore the series →</span></div></a>
+    </div>
+
+    <div class="subhead"><span class="mono">Standalones</span></div>
+    <div class="shelf" aria-label="Standalone books">
+      <a class="cover" href="https://www.russellnohelty.com/books/invasion/"><img src="/img/invasion.webp" alt="" loading="lazy" width="420" height="628"><span class="t">Invasion</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/markedones/"><img src="/img/the-marked-ones.webp" alt="" loading="lazy" width="420" height="672"><span class="t">The Marked Ones</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/thevessel/"><img src="/img/the-vessel.webp" alt="" loading="lazy" width="420" height="634"><span class="t">The Vessel</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/anna/"><img src="/img/anna-and-the-dark-place.webp" alt="" loading="lazy" width="420" height="672"><span class="t">Anna and the Dark Place</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/tiafc/"><img src="/img/time-is-a-flat-circle.webp" alt="" loading="lazy" width="420" height="634"><span class="t">Time Is a Flat Circle</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/skritchsrevenge/"><img src="/img/skritchs-revenge.webp" alt="" loading="lazy" width="420" height="630"><span class="t">Skritch's Revenge</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/vengeance/"><img src="/img/vengeance.webp" alt="" loading="lazy" width="420" height="630"><span class="t">Vengeance</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/sorryforexisting/"><img src="/img/sorry-for-existing.webp" alt="" loading="lazy" width="420" height="630"><span class="t">Sorry for Existing</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/mfdkh/"><img src="/img/my-father-didnt-kill-himself.webp" alt="" loading="lazy" width="420" height="672"><span class="t">My Father Didn't Kill Himself</span></a>
+      <a class="cover" href="https://www.russellnohelty.com/books/gumshoes/"><img src="/img/gumshoes.webp" alt="" loading="lazy" width="420" height="635"><span class="t">Gumshoes</span></a>
+    </div>
+    <p style="margin-top:18px"><a class="link" href="https://www.russellnohelty.com/books/">See every book</a></p>
+  </div>
+</section>
+
+<section class="offer" id="everything" aria-labelledby="offer-h">
+  <div class="wrap">
+    <div>
+      <span class="stamp">Thread Weaver · the complete collection</span>
+      <h2 id="offer-h" style="margin:16px 0 18px">Want all of it? Own all of it.</h2>
+      <p class="lede">Every series, standalone, comic and story game in one app, plus DRM-free files you keep forever. Paid once. No subscription. Unlocks on every device you sign in on.</p>
+      <div class="badges">
+        <a href="https://apps.apple.com/us/app/wannabe-press-thread-weaver/id6785677915"> App Store</a>
+        <a href="https://play.google.com/store/apps/details?id=com.russellnohelty.threadweaver">▶ Google Play</a>
+        <a href="https://thread.wannabepress.com/">On the web</a>
+      </div>
+    </div>
+    <div class="ticket">
+      <span class="mono">Everything</span>
+      <div class="price">$99.99</div>
+      <span class="was">$165 for the series alone</span>
+      <ul>
+        <li>49 novels &amp; 13 comics</li>
+        <li>7 choose-your-path story games</li>
+        <li>150+ DRM-free ebooks &amp; audiobooks to keep</li>
+        <li>Reads offline on phone, tablet and computer</li>
+      </ul>
+      <a class="btn" href="https://thread.wannabepress.com/app?buy=everything">Get everything — $99.99</a>
+      <p class="fine">One time · secure checkout by Stripe · <a href="https://thread.wannabepress.com/app?start=free">or start free</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="reviews" aria-labelledby="rev-h">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="mono kick">What readers say</span><h2 id="rev-h">Five stars, their words.</h2></div>
+    </div>
+    <div class="quotes">
+      <figure class="q"><blockquote>“How can a book be so violent and hilarious and brilliant at the same time?”</blockquote><figcaption><span class="stars">★★★★★</span> S.E. Anderson · Katrina Hates the Dead</figcaption></figure>
+      <figure class="q"><blockquote>“This is definitely more Hannibal than Buffy.”</blockquote><figcaption><span class="stars">★★★★★</span> Ken G. · <a href="https://www.goodreads.com/book/show/25052119-ichabod-jones">Ichabod Jones</a></figcaption></figure>
+      <figure class="q"><blockquote>“Dark, dirty, grimy. That's the Wonderland Nohelty shows.”</blockquote><figcaption><span class="stars">★★★★★</span> Brandon · <a href="https://www.goodreads.com/book/show/36465661-white-rabbit">White Rabbit</a></figcaption></figure>
+      <figure class="q"><blockquote>“It provided EVERYTHING I look for in an SF story.”</blockquote><figcaption><span class="stars">★★★★★</span> Aurora · <a href="https://www.goodreads.com/book/show/51010124-invasion">Invasion</a></figcaption></figure>
+      <figure class="q"><blockquote>“It had everything a great read should have.”</blockquote><figcaption><span class="stars">★★★★★</span> Leah S. · <a href="https://www.goodreads.com/book/show/45307897-the-vessel">The Vessel</a></figcaption></figure>
+      <figure class="q"><blockquote>“This story keeps you glued to the pages.”</blockquote><figcaption><span class="stars">★★★★★</span> Kaye · <a href="https://www.goodreads.com/book/show/25052119-ichabod-jones">Ichabod Jones</a></figcaption></figure>
+    </div>
+    <p class="srcnote">Reader reviews from Goodreads · 4.3 average across 632 reviews</p>
+  </div>
+</section>
+
+<section class="creators" id="creators" aria-labelledby="cr-h">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="mono kick">For creators</span><h2 id="cr-h">Business clarity for chaotic creators.</h2></div>
+      <p>Fifty-plus Kickstarters and a whole independent press, turned into frameworks you can use. Hapitalist is where Russell teaches creatives to grow in the way their brains actually work.</p>
+    </div>
+    <div class="covers">
+      <a class="cover" href="https://www.hapitalist.com/course/frictionless-growth/"><img src="/img/frictionless-growth.webp" alt="" loading="lazy" width="420" height="670"><span class="t">Frictionless Growth!</span><span class="s">Start here · free</span></a>
+      <a class="cover" href="https://www.hapitalist.com/courses/"><img src="/img/six-figure-author-stack.webp" alt="" loading="lazy" width="420" height="670"><span class="t">The Six-Figure Author Stack</span><span class="s">Book &amp; course</span></a>
+      <a class="cover" href="https://www.hapitalist.com/course/direct-sales-strategy-for-authors/"><img src="/img/direct-sales-strategy.webp" alt="" loading="lazy" width="420" height="670"><span class="t">Direct Sales Strategy</span><span class="s">Book &amp; course</span></a>
+      <a class="cover" href="https://www.hapitalist.com/course/how-to-launch-your-book-on-kickstarter/"><img src="/img/launch-kickstarter.webp" alt="" loading="lazy" width="420" height="670"><span class="t">Launch Your Book on Kickstarter</span><span class="s">Book &amp; course</span></a>
+      <a class="cover" href="https://www.hapitalist.com/course/on-being-happy-and-a-successful-writer/"><img src="/img/on-being-happy.webp" alt="" loading="lazy" width="420" height="670"><span class="t">On Being Happy</span><span class="s">Book &amp; course</span></a>
+      <a class="cover" href="https://www.hapitalist.com/courses/"><img src="/img/publishing-is-broken.webp" alt="" loading="lazy" width="420" height="670"><span class="t">Publishing Is Broken</span><span class="s">Book</span></a>
+    </div>
+    <div class="joy">
+      <div>
+        <h3>Stuck? Ask Joy.</h3>
+        <p>Joy is a coach built on Russell's frameworks. Talk to her free, then join Hapitalist when you want the full toolkit.</p>
+      </div>
+      <div class="btns">
+        <a class="btn blue" href="https://www.hapitalist.com/joy">Talk to Joy free</a>
+        <a class="btn plain" href="https://www.hapitalist.com/">Enter Hapitalist</a>
+      </div>
+    </div>
+    <p style="margin-top:26px"><a class="link" style="color:#fff" href="https://www.russellnohelty.com/author-stack/">All 13 books for creators</a></p>
+  </div>
+</section>
+
+<section class="about" id="about" aria-labelledby="ab-h">
+  <div class="wrap">
+    <div class="polaroid"><img src="/img/russell-sdcc.webp" alt="Russell Nohelty at his San Diego Comic-Con panel" loading="lazy" width="900" height="900"></div>
+    <div>
+      <span class="mono" style="color:var(--pink)">The guy behind the press</span>
+      <h2 id="ab-h" style="margin:10px 0 16px">Hi, I'm Russell.</h2>
+      <p>I write for the rebels: punks, emo kids, goths, nerds, geeks and anyone who questions authority. Wannabe Press is my independent press, and Hapitalist is where I teach other creators what has worked for me.</p>
+      <ul class="facts">
+        <li>USA Today bestselling author</li>
+        <li>50+ Kickstarter campaigns</li>
+        <li>Publisher at Wannabe Press</li>
+        <li>Co-founder of Writer MBA</li>
+        <li>Founder of Hapitalist</li>
+        <li>Based in Los Angeles</li>
+      </ul>
+      <div class="links">
+        <a class="link" href="https://www.russellnohelty.com/about/">Full bio</a>
+        <a class="link" href="https://www.russellnohelty.com/media/">Media kit</a>
+        <a class="link" href="https://www.russellnohelty.com/credits/">Credits</a>
+        <a class="link" href="https://consulting.hapitalist.com/">Consulting</a>
+        <a class="link" href="https://www.sixfigureauthorexperiment.com/">6FAE podcast</a>
+        <a class="link" href="https://store.russellnohelty.com/">Shop</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="signup" id="signup" aria-labelledby="su-h">
+  <div class="wrap">
+    <div>
+      <span class="stamp" style="color:var(--blue)">Free · every Saturday</span>
+      <h2 id="su-h" style="margin:16px 0 14px">Get a new chapter every Saturday.</h2>
+      <p class="lede">Join 14,000+ readers on the Wannabe Press newsletter. Serialized novels and new releases, straight to your inbox. Unsubscribe whenever.</p>
+      <div class="freebook">
+        <img src="/img/change.webp" alt="" loading="lazy" width="420" height="630">
+        <p>Want a whole book right now? <a class="link" href="https://dl.bookfunnel.com/zdyn1info6">Get <em>Change</em> free</a></p>
+      </div>
+    </div>
+    <div class="formcard">
+      <iframe src="https://wannabepress.substack.com/embed" title="Subscribe to the Wannabe Press newsletter" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="mark" href="/" style="color:var(--paper)"><b>WANNABE</b>PRESS</a>
+      <p style="margin:14px 0 0;color:#bdb4a6;font-size:16px">We write for the rebels. Independent books, comics and story games by Russell Nohelty.</p>
+    </div>
+    <div><h4>Read</h4><ul>
+      <li><a href="https://thread.wannabepress.com/">Thread Weaver</a></li>
+      <li><a href="https://wannabepress.substack.com/">The newsletter</a></li>
+      <li><a href="https://www.russellnohelty.com/books/">All books</a></li>
+      <li><a href="https://www.russellnohelty.com/quiz/">What should I read?</a></li>
+    </ul></div>
+    <div><h4>Build</h4><ul>
+      <li><a href="https://www.hapitalist.com/">Hapitalist</a></li>
+      <li><a href="https://www.hapitalist.com/joy">Talk to Joy</a></li>
+      <li><a href="https://consulting.hapitalist.com/">Consulting</a></li>
+      <li><a href="https://www.russellnohelty.com/author-stack/">Books for creators</a></li>
+    </ul></div>
+    <div><h4>About</h4><ul>
+      <li><a href="https://www.russellnohelty.com/about/">Russell Nohelty</a></li>
+      <li><a href="https://www.russellnohelty.com/media/">Media kit</a></li>
+      <li><a href="https://store.russellnohelty.com/">Shop</a></li>
+      <li><a href="mailto:help@wannabepress.com">help@wannabepress.com</a></li>
+    </ul></div>
+    <div class="legal">
+      <span>© 2026 Wannabe Press</span>
+      <a href="https://www.russellnohelty.com/privacy-statement-us/">Privacy</a>
+      <a href="https://www.russellnohelty.com/terms-and-conditions/">Terms</a>
+      <a href="https://www.russellnohelty.com/refund-policy/">Refunds</a>
+    </div>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky" aria-hidden="true">
+  <p>16 books &amp; 5 comics free<br>in Thread Weaver</p>
+  <a class="btn" href="https://thread.wannabepress.com/app?start=free" tabindex="-1">Read free</a>
+</div>
+
+<script>
+// Phone buy bar: show once the hero buttons scroll away, hide again at the signup form.
+(function(){
+  var bar=document.getElementById('sticky'), hero=document.querySelector('.hero .ctas'), su=document.getElementById('signup');
+  if(!('IntersectionObserver' in window)||!bar||!hero) return;
+  var heroGone=false, atEnd=false;
+  function set(){ var on=heroGone&&!atEnd; bar.classList.toggle('on',on); bar.setAttribute('aria-hidden',on?'false':'true'); }
+  new IntersectionObserver(function(e){ heroGone=!e[0].isIntersecting && e[0].boundingClientRect.top<0; set(); }).observe(hero);
+  new IntersectionObserver(function(e){ atEnd=e[0].isIntersecting; set(); },{rootMargin:'0px 0px -30% 0px'}).observe(su);
+})();
+
+// This week's chapter, live from the newsletter. The text above is the fallback.
+(function(){
+  if(!window.fetch) return;
+  var ctl=window.AbortController?new AbortController():null; if(ctl) setTimeout(function(){ctl.abort()},6000);
+  fetch('/api/latest',ctl?{signal:ctl.signal}:{}).then(function(r){return r.ok?r.json():null}).then(function(d){
+    var p=d&&(d.posts||d)[0]; if(!p||!p.title||!p.slug) return;
+    var title=String(p.title).replace(/\s+-\s+/,' — ').trim();
+    document.getElementById('weekTitle').textContent=title;
+    if(p.subtitle) document.getElementById('weekLine').textContent=String(p.subtitle).trim();
+    if(p.section_name) document.getElementById('weekFrom').textContent='From '+p.section_name;
+    document.getElementById('weekLink').href='https://wannabepress.substack.com/p/'+encodeURIComponent(p.slug);
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>
