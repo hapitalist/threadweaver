@@ -47,4 +47,11 @@ Stamp every build in `www/comstation.js` (`TW_VERSION`), `www/app.html` (`TW_APP
 - Edge functions: `tw-embed` (link previews for the editor, admins only), `nl-seq-send` (cron `tw-nl-seq-send` every minute, only calls when something is due; page preview/test for admins), `nl-unsubscribe` (one-click + page JSON), `nl-ses-events` (SNS webhook).
 - Amazon SES: configuration set `wannabepress-email` -> SNS `wannabepress-email-events` -> `nl-ses-events`. The weekly serial chapter emails use the same configuration set (tag kind=serial_chapter).
 - Reader pages: `www/email-unsubscribe.html`, `www/email-leave.html`.
+- Wannabe Press readers from the Hapitalist app (16 Nov 2026): this list is the Wannabe Press list. The Hapitalist app still takes
+  Wannabe Press signups (its /wannabe-press page, fiction-only Kit signups, Zapier leads) and holds the Kit fiction readers it brought
+  over from Kit. Edge function `wannabe-sync` (cron `tw-wannabe-sync`, every 10 minutes, `supabase/wannabe_sync.sql`) asks the app's
+  `tw-wannabe-sync` for that list, adds new readers here as source `hapitalist-app` through `wannabe_from_app()` (never a test address,
+  never one the app marks blocked, never one `tw_may_email` refuses, nobody already here re-added), honours leaves made on the app, and
+  hands the app back this list's state so a leave made here is honoured there too. A reader on both the Hapitalist and the Wannabe
+  Press lists is on both. Nothing is emailed by the sync. The app's check `wannabe_tw_problems` reports drift between the two.
 - Heat: `admin_reader_heat.kit_points` counts Kit emails opened (1-4 +3, 5-19 +6, 20+ +10) and Kit open rate >= 50% of 10+ sent (+5), plus recency, clicks and tags.
