@@ -629,17 +629,36 @@ async function walkSelftest(dev) {
   return run;
 }
 
-// look again: every open item a walk found, at its exact page and step
+// look again: every open item a walk found, at its exact page and step (Command Center's nightly look-again). A step that is a
+// button is looked at again: gone from a page that shows, or switched off, closes it without a press; still there, it is
+// pressed once (never a send / pay / delete button) and must answer.
 async function walkAgain(dev) {
   const items = await ingest({ action: "open_findings" });
   if (!items || !Array.isArray(items.findings) || !items.findings.length) return null;
   const run = new Run("Look again", "again", "stranger", dev);
-  const { ctx } = await newContext(dev); const page = await ctx.newPage(); const w = watch(page);
-  const pages = [...new Set(items.findings.filter((f) => (f.seen_devices || []).includes(dev) || (f.sources || []).includes("visitor")).map((f) => f.page))]
-    .filter((p) => /^\/(?!game\/|rest\/)/.test(p));
-  for (const p of pages) {
-    const url = p.startsWith("/reader.html?id=") ? null : SITE + p;
-    if (url) await openAndLook(run, page, w, url);
+  const { ctx } = await newContext(dev);
+  const mine = items.findings.filter((f) => ((f.seen_devices || []).includes(dev) || (f.sources || []).includes("visitor")) && /^\/(?!game\/|rest\/)/.test(f.page));
+  for (const p of [...new Set(mine.map((f) => f.page))]) {
+    const page = await ctx.newPage(); const w = watch(page);
+    await openAndLook(run, page, w, SITE + p);
+    for (const f of mine.filter((x) => x.page === p && x.step && !/^choice/.test(x.step))) {
+      const el = await findByLabel(page, f.step);
+      const on = el ? await el.isEnabled().catch(() => false) : false;
+      if (!el || !on) {
+        run.step({ action: "see", target: f.step, page: p, note: `"${f.step}" is ${el ? "switched off" : "no longer on this page"}${page.url() !== SITE + p ? " (the page now goes to " + page.url() + ")" : ""}; nothing to press, nothing left to answer.` });
+        run.ok(p, f.step);
+        continue;
+      }
+      if (DANGER.test(f.step)) { run.step({ action: "see", target: f.step, page: p, note: `"${f.step}" is still there; it is never pressed by the harness (it sends, pays or deletes). It closes when a test that presses it passes, or when you press it, look, and press Done.` }); continue; }
+      const from = mark(w), before = await page.evaluate(() => ({ c: window.__twEyes ? window.__twEyes.changes : 0, u: location.href })).catch(() => ({ c: 0, u: "" }));
+      await el.click({ timeout: 5000 }).catch(() => {});
+      let answered = false;
+      for (let i = 0; i < 26 && !answered; i++) { await page.waitForTimeout(500); const now = await page.evaluate(() => ({ c: window.__twEyes ? window.__twEyes.changes : 0, u: location.href })).catch(() => ({ c: -1, u: "gone" })); answered = now.c !== before.c || now.u !== before.u || w.dialogs.length > 0; }
+      if (!answered) run.find({ page: p, step: f.step, kind: "pressed, nothing happened", message: `"${f.step}" was pressed again and still nothing changed for 13 s`, shot: await shot(page, "again") });
+      else if (!(await harvest(run, page, w, p, f.step, from))) { run.step({ action: "tap", target: f.step, page: p, note: "it answered" }); run.ok(p, f.step); }
+      await page.goto(SITE + p, { waitUntil: "domcontentloaded" }).catch(() => {}); await settle(page, 2000);
+    }
+    await page.close();
   }
   await ctx.close();
   return run;
