@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+<script src="/tw-eyes.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Data harness · Thread Weaver Admin</title>
+<!-- /admin/harness.html - Thread Weaver's Data Harness (17 Nov 2026). Russell: take everything relevant from the Joy Looper and
+     Command Center data harnesses and add it to Thread Weaver. Command Center's five tabs plus Hapitalist's bug report:
+       What needs doing   the board: broken things land here by themselves (a walk that found something, a red check, a
+                          visitor's error three times, the self-test going blind); + New with "who told you"; one helper at a
+                          time ("I'm on it", held two hours); "Fix is in" waits for the OK and asks for a walk; Done only with
+                          proof (a walk of that step passed after it was opened / the check is green / your own words when
+                          there is no test); Remove puts it under Removed with Put it back - nothing is really deleted
+       Tests              every walk, its steps, Run it now; + New test (steps in plain lines); Remove / Put it back
+       Test runs          every run, every step kept: Back, Play, Next, Every step, with the page's words and a picture
+       Runs by itself     what runs on its own and when, runs asked for, the self-tests
+       Checks             checks on Thread Weaver's own numbers, each with Prove it (a fault planted in a copy that is thrown away)
+       Bug report         what real visitors' browsers and the walks saw, grouped by page + step + kind
+     Data: hx_admin_* (each checks is_tw_admin itself); pictures through the hx-ingest function. -->
+<style>
+:root{--bg:#0e0a16;--panel:#16101f;--panel2:#1b1428;--ink:#e9e1f6;--dim:#9b91ac;--gold:#e8b53a;--edge:#2e2742;--red:#ff8a7a;--green:#7fd08a;--amber:#f0c060}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+body{font:400 16px/1.5 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif}
+#root{max-width:1040px;margin:0 auto;padding:18px 16px 90px}
+h1{font-family:'Cinzel',Georgia,serif;font-weight:600;color:var(--gold);font-size:24px;margin:0 0 4px}
+h2{font-family:'Cinzel',Georgia,serif;font-weight:600;color:var(--gold);font-size:17px;margin:0 0 8px}
+.sub{color:var(--dim);margin:0 0 14px;font-size:14px}
+.top{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{border:1px solid var(--edge);border-radius:999px;padding:5px 11px;font-size:13px;background:var(--panel)}
+.pill.red{border-color:#8a3a30;color:var(--red)} .pill.ok{border-color:#2f5a3a;color:var(--green)} .pill.amb{border-color:#7a6a36;color:var(--amber)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--edge);margin:0 0 14px}
+.tabs button{font:inherit;font-size:14px;color:var(--dim);background:none;border:1px solid transparent;border-bottom:none;border-radius:9px 9px 0 0;padding:8px 12px;cursor:pointer;min-height:40px}
+.tabs button.on{color:var(--gold);border-color:var(--edge);background:var(--panel);font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--edge);background:var(--panel2);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;min-height:34px}
+.chip.on{border-color:var(--gold);color:var(--gold)}
+.btn{font:inherit;font-size:14px;padding:8px 13px;border:1px solid #3a3150;border-radius:9px;background:#241b33;color:var(--ink);font-weight:700;cursor:pointer;min-height:40px}
+.btn:hover{border-color:#6a5d8a}.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.go{background:linear-gradient(150deg,#e8b53a,#b8862a);color:#16121f;border:none}
+.btn.small{font-size:13px;padding:5px 10px;min-height:34px;font-weight:400}
+.card{border:1px solid var(--edge);border-radius:12px;background:var(--panel);padding:13px 14px;margin:0 0 10px}
+.card.fix{border-color:#7a6a36}.card.done{opacity:.85}
+.card .t{font-weight:700;overflow-wrap:anywhere}
+.meta{font-size:13px;color:var(--dim);margin-top:3px;overflow-wrap:anywhere}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;margin-right:6px;background:#241b33;color:var(--dim);vertical-align:1px}
+.tag.walk{color:#9fc4ff}.tag.check{color:var(--amber)}.tag.visitor{color:var(--red)}.tag.selftest{color:#f79ad3}.tag.admin{color:var(--green)}
+.tag.pass{color:var(--green)}.tag.fail{color:var(--red)}
+pre,.pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;background:#120d1b;border:1px solid var(--edge);border-radius:9px;padding:9px;margin:8px 0 0;color:#d9cfe9}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.more{position:relative}
+.menu{position:absolute;right:0;top:38px;z-index:20;background:#1b1428;border:1px solid #3a3150;border-radius:10px;padding:5px;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.menu button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;background:none;border:none;color:var(--ink);padding:8px 10px;border-radius:7px;cursor:pointer}
+.menu button:hover{background:#241b33}
+.form{border:1px dashed #3a3150;border-radius:10px;padding:10px;margin-top:10px;background:#140f1d}
+.form label{display:block;font-size:13px;color:var(--dim);margin:6px 0 3px}
+input[type=text],textarea,select{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--edge);border-radius:8px;padding:8px 10px;width:100%;min-height:40px}
+textarea{min-height:80px;resize:vertical}
+.msg{font-size:14px;margin-top:8px;min-height:1em}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{text-align:left;padding:7px 8px;border-bottom:1px solid #221a31;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
+.replay{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.replay .shot img{max-width:100%;border:1px solid var(--edge);border-radius:8px}
+.steps{max-height:340px;overflow:auto;border:1px solid var(--edge);border-radius:9px}
+.steps div{padding:6px 9px;border-bottom:1px solid #221a31;font-size:13px;cursor:pointer;overflow-wrap:anywhere}
+.steps div.on{background:#241b33}.steps div.bad{color:var(--red)}
+.empty{color:var(--dim);padding:16px;text-align:center;border:1px dashed var(--edge);border-radius:12px}
+@media (min-width:900px){.replay{grid-template-columns:340px minmax(0,1fr)}}
+@media (max-width:640px){h1{font-size:21px}.tabs button{padding:7px 9px;font-size:13px}}
+</style>
+</head>
+<body>
+<main id="root"><p class="sub">One moment…</p></main>
+<script src="/lib/supabase.js"></script>
+<script src="/admin/tw-admin.js"></script>
+<script>
+(function () {
+  'use strict';
+  var root = document.getElementById('root'), sb = null, session = null;
+  var TABS = [['board', 'What needs doing'], ['tests', 'Tests'], ['runs', 'Test runs'], ['schedule', 'Runs by itself'], ['checks', 'Checks'], ['bugs', 'Bug report']];
+  var state = { tab: (location.hash || '#board').slice(1), board: 'open', tests: 'active', bugs: 'visitor', run: null, summary: null };
+  if (!TABS.some(function (t) { return t[0] === state.tab.split('/')[0]; })) state.tab = 'board';
+
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function when(t) { if (!t) return 'never'; var d = new Date(t); return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+  function ago(t) { if (!t) return 'never'; var s = (Date.now() - new Date(t).getTime()) / 1000; if (s < 90) return 'just now'; if (s < 5400) return Math.round(s / 60) + ' min ago'; if (s < 129600) return Math.round(s / 3600) + ' h ago'; return Math.round(s / 86400) + ' days ago'; }
+  function rpc(fn, args) {
+    return sb.rpc(fn, args || {}).then(function (r) {
+      if (r.error) throw new Error(r.error.message || 'That did not work.');
+      return r.data;
+    });
+  }
+  function fail(box, e) { var m = el('div', 'msg err', (e && e.message) || String(e)); box.appendChild(m); }
+
+  function draw() {
+    root.innerHTML = '';
+    root.appendChild(el('h1', null, 'Data harness'));
+    root.appendChild(el('p', 'sub', 'Thread Weaver walked like a reader every night, on a phone and a laptop; real visitors’ errors; checks on the numbers. Whatever breaks lands on What needs doing.'));
+    var top = el('div', 'top'); root.appendChild(top); drawTop(top);
+    var tabs = el('div', 'tabs'); tabs.setAttribute('role', 'tablist'); root.appendChild(tabs);
+    TABS.forEach(function (t) {
+      var b = el('button', state.tab.split('/')[0] === t[0] ? 'on' : '', t[1]); b.type = 'button'; b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', state.tab.split('/')[0] === t[0] ? 'true' : 'false');
+      b.onclick = function () { state.tab = t[0]; location.hash = t[0]; draw(); };
+      tabs.appendChild(b);
+    });
+    var body = el('section'); root.appendChild(body);
+    var tab = state.tab.split('/')[0];
+    ({ board: drawBoard, tests: drawTests, runs: drawRuns, schedule: drawSchedule, checks: drawChecks, bugs: drawBugs })[tab](body);
+  }
+
+  function drawTop(top) {
+    rpc('hx_admin_summary').then(function (s) {
+      state.summary = s; top.innerHTML = '';
+      var st = s.selftest_devices || [];
+      var blind = st.filter(function (x) { return !x.ok; });
+      if (!st.length) top.appendChild(el('span', 'pill amb', 'Self-test: not run yet'));
+      else if (blind.length) top.appendChild(el('span', 'pill red', 'The harness missed: ' + blind.map(function (b) { return b.device + ' — ' + (b.missed || []).join(', '); }).join('; ')));
+      else top.appendChild(el('span', 'pill ok', 'Self-test passed ' + ago(st.map(function (x) { return x.at; }).sort()[0])));
+      top.appendChild(el('span', 'pill' + (s.open ? ' red' : ' ok'), s.open + ' to do'));
+      if (s.fix_waiting) top.appendChild(el('span', 'pill amb', s.fix_waiting + ' fix waiting'));
+      top.appendChild(el('span', 'pill', 'Last walk ' + ago(s.last_walk)));
+      top.appendChild(el('span', 'pill' + (s.checks_red ? ' red' : ' ok'), s.checks_red ? s.checks_red + ' checks red' : 'Checks green'));
+      if (s.reports_day) top.appendChild(el('span', 'pill', s.reports_day + ' visitor reports today'));
+    }).catch(function (e) { fail(top, e); });
+  }
+
+  // ------------------------------------------------------------------ What needs doing
+  function drawBoard(box) {
+    var bar = el('div', 'bar'); box.appendChild(bar);
+    [['open', 'Open'], ['done', 'Done (30 days)'], ['removed', 'Removed']].forEach(function (f) {
+      var c = el('button', 'chip' + (state.board === f[0] ? ' on' : ''), f[1]); c.type = 'button';
+      c.onclick = function () { state.board = f[0]; draw(); }; bar.appendChild(c);
+    });
+    var add = el('button', 'btn go small', '+ New'); add.type = 'button'; bar.appendChild(add);
+    var form = el('div', 'form'); form.hidden = true; box.appendChild(form);
+    add.onclick = function () { form.hidden = !form.hidden; };
+    form.appendChild(el('label', null, 'What is wrong (a few words)'));
+    var ti = el('input'); ti.type = 'text'; form.appendChild(ti);
+    form.appendChild(el('label', null, 'More detail (where, what you pressed, what you saw)'));
+    var de = el('textarea'); form.appendChild(de);
+    form.appendChild(el('label', null, 'Who told you (an email, so you can tell them when it is fixed)'));
+    var wt = el('input'); wt.type = 'text'; form.appendChild(wt);
+    var fm = el('div', 'msg'); var save = el('button', 'btn go', 'Put it on the list'); save.type = 'button';
+    var fa = el('div', 'acts'); fa.appendChild(save); form.appendChild(fa); form.appendChild(fm);
+    save.onclick = function () {
+      save.disabled = true;
+      rpc('hx_admin_item_add', { p_title: ti.value, p_detail: de.value, p_who_told: wt.value }).then(function (r) {
+        save.disabled = false;
+        if (!r.ok) { fm.className = 'msg err'; fm.textContent = r.reason; return; }
+        draw();
+      }).catch(function (e) { save.disabled = false; fm.className = 'msg err'; fm.textContent = e.message; });
+    };
+    var list = el('div'); box.appendChild(list); list.appendChild(el('p', 'sub', 'Loading the list…'));
+    rpc('hx_admin_items', { p_status: state.board }).then(function (items) {
+      list.innerHTML = '';
+      if (!items.length) { list.appendChild(el('div', 'empty', state.board === 'open' ? 'Nothing needs doing.' : 'Nothing here.')); return; }
+      items.forEach(function (it) { list.appendChild(itemCard(it)); });
+    }).catch(function (e) { list.innerHTML = ''; fail(list, e); });
+  }
+  function itemCard(it) {
+    var c = el('div', 'card' + (it.status === 'fix_waiting' ? ' fix' : '') + (it.status === 'done' ? ' done' : ''));
+    var head = el('div', 't'); head.appendChild(el('span', 'tag ' + it.source, it.source === 'walk' ? 'a walk' : it.source === 'visitor' ? 'visitors' : it.source === 'admin' ? 'you' : it.source));
+    head.appendChild(document.createTextNode(it.title)); c.appendChild(head);
+    var m = 'Opened ' + when(it.opened_at);
+    if (it.times) m += ' · seen ' + it.times + ' time' + (it.times === 1 ? '' : 's');
+    if (it.seen_devices && it.seen_devices.length) m += ' on ' + it.seen_devices.join(' and ');
+    if (it.clean_devices && it.clean_devices.length && it.status !== 'done') m += ' · clean since on ' + it.clean_devices.join(' and ');
+    if (it.held) m += ' · ' + it.claimed_by + ' is on it';
+    if (it.status === 'fix_waiting') m += ' · fix waiting for the OK: ' + (it.fix_note || '');
+    if (it.who_told) m += ' · told by ' + it.who_told;
+    if (it.status === 'done') m = 'Closed ' + when(it.closed_at) + ' by ' + (it.closed_by || 'the harness');
+    c.appendChild(el('div', 'meta', m));
+    if (it.detail) c.appendChild(el('div', 'pre', it.detail));
+    if (it.trail && it.trail.length) c.appendChild(el('div', 'pre', 'Just before: ' + [].concat(it.trail).join('  →  ')));
+    if (it.status === 'done' && it.proof) c.appendChild(el('div', 'pre', 'Proof: ' + it.proof));
+    (it.notes || []).forEach(function (n) { c.appendChild(el('div', 'meta', when(n.at) + ' — ' + (n.by || '') + ': ' + n.note)); });
+    var acts = el('div', 'acts'), msg = el('div', 'msg'), form = el('div', 'form'); form.hidden = true;
+    c.appendChild(acts); c.appendChild(form); c.appendChild(msg);
+    function act(label, go, cls) { var b = el('button', 'btn small' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.onclick = go; acts.appendChild(b); return b; }
+    function after(p, okText) {
+      return p.then(function (r) {
+        if (r && r.ok === false) { msg.className = 'msg err'; msg.textContent = r.reason || 'That did not work.'; return r; }
+        msg.className = 'msg ok'; msg.textContent = okText || 'Done.';
+        if (r && r.who_told) { var a = el('a', null, 'Tell ' + r.who_told + ' it’s fixed'); a.href = 'mailto:' + encodeURIComponent(r.who_told) + '?subject=' + encodeURIComponent('Fixed: ' + it.title) + '&body=' + encodeURIComponent('Hi,\n\nThanks for telling me about this. It’s fixed now.\n\nRussell'); msg.appendChild(document.createTextNode(' ')); msg.appendChild(a); return r; }
+        setTimeout(draw, 900); return r;
+      }).catch(function (e) { msg.className = 'msg err'; msg.textContent = e.message; });
+    }
+    function ask(label, placeholder, go) {
+      form.hidden = false; form.innerHTML = '';
+      form.appendChild(el('label', null, label));
+      var t = el('textarea'); t.placeholder = placeholder || ''; form.appendChild(t);
+      var a = el('div', 'acts'), ok = el('button', 'btn go small', 'Save'), no = el('button', 'btn small', 'Never mind');
+      ok.type = no.type = 'button'; a.appendChild(ok); a.appendChild(no); form.appendChild(a);
+      no.onclick = function () { form.hidden = true; };
+      ok.onclick = function () { ok.disabled = true; go(t.value).then(function () { ok.disabled = false; }); };
+      setTimeout(function () { t.focus(); }, 20);
+    }
+    if (it.status === 'open') {
+      act(it.held ? 'Let it go' : 'I’m on it', function () { after(it.held ? rpc('hx_admin_item_release', { p_id: it.id }) : rpc('hx_admin_item_claim', { p_id: it.id, p_who: null }), it.held ? 'Let go.' : 'It’s yours for two hours.'); });
+      act('Fix is in', function () { ask('What was the fix?', 'What changed, and where', function (v) { return after(rpc('hx_admin_item_fix', { p_id: it.id, p_note: v }), 'Waiting for the OK; a walk will look again.'); }); });
+    }
+    if (it.status === 'open' || it.status === 'fix_waiting') {
+      if (it.source === 'walk' || it.source === 'visitor' || it.test_id) act('Check it again now', function () { after(rpc('hx_admin_request', { p_test: it.test_id, p_item: it.id }), 'Asked for. The walker picks it up on its next pass.'); });
+      if (it.source === 'check') act('Run the check now', function () { after(rpc('hx_admin_check_run', { p_name: it.check_name }).then(function (r) { return r.ok ? { ok: true } : { ok: false, reason: 'Still red: ' + (r.problems || []).slice(0, 3).join(' • ') }; }), 'Green: it closed itself.'); });
+      act('Done', function () { ask('What shows it is fixed?', it.source === 'admin' ? 'What you saw (this one has no test, so your words are the proof)' : 'Optional: it closes by itself when its walk or check passes', function (v) { return after(rpc('hx_admin_item_done', { p_id: it.id, p_proof: v }), 'Closed.'); }); }, 'go');
+    }
+    var more = el('span', 'more'); acts.appendChild(more);
+    var dots = el('button', 'btn small', '···'); dots.type = 'button'; dots.setAttribute('aria-label', 'More for this item'); more.appendChild(dots);
+    var menu = el('div', 'menu'); menu.hidden = true; more.appendChild(menu);
+    dots.onclick = function (e) { e.stopPropagation(); menu.hidden = !menu.hidden; };
+    function mi(label, go) { var b = el('button', null, label); b.type = 'button'; b.onclick = function () { menu.hidden = true; go(); }; menu.appendChild(b); }
+    if (it.status !== 'removed') {
+      mi('Change', function () {
+        form.hidden = false; form.innerHTML = '';
+        form.appendChild(el('label', null, 'What is wrong')); var t = el('input'); t.type = 'text'; t.value = it.title; form.appendChild(t);
+        form.appendChild(el('label', null, 'Detail')); var d = el('textarea'); d.value = it.detail || ''; form.appendChild(d);
+        form.appendChild(el('label', null, 'Who told you')); var w = el('input'); w.type = 'text'; w.value = it.who_told || ''; form.appendChild(w);
+        var a = el('div', 'acts'), ok = el('button', 'btn go small', 'Save'); ok.type = 'button'; a.appendChild(ok); form.appendChild(a);
+        ok.onclick = function () { after(rpc('hx_admin_item_change', { p_id: it.id, p_title: t.value, p_detail: d.value, p_who_told: w.value }), 'Saved.'); };
+      });
+      mi('Add a note', function () { ask('Note', '', function (v) { return after(rpc('hx_admin_item_note', { p_id: it.id, p_note: v }), 'Noted.'); }); });
+      mi('Remove', function () { after(rpc('hx_admin_item_remove', { p_id: it.id }), 'Removed. It waits under Removed.').then(function (r) { if (r && r.ok !== false) { var u = el('button', 'btn small', 'Undo'); u.type = 'button'; u.onclick = function () { after(rpc('hx_admin_item_putback', { p_id: it.id }), 'Put back.'); }; msg.appendChild(document.createTextNode(' ')); msg.appendChild(u); } }); });
+    } else mi('Put it back', function () { after(rpc('hx_admin_item_putback', { p_id: it.id }), 'Put back.'); });
+    return c;
+  }
+  document.addEventListener('click', function () { [].forEach.call(document.querySelectorAll('.menu'), function (m) { m.hidden = true; }); });
+
+  // ------------------------------------------------------------------ Tests
+  var STEP_HELP = 'One step a line:\n  goto /app\n  tap Store\n  type Email = someone@test.invalid\n  see Unlock Everything\n  not_see Something went wrong\n  url contains /app\n  wait 2000\n  sweep            (look for bugs on this page)';
+  function stepsToText(steps) { return (steps || []).map(function (s) { var d = s.do; if (d === 'goto') return 'goto ' + s.url; if (d === 'tap') return 'tap ' + s.text; if (d === 'type') return 'type ' + s.field + ' = ' + s.value; if (d === 'see' || d === 'not_see') return d + ' ' + s.text; if (d === 'url') return 'url contains ' + s.contains; if (d === 'wait') return 'wait ' + s.ms; return d; }).join('\n'); }
+  function textToSteps(t) {
+    return t.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+      var m = l.match(/^(\w+)\s*(.*)$/), d = m[1].toLowerCase(), r = m[2];
+      if (d === 'goto') return { do: 'goto', url: r }; if (d === 'tap') return { do: 'tap', text: r };
+      if (d === 'type') { var p = r.split('='); return { do: 'type', field: p[0].trim(), value: p.slice(1).join('=').trim() }; }
+      if (d === 'see' || d === 'not_see') return { do: d, text: r }; if (d === 'url') return { do: 'url', contains: r.replace(/^contains\s+/, '') };
+      if (d === 'wait') return { do: 'wait', ms: +r || 1000 }; return { do: d };
+    });
+  }
+  function drawTests(box) {
+    var bar = el('div', 'bar'); box.appendChild(bar);
+    [['active', 'Tests'], ['removed', 'Removed']].forEach(function (f) {
+      var c = el('button', 'chip' + (state.tests === f[0] ? ' on' : ''), f[1]); c.type = 'button'; c.onclick = function () { state.tests = f[0]; draw(); }; bar.appendChild(c);
+    });
+    var add = el('button', 'btn go small', '+ New test'); add.type = 'button'; bar.appendChild(add);
+    var form = el('div'); box.appendChild(form);
+    add.onclick = function () { form.innerHTML = ''; form.appendChild(testForm({ name: '', persona: 'stranger', devices: ['phone', 'laptop'], steps: [{ do: 'goto', url: '/app' }, { do: 'sweep' }] })); };
+    var list = el('div'); box.appendChild(list);
+    rpc('hx_admin_tests', { p_removed: state.tests === 'removed' }).then(function (ts) {
+      if (!ts.length) { list.appendChild(el('div', 'empty', state.tests === 'removed' ? 'Nothing removed.' : 'No tests yet. The first walk adds them.')); return; }
+      var wrap = el('div', 'tablewrap'), tb = el('table'); wrap.appendChild(tb); list.appendChild(wrap);
+      tb.innerHTML = '<thead><tr><th>Test</th><th>As</th><th>Last run</th><th>Runs</th><th></th></tr></thead>';
+      var body = el('tbody'); tb.appendChild(body);
+      ts.forEach(function (t) {
+        var tr = el('tr'); body.appendChild(tr);
+        var n = el('td'); n.appendChild(el('div', 't', t.name)); n.appendChild(el('div', 'meta', t.kind + (t.open_items ? ' · ' + t.open_items + ' open' : ''))); tr.appendChild(n);
+        tr.appendChild(el('td', null, t.persona + ' · ' + (t.devices || []).join(', ')));
+        var lr = el('td'); if (t.last_run_at) { lr.appendChild(el('span', 'tag ' + (t.last_passed ? 'pass' : 'fail'), t.last_passed ? 'passed' : 'failed')); lr.appendChild(document.createTextNode(ago(t.last_run_at))); } else lr.textContent = 'not yet'; tr.appendChild(lr);
+        tr.appendChild(el('td', null, String(t.runs)));
+        var a = el('td'), msg = el('div', 'msg');
+        if (t.removed_at) { var pb = el('button', 'btn small', 'Put it back'); pb.type = 'button'; pb.onclick = function () { rpc('hx_admin_test_remove', { p_id: t.id, p_back: true }).then(draw); }; a.appendChild(pb); }
+        else {
+          var rn = el('button', 'btn small', 'Run it now'); rn.type = 'button'; rn.onclick = function () { rpc('hx_admin_request', { p_test: t.id, p_item: null }).then(function () { msg.className = 'msg ok'; msg.textContent = 'Asked for.'; }).catch(function (e) { msg.className = 'msg err'; msg.textContent = e.message; }); }; a.appendChild(rn);
+          var ch = el('button', 'btn small', 'Change'); ch.type = 'button'; ch.onclick = function () { form.innerHTML = ''; form.appendChild(testForm(t)); form.scrollIntoView({ behavior: 'smooth' }); }; a.appendChild(ch);
+          var rm = el('button', 'btn small', 'Remove'); rm.type = 'button'; rm.onclick = function () { rpc('hx_admin_test_remove', { p_id: t.id, p_back: false }).then(draw); }; a.appendChild(rm);
+          if (t.last_run_id) { var rp = el('button', 'btn small', 'Replay'); rp.type = 'button'; rp.onclick = function () { state.tab = 'runs/' + t.last_run_id; location.hash = state.tab; draw(); }; a.appendChild(rp); }
+        }
+        a.appendChild(msg); tr.appendChild(a);
+      });
+    }).catch(function (e) { fail(list, e); });
+  }
+  function testForm(t) {
+    var f = el('div', 'form');
+    f.appendChild(el('label', null, 'Name')); var n = el('input'); n.type = 'text'; n.value = t.name || ''; f.appendChild(n);
+    f.appendChild(el('label', null, 'Walk it as')); var p = el('select'); ['stranger', 'nothing bought', 'Unlock Everything'].forEach(function (o) { var op = el('option', null, o); op.value = o; if (o === t.persona) op.selected = true; p.appendChild(op); }); f.appendChild(p);
+    f.appendChild(el('label', null, 'Steps')); var s = el('textarea'); s.style.minHeight = '150px'; s.value = stepsToText(t.steps); f.appendChild(s);
+    f.appendChild(el('div', 'pre', STEP_HELP));
+    var a = el('div', 'acts'), ok = el('button', 'btn go small', 'Save the test'), msg = el('div', 'msg'); ok.type = 'button'; a.appendChild(ok); f.appendChild(a); f.appendChild(msg);
+    ok.onclick = function () {
+      rpc('hx_admin_test_save', { p: { id: t.id || null, name: n.value, persona: p.value, devices: t.devices || ['phone', 'laptop'], steps: textToSteps(s.value), note: t.note || null } }).then(function (r) {
+        if (!r.ok) { msg.className = 'msg err'; msg.textContent = r.reason; return; } draw();
+      }).catch(function (e) { msg.className = 'msg err'; msg.textContent = e.message; });
+    };
+    return f;
+  }
+
+  // ------------------------------------------------------------------ Test runs and the replay
+  function drawRuns(box) {
+    var id = +(state.tab.split('/')[1] || 0);
+    if (id) { drawReplay(box, id); return; }
+    rpc('hx_admin_runs', { p_test: null, p_limit: 150 }).then(function (rs) {
+      if (!rs.length) { box.appendChild(el('div', 'empty', 'No runs yet.')); return; }
+      var wrap = el('div', 'tablewrap'), tb = el('table'); wrap.appendChild(tb); box.appendChild(wrap);
+      tb.innerHTML = '<thead><tr><th>When</th><th>Test</th><th>Device</th><th>Result</th></tr></thead>';
+      var body = el('tbody'); tb.appendChild(body);
+      rs.forEach(function (r) {
+        var tr = el('tr', 'click'); tr.tabIndex = 0; body.appendChild(tr);
+        tr.appendChild(el('td', null, when(r.started_at)));
+        var n = el('td'); n.appendChild(el('div', 't', r.name)); n.appendChild(el('div', 'meta', r.trigger + (r.persona ? ' · as ' + r.persona : ''))); tr.appendChild(n);
+        tr.appendChild(el('td', null, r.device));
+        var res = el('td'); res.appendChild(el('span', 'tag ' + (r.passed ? 'pass' : 'fail'), r.passed ? 'passed' : r.finished_at ? 'failed' : 'never finished')); res.appendChild(el('div', 'meta', r.summary || '')); tr.appendChild(res);
+        tr.onclick = tr.onkeydown = function (e) { if (e.type === 'keydown' && e.key !== 'Enter') return; state.tab = 'runs/' + r.id; location.hash = state.tab; draw(); };
+      });
+    }).catch(function (e) { fail(box, e); });
+  }
+  function drawReplay(box, id) {
+    var back = el('button', 'btn small', '← All runs'); back.type = 'button'; back.onclick = function () { state.tab = 'runs'; location.hash = 'runs'; draw(); };
+    box.appendChild(back);
+    rpc('hx_admin_run', { p_id: id }).then(function (d) {
+      var r = d.run, steps = d.steps || [], i = 0, timer = null;
+      if (!r) { box.appendChild(el('div', 'empty', 'No such run.')); return; }
+      var h = el('div', 'card'); h.appendChild(el('div', 't', r.name + ' on a ' + r.device + (r.persona ? ', as ' + r.persona : ''))); h.appendChild(el('div', 'meta', when(r.started_at) + ' · ' + (r.passed ? 'passed' : 'failed') + ' · ' + (r.summary || '') + (r.gh_run ? ' · ' + r.gh_run : ''))); box.appendChild(h);
+      var ctl = el('div', 'acts'); box.appendChild(ctl);
+      var bB = el('button', 'btn small', 'Back'), bP = el('button', 'btn small', 'Play'), bN = el('button', 'btn small', 'Next'), bA = el('button', 'btn small', 'Every step');
+      [bB, bP, bN, bA].forEach(function (b) { b.type = 'button'; ctl.appendChild(b); });
+      var rp = el('div', 'replay'); box.appendChild(rp);
+      var list = el('div', 'steps'), view = el('div'); rp.appendChild(list); rp.appendChild(view);
+      steps.forEach(function (s, k) { var row = el('div', s.passed ? '' : 'bad', s.n + '. ' + s.action + (s.target ? ' — ' + s.target : '')); row.onclick = function () { show(k); }; list.appendChild(row); });
+      function show(k) {
+        i = Math.max(0, Math.min(steps.length - 1, k)); var s = steps[i]; view.innerHTML = '';
+        [].forEach.call(list.children, function (c, n) { c.classList.toggle('on', n === i); });
+        if (!s) { view.appendChild(el('div', 'empty', 'This run kept no steps.')); return; }
+        var c = el('div', 'card'); view.appendChild(c);
+        c.appendChild(el('div', 't', 'Step ' + s.n + ' of ' + steps.length + ': ' + s.action + (s.target ? ' — ' + s.target : '')));
+        c.appendChild(el('div', 'meta', (s.passed ? 'fine' : 'something wrong') + (s.url ? ' · ' + s.url : '') + (s.ms ? ' · ' + (s.ms / 1000).toFixed(1) + ' s' : '')));
+        if (s.note) c.appendChild(el('div', 'pre', s.note));
+        if (s.page_said) c.appendChild(el('div', 'pre', 'The page said: ' + s.page_said));
+        if (s.shot) {
+          var sh = el('div', 'shot'); c.appendChild(sh); sh.appendChild(el('p', 'sub', 'Loading the picture…'));
+          picture(s.shot).then(function (u) { sh.innerHTML = ''; var im = el('img'); im.alt = 'What the page looked like at this step'; im.src = u; sh.appendChild(im); }).catch(function (e) { sh.innerHTML = ''; sh.appendChild(el('div', 'msg err', 'The picture did not load: ' + e.message)); });
+        }
+      }
+      function every() { view.innerHTML = ''; steps.forEach(function (s) { var c = el('div', 'card'); c.appendChild(el('div', 't', s.n + '. ' + s.action + (s.target ? ' — ' + s.target : ''))); if (s.note) c.appendChild(el('div', 'meta', s.note)); if (s.page_said) c.appendChild(el('div', 'pre', s.page_said)); view.appendChild(c); }); }
+      bB.onclick = function () { show(i - 1); }; bN.onclick = function () { show(i + 1); }; bA.onclick = every;
+      bP.onclick = function () { if (timer) { clearInterval(timer); timer = null; bP.textContent = 'Play'; return; } bP.textContent = 'Stop'; timer = setInterval(function () { if (i >= steps.length - 1) { clearInterval(timer); timer = null; bP.textContent = 'Play'; return; } show(i + 1); }, 1400); };
+      var firstBad = steps.findIndex(function (s) { return !s.passed; });
+      show(firstBad >= 0 ? firstBad : 0);
+    }).catch(function (e) { fail(box, e); });
+  }
+  var shotCache = {};
+  function picture(path) {
+    if (shotCache[path]) return Promise.resolve(shotCache[path]);
+    return sb.auth.getSession().then(function (r) {
+      var t = r && r.data && r.data.session && r.data.session.access_token;
+      return fetch(TWAdmin.url + '/functions/v1/hx-ingest', { method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + t }, body: JSON.stringify({ action: 'shot', path: path }) });
+    }).then(function (r) { return r.json(); }).then(function (j) { if (!j.url) throw new Error(j.error || 'no picture'); shotCache[path] = j.url; return j.url; });
+  }
+
+  // ------------------------------------------------------------------ Runs by itself
+  function drawSchedule(box) {
+    rpc('hx_admin_schedule').then(function (d) {
+      (d.jobs || []).forEach(function (j) {
+        var c = el('div', 'card'); c.appendChild(el('div', 't', j.what));
+        c.appendChild(el('div', 'meta', j.runs + ' · ' + j.place + ' · last ' + ago(j.last_at) + (j.last_ok === false ? ' (something was wrong)' : ''))); box.appendChild(c);
+      });
+      box.appendChild(el('h2', null, 'Asked for'));
+      if (!(d.requests || []).length) box.appendChild(el('div', 'empty', 'Nothing asked for.'));
+      (d.requests || []).forEach(function (q) { box.appendChild(el('div', 'meta', when(q.requested_at) + ' — ' + (q.test_name || q.item_title || 'a look again') + ' — ' + q.status + (q.done_at ? ' ' + ago(q.done_at) : ''))); });
+      box.appendChild(el('h2', null, 'Self-tests')).style.marginTop = '16px';
+      if (!(d.selftests || []).length) box.appendChild(el('div', 'empty', 'The self-test has not run yet.'));
+      (d.selftests || []).forEach(function (s) { box.appendChild(el('div', 'meta', when(s.at) + ' — ' + s.device + ': ' + (s.ok ? 'caught all ' + s.expected.length : 'missed ' + s.missed.join(', ')))); });
+    }).catch(function (e) { fail(box, e); });
+  }
+
+  // ------------------------------------------------------------------ Checks
+  function drawChecks(box) {
+    rpc('hx_admin_checks').then(function (cs) {
+      cs.forEach(function (k) {
+        var c = el('div', 'card'), t = el('div', 't');
+        t.appendChild(el('span', 'tag ' + (k.last_ok ? 'pass' : k.last_ok === false ? 'fail' : ''), k.last_ok ? 'green' : k.last_ok === false ? 'red' : 'not run'));
+        t.appendChild(document.createTextNode(k.title)); c.appendChild(t);
+        c.appendChild(el('div', 'meta', k.why + ' Last ran ' + ago(k.last_run) + '. Proved ' + ago(k.proved_at) + (k.prove_ok === true ? ' ✓' : k.prove_ok === false ? ' ✗' : '') + '.'));
+        if (k.last_problems && k.last_problems.length) c.appendChild(el('div', 'pre', k.last_problems.join('\n')));
+        if (k.prove_note) c.appendChild(el('div', 'meta', 'Prove it: ' + k.prove_note));
+        var a = el('div', 'acts'), msg = el('div', 'msg'); c.appendChild(a); c.appendChild(msg);
+        var run = el('button', 'btn small', 'Run the check now'), pr = el('button', 'btn small', 'Prove it'); run.type = pr.type = 'button'; a.appendChild(run); a.appendChild(pr);
+        run.onclick = function () { run.disabled = true; rpc('hx_admin_check_run', { p_name: k.name }).then(function () { draw(); }).catch(function (e) { run.disabled = false; msg.className = 'msg err'; msg.textContent = e.message; }); };
+        pr.onclick = function () { pr.disabled = true; rpc('hx_admin_check_prove', { p_name: k.name }).then(function (r) { msg.className = 'msg ' + (r.ok === false ? 'err' : 'ok'); msg.textContent = r.note || ''; pr.disabled = false; }).catch(function (e) { pr.disabled = false; msg.className = 'msg err'; msg.textContent = e.message; }); };
+        box.appendChild(c);
+      });
+    }).catch(function (e) { fail(box, e); });
+  }
+
+  // ------------------------------------------------------------------ Bug report
+  function drawBugs(box) {
+    var bar = el('div', 'bar'); box.appendChild(bar);
+    [['visitor', 'Real visitors'], ['walk', 'The walks'], ['all', 'Everything']].forEach(function (f) {
+      var c = el('button', 'chip' + (state.bugs === f[0] ? ' on' : ''), f[1]); c.type = 'button'; c.onclick = function () { state.bugs = f[0]; draw(); }; bar.appendChild(c);
+    });
+    rpc('hx_admin_findings', { p_source: state.bugs, p_days: 30 }).then(function (fs) {
+      if (!fs.length) { box.appendChild(el('div', 'empty', 'Nothing in the last 30 days.')); return; }
+      fs.forEach(function (f) {
+        var c = el('div', 'card'), t = el('div', 't');
+        t.appendChild(el('span', 'tag ' + (f.sources.indexOf('visitor') >= 0 ? 'visitor' : 'walk'), f.kind)); t.appendChild(document.createTextNode(f.page + (f.step ? ' — ' + f.step : ''))); c.appendChild(t);
+        c.appendChild(el('div', 'meta', f.times + ' time' + (f.times === 1 ? '' : 's') + (f.people ? ', ' + f.people + ' signed-in ' + (f.people === 1 ? 'person' : 'people') : '') + ' · ' + (f.seen_devices || []).join(', ') + ' · first ' + when(f.first_seen) + ', last ' + ago(f.last_seen) + (f.item_status ? ' · on the list: ' + f.item_status.replace('_', ' ') : '')));
+        if (f.message) c.appendChild(el('div', 'pre', f.message));
+        var a = el('div', 'acts'), more = el('button', 'btn small', 'Every time it happened'); more.type = 'button'; a.appendChild(more); c.appendChild(a);
+        var out = el('div'); c.appendChild(out);
+        more.onclick = function () {
+          more.disabled = true;
+          rpc('hx_admin_reports', { p_fp: f.fp }).then(function (rs) {
+            out.innerHTML = '';
+            if (!rs.length) out.appendChild(el('div', 'meta', 'Only the walk saw it (its run has the steps).'));
+            rs.forEach(function (r) { out.appendChild(el('div', 'meta', when(r.at) + ' · ' + (r.device || '') + ' · ' + (r.browser || '') + (r.build ? ' · v' + r.build : '') + (r.harness ? ' · the harness' : '') + (r.trail ? ' · before: ' + [].concat(r.trail).slice(-5).join(' → ') : ''))); });
+          }).catch(function (e) { fail(out, e); });
+        };
+        box.appendChild(c);
+      });
+    }).catch(function (e) { fail(box, e); });
+  }
+
+  window.addEventListener('hashchange', function () { var h = (location.hash || '#board').slice(1); if (h !== state.tab) { state.tab = h; draw(); } });
+  TWAdmin.ready(function (client, s) { sb = client; session = s; draw(); });
+})();
+</script>
+</body>
+</html>

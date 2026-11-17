@@ -2,6 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co; font-src 'self' data: blob:; connect-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<script src="tw-eyes.js"></script><!-- the data harness's eyes (17 Nov 2026): first, so it sees everything -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <title>Comic</title>
 <style>
@@ -42,6 +43,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'DM Mono
 #navbtns{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;z-index:17;pointer-events:none}
 #navbtns button{pointer-events:auto;font-family:'DM Mono';font-size:12px;background:rgba(29,24,48,.9);border:1px solid var(--edge);color:var(--ink);padding:11px 16px;border-radius:10px;cursor:pointer;letter-spacing:.5px}
 #navbtns button:active{border-color:var(--gold);color:var(--gold)}
+#navbtns button:disabled{opacity:.35;cursor:default}
 #navbtns.hideMovie{display:none}
 #hint{position:fixed;bottom:44px;left:0;right:0;text-align:center;color:var(--dim);font-size:11px;z-index:18;opacity:0;transition:opacity .4s;pointer-events:none}
 #hint.show{opacity:.85}
@@ -268,6 +270,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'DM Mono
     var pos=pool.indexOf(item), dd='';
     for(var k=0;k<pool.length;k++) dd+='<span class="d'+(k===pos?' on':'')+'"></span>';
     document.getElementById('dots').innerHTML=dd;
+    if(window.__twSyncNav) window.__twSyncNav();
   }
   window.next=function(){ if(idx<flat.length-1) showIdx(idx+1); };
   window.navNext=function(){
@@ -279,6 +282,16 @@ html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'DM Mono
     else { prev(); }
   };
   window.prev=function(){ if(idx>0) showIdx(idx-1); };
+  // 17 Nov 2026 (found by the data harness's every-button walk): on the first page Back answered nothing. At the start it is
+  // now switched off (dimmed), so a press that cannot do anything is never offered.
+  function syncNav(){
+    var b=document.getElementById('backBtn'); if(!b) return;
+    var sc=document.getElementById('scroll');
+    var atStart = mode==='page' ? !sc || sc.scrollTop<=2 : idx<=0;
+    b.disabled=atStart; b.setAttribute('aria-disabled', atStart?'true':'false');
+  }
+  window.__twSyncNav=syncNav;
+  try{ document.getElementById('scroll').addEventListener('scroll', syncNav, {passive:true}); }catch(e){}
 
   // ---------- ZOOM (pinch + double-tap) ----------
   var pinchStart=null, lastTap=0;
@@ -393,6 +406,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'DM Mono
     document.getElementById('modeBtn').style.display=(m==='movie')?'none':'';
     document.getElementById('modeBtn').textContent=(m==='page')?'GUIDED':'SCROLL';
     if(g) showIdx(idx,true);
+    if(window.__twSyncNav) setTimeout(window.__twSyncNav, 50);
   }
   window.toggleMode=function(){ var to=(mode==='page')?'panel':'page'; setMode(to); if(to==='page'){ var fn=flat[idx].page,t=document.querySelector('#pages img[data-page="'+fn+'"]'); if(t)t.scrollIntoView(); } };
 

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<script src="tw-eyes.js"></script><!-- the data harness's eyes (17 Nov 2026): first, so it sees everything -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Serial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,6 +46,10 @@ h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-heig
   var P = new URLSearchParams(location.search), SID = P.get("serial"), G = Math.max(0, +P.get("g") || 0);
   var DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var parentWin = (window.parent && window.parent !== window) ? window.parent : null;
+  // 17 Nov 2026 (found by the data harness's every-button walk): this page only works inside the app. Opened on its own
+  // (a shared or old link) its Sign in button did nothing. On its own it now hands the reader to the app, which signs them
+  // in and opens this serial.
+  if (!parentWin) { location.replace((/^https?:$/.test(location.protocol) ? "/app" : "app.html") + (SID ? "?serial=" + encodeURIComponent(SID) : "")); return; }
   function token(){ try{ return parentWin && parentWin.twAccessToken ? parentWin.twAccessToken() : null; }catch(e){ return null; } }
   function fnBase(){ try{ return (parentWin && parentWin.twFnBase) || "https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1"; }catch(e){ return "https://nzkgurdmvgkizvzisqxt.supabase.co/functions/v1"; } }
   function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
@@ -74,7 +79,7 @@ h1{font-family:'Cinzel',Georgia,serif;color:var(--gold);font-size:24px;line-heig
         '</div>'+one+buy+(G>0?'<button class="btn alt" onclick="twGo('+(G-1)+')">← Previous chapter</button>':'')+'</div>');
       return;
     }
-    if (res.s === 401) { state('Sign in to read your serial.'); return; }
+    if (res.s === 401) { state('Sign in to read your serial.<br><br><button class="btn go" style="max-width:280px;margin:0 auto" onclick="try{parent.promptSignin()}catch(e){}">Sign in</button>'); return; }
     if (res.s !== 200 || !j.html) { state(j.end ? 'That’s the end of this serial.' : 'Couldn’t open this chapter. Check your connection and try again.<br><br><button class="btn alt" style="max-width:240px;margin:0 auto" onclick="location.reload()">Try again</button>'); return; }
     document.title = j.title;
     document.getElementById("kick").textContent = j.serial_title + (j.book && j.book.title && j.book.title !== j.serial_title ? " · " + j.book.title : "");

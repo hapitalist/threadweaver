@@ -8,13 +8,13 @@
    FREE_CACHE is versioned SEPARATELY on purpose: it holds ~44MB of free books,
    so bumping the shell must not force every user to re-download all of it.
    Only bump FREE_CACHE when free_assets.json actually changes. */
-var SHELL_CACHE   = 'wl-shell-v1.16.9';
+var SHELL_CACHE   = 'wl-shell-v1.17.0';
 var FREE_CACHE    = 'wl-free-v1.14.81';   /* bumped: free_assets.json changed */      /* the 44MB of free books/comics, offline up front */
 var CONTENT_CACHE = 'wl-content-v2';   /* downloader fills this on unlock */
 
 var SHELL = [
   './','./index.html','./app.html','./reader.html','./comic.html',
-  './pwa.js','./store.js','./discover.js','./comstation.js','./pods.js','./fun.js','./serials.js','./serial.html','./manifest.webmanifest',
+  './tw-eyes.js','./pwa.js','./store.js','./discover.js','./comstation.js','./pods.js','./fun.js','./serials.js','./serial.html','./manifest.webmanifest',
   './lib/jszip.min.js','./lib/epub.min.js','./lib/supabase.js',
   './fonts/atkinson-400.woff2','./fonts/cinzel-latin-600-normal.woff2','./fonts/cinzel-latin-700-normal.woff2','./fonts/cormorant-garamond-latin-500-normal.woff2','./fonts/cormorant-garamond-latin-500-italic.woff2','./fonts/cormorant-garamond-latin-600-normal.woff2','./fonts/cormorant-garamond-latin-600-italic.woff2','./fonts/dm-mono-latin-500-normal.woff2','./fonts/atkinson-700.woff2',
   './books/weave.json','./books/briefs.json','./books/weaver.json','./books/library.json',

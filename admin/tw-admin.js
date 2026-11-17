@@ -9,7 +9,7 @@
  * same email + password sign-in as /admin.html when nobody is signed in, says "This account isn't an
  * admin" for anyone else, and only then hands the page its client. The database checks again on every
  * call (is_tw_admin), so this gate is for clarity, not the lock.
- * It also draws the top nav: Readers, One-off emails, Sequences, Newsletter, Subscribers, Sign out.
+ * It also draws the top nav: Readers, One-off emails, Sequences, Newsletter, Subscribers, Data harness, Sign out.
  */
 (function () {
   'use strict';
@@ -21,7 +21,8 @@
     ['/admin/one-offs.html', 'One-off emails'],
     ['/admin/sequences.html', 'Sequences'],
     ['/admin/newsletter.html', 'Newsletter'],
-    ['/admin/subscribers.html', 'Subscribers']
+    ['/admin/subscribers.html', 'Subscribers'],
+    ['/admin/harness.html', 'Data harness']
   ];
 
   var CSS = [

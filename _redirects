@@ -2,6 +2,8 @@
 /supabase/*       /   404!
 /README.md        /   404!
 /qa-live/*        /   404!
+/harness/*        /   404!
+/.github/*        /   404!
 /voltbuilder.json /   404!
 /config.xml       /   404!
 /resources/*      /   404!

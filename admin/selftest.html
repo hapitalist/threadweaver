@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://nzkgurdmvgkizvzisqxt.supabase.co">
+<script src="/tw-eyes.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Self-test · Thread Weaver data harness</title>
+<!-- /admin/selftest.html - the Data Harness's self-test (17 Nov 2026). From Hapitalist's /qa/broken and Command Center's
+     /harness/selftest/: one of every break, planted on purpose. The walker (harness/walk.mjs, "Self-test") presses them on a
+     phone and a laptop every night and every break must be caught; one that is not caught turns the self-test red on
+     /admin/harness.html and opens "The harness went blind" on What needs doing. Nothing here touches any reader or any data:
+     what the eyes report from this page is marked planted and never goes on the board. -->
+<style>
+body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:18px;background:#fff;color:#222}
+h1{font-size:20px;margin:0 0 6px}
+p{margin:6px 0 14px;color:#555}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button{font:inherit;padding:10px 14px;border:1px solid #999;border-radius:8px;background:#f3f3f3;color:#222;cursor:pointer}
+#wide{width:1600px;height:8px;background:#eee}
+#cut{position:relative;left:calc(100vw - 70px);width:170px;white-space:nowrap}
+#pale{color:#f4f4f4;background:#ffffff;border-color:#eee}
+#out{min-height:24px}
+</style>
+</head>
+<body>
+<h1>Data harness self-test</h1>
+<p>Every thing on this page is broken on purpose, so the harness can prove it still sees each kind of break.</p>
+<div id="loadingNote">Loading your library...</div>
+<div class="row">
+  <button id="dead">Does nothing</button>
+  <button id="slow">Answers after 11 seconds</button>
+  <button id="rage">Press me again and again</button>
+  <button id="stall">Save my place</button>
+  <button id="popup">Pop-up error</button>
+  <button id="shown">Shows an error</button>
+  <button id="crash">Crashes</button>
+  <button id="call">Calls nowhere</button>
+  <button id="expect">Promises and breaks it</button>
+</div>
+<div id="out"></div>
+<div id="outStall"></div>
+<div id="outShown"></div>
+<div id="outSlow"></div>
+<p>Your total is NaN. Welcome back, undefined.</p>
+<img src="/admin/no-such-picture.png" alt="a picture that is not there" width="40" height="40">
+<p><a href="/admin/no-such-page.html">A link that goes nowhere</a></p>
+<div id="wide"></div>
+<div class="row"><button id="cut">Cut off at the edge</button> <button id="pale">Hard to read</button></div>
+<script>
+(function () {
+  var out = document.getElementById("out");
+  function say(t, where) { (where ? document.getElementById(where) : out).textContent = t; }
+  document.getElementById("dead").onclick = function () {};
+  document.getElementById("rage").onclick = function () {};
+  document.getElementById("slow").onclick = function () { setTimeout(function () { say("Answered at last.", "outSlow"); }, 11000); };
+  document.getElementById("stall").onclick = function () { say("Saving your place...", "outStall"); };
+  document.getElementById("popup").onclick = function () { alert("Couldn't save that. Try again."); };
+  document.getElementById("shown").onclick = function () { say("Something went wrong. Your bookmark was not saved.", "outShown"); };
+  document.getElementById("crash").onclick = function () { setTimeout(function () { null.planted(); }, 10); say("Crashing on purpose."); };
+  document.getElementById("call").onclick = function () { say("Calling..."); fetch("https://planted.invalid/never").then(function () {}, function () { say("Called."); }); };
+  document.getElementById("expect").onclick = function () { say("Promised."); window.twExpect("Planted promise", function () { return false; }, 3000, "The planted promise did not come true in 3 s"); };
+})();
+</script>
+</body>
+</html>

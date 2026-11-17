@@ -1,0 +1,60 @@
+# Thread Weaver's Data Harness - the walker on GitHub's computers (17 Nov 2026).
+# Ported from Hapitalist's app-walks / every-page / route-harness workflows and Command Center's nightly walks.
+#   2:17 am PT every night   every walk: every page, admin kept locked, every button, the phone app (games, free books,
+#                            comics, the Weave, the store), signed in as the test people, the self-test, look again
+#   every push to main       the same, once Netlify has published that commit (the walks of every piece a change touches)
+#   every 30 minutes         only when a run was asked for on /admin/harness.html ("Run it now", "Check it again now", "Fix is in")
+# Results go to Thread Weaver's own database through the hx-ingest function, which checks GitHub's own OIDC token for this
+# repository and this workflow: no secret is kept here. Everything shows on /admin/harness.html.
+name: data-harness
+on:
+  schedule:
+    - cron: "17 10 * * *"
+    - cron: "*/30 * * * *"
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "supabase/**", "qa-live/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: data-harness
+  cancel-in-progress: false
+jobs:
+  walk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the browsers (Chromium for the laptop, WebKit - Safari's engine - for the phone)
+        working-directory: harness
+        run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium webkit
+      - name: Wait for Netlify to publish this commit
+        if: github.event_name == 'push'
+        run: |
+          want=$(grep -o 'TW_VERSION = "[0-9.]*"' www/comstation.js | grep -o '[0-9.]*')
+          for i in $(seq 1 40); do
+            have=$(curl -s "https://thread.wannabepress.com/comstation.js?hx=$RANDOM" | grep -o 'TW_VERSION = "[0-9.]*"' | grep -o '[0-9.]*')
+            [ "$have" = "$want" ] && echo "Live: $have" && exit 0
+            sleep 15
+          done
+          echo "The site still says $have, not $want; walking what is live anyway."
+      - name: Walk
+        run: |
+          case "${{ github.event_name }}/${{ github.event.schedule }}" in
+            "schedule/*/30 * * * *") node harness/walk.mjs --ingest oidc --trigger asked --queue --only pages,locked,app,signedin,again ;;
+            push/*) node harness/walk.mjs --ingest oidc --trigger push ;;
+            *) node harness/walk.mjs --ingest oidc --trigger schedule ;;
+          esac
+      - name: Keep the pictures with the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-shots
+          path: /tmp/tw-harness
+          retention-days: 14
+          if-no-files-found: ignore

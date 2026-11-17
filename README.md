@@ -55,3 +55,36 @@ Stamp every build in `www/comstation.js` (`TW_VERSION`), `www/app.html` (`TW_APP
   hands the app back this list's state so a leave made here is honoured there too. A reader on both the Hapitalist and the Wannabe
   Press lists is on both. Nothing is emailed by the sync. The app's check `wannabe_tw_problems` reports drift between the two.
 - Heat: `admin_reader_heat.kit_points` counts Kit emails opened (1-4 +3, 5-19 +6, 20+ +10) and Kit open rate >= 50% of 10+ sent (+5), plus recency, clicks and tags.
+
+## The Data Harness (17 Nov 2026, 1.17.0)
+Ported from Hapitalist's own harness and Command Center's Data Harness 1.6.0, for Thread Weaver's pages, games, books and comics.
+Russell: "take everything relevant from the data harness we developed for Joy Looper and the command center data harness and add it
+to Thread Weaver. Then run it through every page to check for bugs."
+- **The eyes** - `www/tw-eyes.js`, loaded first on every page (app, reader, comics, serials, landing, sign-in links, email pages,
+  admin pages) and injected into every story game (`gameURL` in `app.html`, page `/game/<id>`). A press nothing answers in 13 s,
+  an answer that took 10 s, the same thing pressed 4 times in 3 s, "loading..." still up after 45 s (25 s when the page opened on
+  it), error pop-ups and error words after a press, crashes, failed calls, broken pictures, junk (undefined / NaN / null /
+  [object Object] / {{x}} / raw ** / Invalid Date), sideways scroll and cut-off / unreadable buttons on a phone, slow pages,
+  `twExpect()` promises. Each goes to `hx_report` with the last 20 presses and pages (never anything typed). The harness's own
+  browser says `TWDataHarness/1`: kept, never counted as a visitor.
+- **The database** - `supabase/data_harness.sql`, `data_harness_board.sql`, `data_harness_checks.sql`: `hx_reports` (raw, 30 days),
+  `hx_findings` (page + step + kind), `hx_items` (What needs doing), `hx_tests`, `hx_runs`, `hx_run_steps`, `hx_run_requests`,
+  `hx_checks`, `hx_selftests`, `hx_schedule`, `hx_keys`. Board rules: one helper at a time (held two hours), nobody takes a fix
+  waiting for the OK or a closed item, Done only with proof (a walk of that step passed on every device it was seen on after it
+  was opened / the check is green / the owner's words when there is no test), Remove -> Removed -> Put it back.
+  A visitor's error goes on the board the third time or when two people hit it; it closes when a walk opens that page clean on a
+  phone and a laptop.
+- **Checks with Prove it** - 17 checks on Thread Weaver's own data (sign-in records GoTrue can read, iPhone purchases unlocked,
+  serials and $1 chapters for real books, paid files in storage, only Substack readers on the list, suppressed addresses,
+  scheduled jobs failing or silent, failing calls, Hapitalist member sync, sign-in emails, walks / runs / self-test / checks
+  themselves). Cron `hx-checks` hourly at :41, `hx-prove` 5:13 am PT (a fault planted in a rolled-back copy; the check must see it).
+- **The walker** - `harness/walk.mjs` (Playwright). Walks: Every page, Admin kept locked (pages + admin calls with no account),
+  Every button (never pay / send / delete / sign out / subscribe), The app (phone app: every game - locked ones must open the
+  unlock sheet, the free one played 25 moves - every free book opened and paged, free comics, the Weave, the store), Signed in
+  (test people `harness-reader@test.invalid`, `harness-everything@test.invalid`, made by `hx-ingest`), Self-test, Look again.
+  Locally: `node harness/walk.mjs --local .` serves this repository under the real address (Netlify's `_redirects`).
+- **The self-test** - `/admin/selftest.html`: one of every break (13 on a laptop, 16 on a phone). Every one must be caught.
+- **Runs by itself** - `.github/workflows/data-harness.yml`: 2:17 am PT nightly, after every push to main (once Netlify has the
+  commit), and every 30 minutes when a run was asked for. It proves itself to `hx-ingest` with GitHub's OIDC token.
+- **Admin** - `/admin/harness.html`: What needs doing, Tests, Test runs (replay: Back, Play, Next, Every step, pictures),
+  Runs by itself, Checks, Bug report.

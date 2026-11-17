@@ -1,0 +1,7 @@
+{
+  "name": "tw-data-harness",
+  "private": true,
+  "type": "module",
+  "description": "Thread Weaver's walker (the Data Harness). See walk.mjs.",
+  "dependencies": { "playwright": "1.56.1" }
+}

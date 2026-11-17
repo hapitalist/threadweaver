@@ -21,6 +21,7 @@
   <script src="serials.js" defer></script>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-src 'self' blob: data:; child-src 'self' blob: data:; connect-src 'self' data: blob: https://nzkgurdmvgkizvzisqxt.supabase.co;">
+<script src="tw-eyes.js"></script><!-- the data harness's eyes (17 Nov 2026): first, so it sees everything -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Thread Weaver</title>
 <style>
@@ -576,7 +577,18 @@ function gameURL(id){
   if(blobCache[id]) return blobCache[id];
   var bin = atob(STORE[id]); var bytes = new Uint8Array(bin.length);
   for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-  var url = URL.createObjectURL(new Blob([bytes], {type:"text/html"}));
+  /* 17 Nov 2026 (the data harness): the game gets the same eyes as every page, so a choice that does nothing,
+     a crash or junk inside a game is reported as /game/<id>. If anything about this fails, the game opens as before. */
+  var body = bytes;
+  try{
+    var html = new TextDecoder("utf-8").decode(bytes), at = html.search(/<head[^>]*>/i);
+    if(at >= 0 && html.indexOf("tw-eyes.js") < 0){
+      var end = html.indexOf(">", at) + 1, base = location.href.replace(/[?#].*$/, "").replace(/[^\/]*$/, "");
+      html = html.slice(0, end) + '<script>window.__twEyesPage="/game/' + id + '";window.TW_APP_VERSION=' + JSON.stringify(window.TW_APP_VERSION||"") + ';<\/script><script src="' + base + 'tw-eyes.js"><\/script>' + html.slice(end);
+      body = html;
+    }
+  }catch(e){ body = bytes; }
+  var url = URL.createObjectURL(new Blob([body], {type:"text/html"}));
   blobCache[id]=url; return url;
 }
 var DONE_KEY="wannabe.finished";
@@ -1881,7 +1893,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){ var b=document.getElementById('boot'); if(b){ b.classList.add('gone'); setTimeout(function(){ b.style.display='none'; },600); } }, 900);
   // in-app version stamp (confirms which build is live after a deploy)
   try{
-    var TW_APP_VERSION="1.16.9";
+    var TW_APP_VERSION=window.TW_APP_VERSION="1.17.0";
     if(!document.getElementById('twVer')){
       var v=document.createElement('div'); v.id='twVer';
       v.textContent='v'+TW_APP_VERSION;
