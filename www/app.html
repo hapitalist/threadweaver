@@ -299,6 +299,85 @@ body{background:radial-gradient(140% 90% at 50% -10%,#22163b,#0a0810 60%);color:
 #weave .went .wlface .fn{font-size:13.5px;color:var(--dim);line-height:1.36;margin-top:2px}
 #weave .went .wlx{margin:5px 0 0;font-size:13.5px;color:var(--dim);line-height:1.36}
 #weave .went .wlx b{color:#b9aee0;font-weight:600}
+/* THE WEAVE, 1.18.0 */
+#weave .wv-top{flex:none;display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--edge)}
+#weave .wv-top button{font-family:'DM Mono';font-size:12px;background:#1d1830;border:1px solid var(--edge);color:var(--ink);padding:9px 12px;border-radius:9px;cursor:pointer}
+#weave .wv-top h2{flex:1;font-family:'Cinzel';font-size:18px;color:var(--gold);letter-spacing:1px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#weave .wsearch{margin:0 0 16px}
+#weave .wv-thread,#weave .wv-erow,#weave .wv-hrow,#weave .wv-book,#weave .wv-ev,#weave .wv-kind{font:inherit;color:inherit;text-align:left}
+.wv-me{background:linear-gradient(180deg,#1d1530,#120d1c);border:1px solid var(--edge);border-radius:16px;padding:16px 18px;margin-bottom:22px}
+.wv-rank{font-family:'Cinzel';font-size:20px;color:var(--gold)}
+.wv-count{font-family:'DM Mono';font-size:12px;color:var(--dim);margin:4px 0 10px}.wv-count b{color:var(--ink)}
+.wv-bar{height:6px;border-radius:9px;background:#221a33;overflow:hidden}.wv-bar i{display:block;height:100%;background:var(--gold);border-radius:9px}
+.wv-h2{font-family:'Cinzel';font-size:19px;color:var(--ink);margin:6px 0 2px}
+.wv-sub{font-size:15px;color:var(--dim);margin-bottom:12px}
+.wv-h3{font-family:'DM Mono';font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin:24px 0 10px}
+.wv-note{font-family:'DM Mono';font-size:12px;color:var(--dim);margin:10px 0}
+.wv-threads{display:grid;gap:10px;margin-bottom:26px}
+.wv-thread{display:grid;grid-template-columns:62px 1fr;gap:14px;align-items:center;width:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,#140f20),#120d1c 70%);border:1px solid var(--edge);border-left:3px solid var(--c);border-radius:14px;padding:10px 14px 12px 10px;cursor:pointer}
+.wv-thread:active{transform:scale(.99)}
+.wv-thread img{width:62px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;box-shadow:0 6px 14px rgba(0,0,0,.5)}
+.wv-tb{display:flex;flex-direction:column;min-width:0}
+.wv-tn{font-family:'Cinzel';font-size:16px;color:var(--ink)}
+.wv-td{font-size:14.5px;color:var(--dim);line-height:1.3;margin:3px 0 7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wv-tc{font-family:'DM Mono';font-size:11px;color:var(--c);margin-bottom:5px}
+.wv-thread .wv-bar i{background:var(--c)}
+.wv-kinds{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wv-kind{background:#141020;border:1px solid var(--edge);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.wv-kind b{font-family:'Cinzel';font-size:14.5px;font-weight:600;color:var(--ink)}.wv-kind span{font-family:'DM Mono';font-size:11px;color:var(--dim)}
+.wv-thero{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:start}
+.wv-thero img{width:96px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;box-shadow:0 10px 24px rgba(0,0,0,.6)}
+.wv-thero .wv-tn{font-size:20px;color:var(--c)}.wv-thero p{margin:6px 0 8px;font-size:15.5px;color:var(--ink);line-height:1.4}
+.wv-meta{font-family:'DM Mono';font-size:11px;color:var(--dim);margin-bottom:6px}.wv-thero .wv-bar i{background:var(--c)}
+.wv-shelf{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.wv-book{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;cursor:pointer;scroll-snap-align:start;background:none;border:0;padding:0}
+.wv-book span{font-size:13px;line-height:1.2;color:var(--dim)}
+.wv-cov{width:92px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;box-shadow:0 6px 14px rgba(0,0,0,.5);display:block}
+.wv-covtxt{display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;font-family:'Cinzel';font-size:12px;color:#0a0810;background:linear-gradient(160deg,var(--c),color-mix(in srgb,var(--c) 55%,#000))}
+.wv-tl{position:relative;padding-left:4px}
+.wv-ev{display:grid;grid-template-columns:86px 14px 1fr auto;gap:10px;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--edge);padding:11px 0;cursor:pointer}
+.wv-ev[disabled]{cursor:default}
+.wv-date{font-family:'DM Mono';font-size:11px;color:var(--gold);text-align:right}
+.wv-dot{width:10px;height:10px;border-radius:50%;background:#a98bff;box-shadow:0 0 0 3px rgba(169,139,255,.2)}
+.wv-evb{display:flex;flex-direction:column}.wv-evb b{font-family:'Cinzel';font-size:14.5px;font-weight:600;color:var(--ink)}.wv-evb small{font-size:13.5px;color:var(--dim)}
+.wv-go{font-family:'DM Mono';font-size:11px;color:var(--gold);white-space:nowrap}
+.wv-chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;-webkit-overflow-scrolling:touch}
+.wv-chip{flex:none;font-family:'DM Mono';font-size:11.5px;background:#141020;border:1px solid var(--edge);color:var(--ink);padding:8px 11px;border-radius:999px;cursor:pointer}
+.wv-chip span{color:var(--dim)}.wv-chip.on{background:var(--gold);border-color:var(--gold);color:#1a1206}.wv-chip.on span{color:#4a3a14}
+.wv-chips.small .wv-chip{font-size:11px;padding:6px 10px;border-color:color-mix(in srgb,var(--c,#2e2742) 45%,#2e2742)}
+.wv-erow{display:flex;flex-direction:column;gap:2px;width:100%;background:linear-gradient(180deg,#191324,#120d1c);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.wv-et{font-family:'Cinzel';font-size:15.5px;color:var(--ink)}.wv-es{font-size:14.5px;color:var(--dim);line-height:1.3}
+.wv-hidden{display:grid;gap:8px}
+.wv-gh{font-family:'Cinzel';font-size:14px;color:var(--c);margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--c) 35%,transparent)}.wv-gh span{font-family:'DM Mono';font-size:11px;color:var(--dim)}
+.wv-hrow{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;width:100%;background:#100c19;border:1px dashed #3a3150;border-radius:12px;padding:9px 12px;cursor:pointer;margin-bottom:8px}
+.wv-hrow.nolink{grid-template-columns:40px 1fr;cursor:default}
+.wv-hcov{width:40px;aspect-ratio:2/3;object-fit:cover;border-radius:3px;font-size:7px;padding:3px}
+.wv-hn{font-family:'Cinzel';font-size:20px;color:var(--gold);text-align:center}
+.wv-ht{display:flex;flex-direction:column;min-width:0}.wv-ht b{font-family:'Cinzel';font-size:14px;font-weight:600;color:var(--ink)}
+.wv-ht small{font-size:13.5px;color:var(--dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wvSheet{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;background:rgba(5,4,10,.6)}
+#wvSheet.on{display:flex}
+#wvSheet .wv-sh{width:100%;max-width:760px;max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1b1429,#0e0a16);border:1px solid var(--edge);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -20px 50px rgba(0,0,0,.6)}
+#wvSheet .wv-shh{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px 14px 0}
+#wvSheet .wv-grab{width:44px;height:4px;border-radius:4px;background:#3a3150;margin:0 auto}
+#wvSheet .wv-x{background:#1d1830;border:1px solid var(--edge);color:var(--ink);border-radius:9px;padding:7px 11px;font-family:'DM Mono';font-size:12px;cursor:pointer}
+#wvSheetBody{overflow-y:auto;padding:6px 18px calc(28px + env(safe-area-inset-bottom))}
+#wvSheetBody h3{font-family:'Cinzel';font-size:22px;color:var(--ink);margin:2px 0 8px}
+.wv-skind{font-family:'DM Mono';font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.wv-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.wv-tag{font-family:'DM Mono';font-size:11px;border:1px solid var(--c);color:var(--c);background:none;border-radius:999px;padding:4px 9px;cursor:pointer}
+.wv-sbody{font-size:16.5px;line-height:1.5;color:var(--ink)}
+#wvSheetBody .wlayer{margin-top:12px;padding-top:12px;border-top:1px solid var(--edge)}
+#wvSheetBody .wlh{font-family:'DM Mono';font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+#wvSheetBody .wlbody{font-size:15px;color:var(--dim);line-height:1.42}#wvSheetBody .wlbody.real{color:#b9aee0}
+#wvSheetBody .wlsrc{display:inline-block;margin-top:7px;background:#241640;border:1px solid var(--gold);color:var(--gold);padding:5px 11px;border-radius:8px;font-family:'DM Mono';font-size:11px;cursor:pointer}
+#wvSheetBody .wlface{margin:6px 0 0;padding-left:10px;border-left:2px solid var(--edge)}#wvSheetBody .wlface .ff{font-family:'Cinzel';font-size:13px}#wvSheetBody .wlface .ft{font-family:'DM Mono';font-size:9.5px;color:var(--gold)}#wvSheetBody .wlface .fn{font-size:13.5px;color:var(--dim)}
+#wvSheetBody .wlx{margin:5px 0 0;font-size:13.5px;color:var(--dim)}
+.wv-links{display:flex;flex-wrap:wrap;gap:7px}
+.wv-link{background:#241640;border:1px solid var(--edge);color:var(--gold);padding:6px 10px;border-radius:9px;font-family:'Cinzel';font-size:13px;cursor:pointer}
+.wv-link.dim{color:#7c7192;border-style:dashed;font-family:'Cormorant Garamond';font-style:italic;font-size:14px}
+@media (min-width:700px){.wv-threads{grid-template-columns:1fr 1fr}.wv-kinds{grid-template-columns:repeat(3,1fr)}}
+
 #weave .went .wlconf{font-family:'DM Mono';font-size:9px;color:#6a6080;letter-spacing:.5px;float:right;opacity:.7}
 /* --- codex search --- */
 #weave .wsearch{position:relative;margin:0 0 12px}
@@ -466,23 +545,19 @@ body.is-native.pre-auth #shell{display:block !important}
 </div>
 
 <div id="weave">
-  <div class="wbar">
-    <h2>&#10038; THE WEAVE</h2>
-    <button onclick="closeWeave()">&larr; Back</button>
+  <div class="wv-top">
+    <button onclick="wvBack()" aria-label="Back">&larr;</button>
+    <h2 id="wvTitle">The Weave</h2>
   </div>
-  <div class="wscroll">
-    <div class="wprog" id="weaveProg"></div>
+  <div class="wscroll" id="wvScroll">
     <div class="wsearch">
-      <input class="wq" id="weaveQ" type="text" placeholder="&#9906; Search all 864 entries — gods, monsters, places, items…" autocomplete="off" spellcheck="false" oninput="weaveSearch(this.value)">
+      <input class="wq" id="weaveQ" type="text" placeholder="&#9906; Search gods, monsters, places, relics…" autocomplete="off" spellcheck="false" oninput="weaveSearch(this.value)">
       <button class="wqx" id="weaveQx" onclick="weaveSearchClear()" aria-label="Clear" style="display:none">&#215;</button>
     </div>
-    <div class="wtabs" id="weaveTabs">
-      <div class="wtab on" id="tab-timeline" onclick="weaveTab('timeline')">✶ TIMELINE</div>
-      <div class="wtab" id="tab-threads" onclick="weaveTab('threads')">❋ THREADS</div>
-      <div class="wtab" id="tab-codex" onclick="weaveTab('codex')">☉ CODEX</div>
-      <div class="wtab" id="tab-places" onclick="weaveTab('places')">⌖ PLACES</div>
-    </div>
     <div id="weaveBody"></div>
+  </div>
+  <div id="wvSheet" onclick="if(event.target===this)wvSheetClose()" role="dialog" aria-modal="true">
+    <div class="wv-sh"><div class="wv-shh"><span></span><span class="wv-grab"></span><button class="wv-x" onclick="wvSheetClose()">Close</button></div><div id="wvSheetBody"></div></div>
   </div>
 </div>
 
@@ -1298,7 +1373,7 @@ var WEAVE_UNLOCK_KEY='weave.unlocked';
 function weaveUnlocked(){ try{return JSON.parse(localStorage.getItem(WEAVE_UNLOCK_KEY)||'{}');}catch(e){return {};} }
 function loadWeave(){
   fetch('books/weave.json').then(function(r){return r.ok?r.json():null;}).then(function(w){
-    WEAVE=w; updateWeaveCount();
+    WEAVE=w; updateWeaveCount(); if(document.getElementById('weave').classList.contains('on')) renderWeave();
   }).catch(function(){});
 }
 function totalSpoilerEntries(){ return WEAVE?WEAVE.entries.length:0; }
@@ -1311,6 +1386,7 @@ function updateWeaveCount(){
 function entryById(id){ return WEAVE?WEAVE.entries.find(function(e){return e.id===id;}):null; }
 function openWeave(){
   if(!WEAVE){ loadWeave(); }
+  WV.view='home'; WV.stack=[]; WV.kind=null; WV.tf=null; if(typeof wvSheetClose==='function') wvSheetClose();
   renderWeave();
   document.getElementById('weave').classList.add('on');
 }
@@ -1479,26 +1555,6 @@ window.addEventListener("message",function(ev){
   if(ev.data&&ev.data.type==="weaver-relic"){ updateRankLabel(); /* relic toast handled by existing unlock modal style if open */ }
 });
 
-var WEAVE_TAB='timeline';
-function weaveTab(t){
-  WEAVE_TAB=t;
-  ['timeline','threads','codex','places'].forEach(function(k){
-    document.getElementById('tab-'+k).classList.toggle('on',k===t);
-  });
-  renderWeave();
-}
-var WEAVE_Q='';
-function weaveSearch(v){
-  WEAVE_Q=(v||'').trim();
-  document.getElementById('weaveQx').style.display = WEAVE_Q ? 'block' : 'none';
-  renderWeave();
-}
-function weaveSearchClear(){
-  WEAVE_Q='';
-  var i=document.getElementById('weaveQ'); if(i) i.value='';
-  document.getElementById('weaveQx').style.display='none';
-  renderWeave();
-}
 function jumpFromWeave(kind,id){
   closeWeave();
   if(kind==='comic'){
@@ -1635,124 +1691,216 @@ function loadSb_FT(){
 }
 function closeFullText(){ document.getElementById('ftOverlay').classList.remove('on'); }
 function closeSourceWork(){ document.getElementById('srcModal').classList.remove('on'); }
-function renderWeave(){
-  if(!WEAVE){ document.getElementById('weaveBody').innerHTML='<div class="wprog">The Weave is still forming…</div>'; return; }
-  var owned=weaveUnlocked();
-  var nOwned=WEAVE.entries.filter(function(e){return owned[e.id];}).length;
-  document.getElementById('weaveProg').innerHTML='<b>'+nOwned+'</b> of <b>'+WEAVE.entries.length+'</b> entries discovered — keep reading to reveal more';
-  var html='';
+/* ===================== THE WEAVE, 1.18.0 (17 Nov 2026) =====================
+   Russell: the old Weave was a flat timeline picture of ONE thread, text-only thread lists, and endless scrolls of
+   locked "???" cards. Now: the nine threads come first, each opens its own page (its books, its timeline, everything
+   found there); the codex filters by kind and thread; locked entries fold into "N hidden in <book>" that open the
+   book; every entry opens a sheet with its full text, where it appears and what it connects to, all tappable. */
+var WV={view:'home', thread:null, kind:null, tf:null, stack:[]};
+var WEAVE_Q='';
+var WV_COVERS=null;
+var WV_THREAD_ART={thread1:'sleeping-beauty',thread27:'change',thread26:'quest-girls',thread_ichabod:'ichabod-1',thread_shared:'anna-and-the-dark-place',thread_wonderland:'white-rabbit',thread_worst:'worst-thing-in-the-universe',thread_marked:'the-marked-ones',thread_invasion:'invasion'};
+var WV_THREAD_COLOR={thread1:'#e8b53a',thread27:'#a98bff',thread26:'#e0644f',thread_ichabod:'#7fd08a',thread_shared:'#6fb7e8',thread_wonderland:'#e88fb4',thread_worst:'#d9c38a',thread_invasion:'#8fd3c6',thread_marked:'#c9a0e8'};
+var WV_SERIES_THREAD={'Godsverse Chronicles':'thread27','Obsidian Spindle Saga':'thread1','Dragon Strife':'thread1','Quest Girls':'thread26','Wonderland':'thread_wonderland','Ichabod Jones':'thread_ichabod','In-World Comics':'thread27'};
+var WV_ID_THREAD={'the-vessel':'thread27','skritchs-revenge':'thread27','godsverse-game':'thread27','obsidian-game':'thread1','dragon-strife-game':'thread1','04-wicked-bodies':'thread1','05-wicked-minds':'thread1',
+  'ichabod-game':'thread_ichabod','the-void-calls-us-home-russell-nohelty':'thread_shared','anna-and-the-dark-place':'thread_shared','my-father-didnt-kill-himself':'thread_shared','sorry-for-existing':'thread_shared',
+  'gumshoes-the-case-of-madisons-father':'thread_shared','time-is-a-flat-circle':'thread_shared','east-willow-game':'thread_shared','worst-thing-in-the-universe':'thread_worst','paradise':'thread_worst',
+  'the-marked-ones':'thread_marked','invasion':'thread_invasion','12-eternity':'thread27'};
+var WV_GAME_ID={'godsverse-game':'godsverse','obsidian-game':'obsidian','dragon-strife-game':'dragonstrife','ichabod-game':'ichabod','east-willow-game':'eastwillow','quest-girls-game':'questgirls'};
+var WV_KIND={characters:'Characters',places:'Places',objects:'Objects & Relics',powers:'Powers & Beings',cosmology:'The Cosmic Weave',connections:'Connections',threads:'The Threads'};
+var WV_KIND_ORDER=['characters','places','objects','powers','cosmology','connections','threads'];
 
-  // --- SEARCH: a query overrides the tab view and searches ALL entries ---
+function wvLoadCovers(){ if(WV_COVERS) return; WV_COVERS={}; fetch('books/covers.json').then(function(r){return r.ok?r.json():{};}).then(function(m){ WV_COVERS=m||{}; if(document.getElementById('weave').classList.contains('on')) renderWeave(); }).catch(function(){}); }
+function wvItem(id){
+  // a book, comic or game the Weave can point at
+  var b=(typeof BOOKS!=='undefined'?BOOKS:[]).find(function(x){return x.id===id;});
+  if(b) return {kind:'book', id:id, title:b.title, series:b.series, thread:WV_SERIES_THREAD[b.series]||WV_ID_THREAD[id]||null};
+  var c=(typeof COMICS!=='undefined'?COMICS:[]).find(function(x){return x.id===id;});
+  if(c) return {kind:'comic', id:id, title:c.title, series:c.series, thread:(c.thread==='ichabod'?'thread_ichabod':c.thread)||WV_SERIES_THREAD[c.series]||null, dir:c.dir||id};
+  var gid=WV_GAME_ID[id]; var g=gid&&(typeof GAMES!=='undefined'?GAMES:[]).find(function(x){return x.id===gid;});
+  if(g) return {kind:'game', id:gid, title:g.title+' (story game)', thread:WV_ID_THREAD[id]||null};
+  return {kind:'book', id:id, title:id, thread:WV_ID_THREAD[id]||null};
+}
+function wvCover(it, cls){
+  var f=WV_COVERS&&WV_COVERS[it.id];
+  if(f) return '<img class="'+(cls||'wv-cov')+'" src="site/covers/'+f+'.webp" alt="" loading="lazy">';
+  if(it.kind==='comic') return '<img class="'+(cls||'wv-cov')+'" src="comics/'+wEsc(it.dir)+'/000.jpg" alt="" loading="lazy">';
+  var col=WV_THREAD_COLOR[it.thread]||'#e8b53a';
+  return '<span class="'+(cls||'wv-cov')+' wv-covtxt" style="--c:'+col+'">'+wEsc(it.title)+'</span>';
+}
+function wvOpen(kind,id){
+  if(kind==='game'){ closeWeave(); openGame(id); return; }
+  jumpFromWeave(kind,id);
+}
+function wvThreadsOf(e){
+  var t={}; (e.anchors||[]).forEach(function(a){ var it=wvItem(a.book); if(it.thread) t[it.thread]=1; });
+  return Object.keys(t);
+}
+function wvIndex(){
+  if(WEAVE._wv) return WEAVE._wv;
+  var byThread={}, tl=WEAVE.threads||[];
+  tl.forEach(function(t){ byThread[t.id]=[]; });
+  WEAVE.entries.forEach(function(e){ e._th=wvThreadsOf(e); e._th.forEach(function(t){ (byThread[t]=byThread[t]||[]).push(e); }); });
+  // the books in each thread, in shelf order
+  var books={};
+  (typeof BOOKS!=='undefined'?BOOKS:[]).forEach(function(b){ var t=WV_SERIES_THREAD[b.series]||WV_ID_THREAD[b.id]; if(t)(books[t]=books[t]||[]).push(wvItem(b.id)); });
+  (typeof COMICS!=='undefined'?COMICS:[]).forEach(function(c){ var it=wvItem(c.id); if(it.thread)(books[it.thread]=books[it.thread]||[]).push(it); });
+  Object.keys(WV_GAME_ID).forEach(function(k){ var it=wvItem(k); if(it.thread&&it.kind==='game')(books[it.thread]=books[it.thread]||[]).push(it); });
+  WEAVE._wv={byThread:byThread, books:books};
+  // only cache once the shelf has loaded
+  if(!(typeof BOOKS!=='undefined'&&BOOKS.length)) delete WEAVE._wv;
+  return {byThread:byThread, books:books};
+}
+function wvThread(id){ return (WEAVE.threads||[]).find(function(t){return t.id===id;}); }
+function wvRank(){
+  try{ if(typeof WEAVER!=='undefined'&&WEAVER&&typeof weaverStats==='function'&&typeof weaverXP==='function'){ var st=weaverStats(); var xp=weaverXP(st); var r=WEAVER.ranks[0]; WEAVER.ranks.forEach(function(k){ if(xp>=k.min) r=k; }); return r.title; } }catch(e){}
+  return 'Unwoven';
+}
+function wvBar(n,t,col){ var p=t?Math.round(100*n/t):0; return '<div class="wv-bar"><i style="width:'+Math.max(p,n?3:0)+'%;'+(col?'background:'+col:'')+'"></i></div>'; }
+/* hidden entries fold into the book that reveals them */
+function wvHidden(list, owned){
+  var by={}, order=[];
+  list.forEach(function(e){ if(owned[e.id]) return; var a=(e.anchors||[])[0]; var k=a?a.book:'_'; if(!by[k]){by[k]=[];order.push(k);} by[k].push(e); });
+  if(!order.length) return '';
+  order.sort(function(a,b){ return by[b].length-by[a].length; });
+  var h='<div class="wv-h3">Still hidden</div><div class="wv-hidden">';
+  order.forEach(function(k){
+    var n=by[k].length;
+    if(k==='_'){ h+='<div class="wv-hrow nolink"><span class="wv-hn">'+n+'</span><span class="wv-ht">hidden across the Weave<small>Keep reading to reveal '+(n===1?'it':'them')+'.</small></span></div>'; return; }
+    var it=wvItem(k);
+    h+='<button class="wv-hrow" onclick="wvOpen(\''+it.kind+'\',\''+wEsc(it.id)+'\')">'+wvCover(it,'wv-hcov')+'<span class="wv-ht"><b>'+n+' hidden in '+wEsc(it.title)+'</b><small>'+wEsc(by[k][0].teaser||'')+'</small></span><span class="wv-go">'+(it.kind==='game'?'Play':'Read')+'</span></button>';
+  });
+  return h+'</div>';
+}
+function wvEntryRow(e){
+  return '<button class="wv-erow" onclick="wvEntry(\''+wEsc(e.id)+'\')"><span class="wv-et">'+wEsc(e.title)+'</span><span class="wv-es">'+wEsc(e.teaser||'')+'</span></button>';
+}
+function wvKindChips(list, owned, cur, fn){
+  var cnt={}; list.forEach(function(e){ if(owned[e.id]) cnt[e.cat]=(cnt[e.cat]||0)+1; });
+  var h='<div class="wv-chips">'+'<button class="wv-chip'+(!cur?' on':'')+'" onclick="'+fn+'(null)">All</button>';
+  WV_KIND_ORDER.forEach(function(k){ var tot=list.filter(function(e){return e.cat===k;}).length; if(!tot) return;
+    h+='<button class="wv-chip'+(cur===k?' on':'')+'" onclick="'+fn+'(\''+k+'\')">'+WV_KIND[k]+' <span>'+(cnt[k]||0)+'/'+tot+'</span></button>'; });
+  return h+'</div>';
+}
+function wvGo(view, arg){
+  WV.stack.push({view:WV.view, thread:WV.thread, kind:WV.kind, tf:WV.tf});
+  WV.view=view;
+  if(view==='thread'){ WV.thread=arg; WV.kind=null; }
+  if(view==='codex'){ WV.kind=arg||null; WV.tf=null; }
+  renderWeave(); var s=document.getElementById('wvScroll'); if(s) s.scrollTop=0;
+}
+function wvBack(){
+  if(document.getElementById('wvSheet').classList.contains('on')){ wvSheetClose(); return; }
+  if(WEAVE_Q){ weaveSearchClear(); return; }
+  if(!WV.stack.length){ closeWeave(); return; }
+  var p=WV.stack.pop(); WV.view=p.view; WV.thread=p.thread; WV.kind=p.kind; WV.tf=p.tf; renderWeave();
+}
+function wvSetKind(k){ WV.kind=k; renderWeave(); }
+function wvSetTF(t){ WV.tf=t; renderWeave(); }
+function weaveTab(t){ WV.stack=[]; WV.view=(t==='codex'||t==='places')?'codex':'home'; WV.kind=(t==='places')?'places':null; if(t==='timeline'){ WV.view='thread'; WV.thread='thread27'; } renderWeave(); }
+function weaveSearch(v){ WEAVE_Q=(v||'').trim(); document.getElementById('weaveQx').style.display=WEAVE_Q?'block':'none'; renderWeave(); }
+function weaveSearchClear(){ WEAVE_Q=''; var i=document.getElementById('weaveQ'); if(i) i.value=''; document.getElementById('weaveQx').style.display='none'; renderWeave(); }
+
+function renderWeave(){
+  var body=document.getElementById('weaveBody');
+  if(!WEAVE){ body.innerHTML='<div class="wprog">The Weave is still forming…</div>'; return; }
+  wvLoadCovers();
+  var owned=weaveUnlocked(), all=WEAVE.entries, X=wvIndex();
+  var nOwned=all.filter(function(e){return owned[e.id];}).length;
+  var title=document.getElementById('wvTitle');
+  var h='';
   if(WEAVE_Q){
     var q=WEAVE_Q.toLowerCase();
-    var catName={}; (WEAVE.categories||[]).forEach(function(c){catName[c.id]={name:c.name,icon:c.icon};});
-    catName.places=catName.places||{name:'Places',icon:'\u2316'};
-    var hits=WEAVE.entries.filter(function(e){
-      var hay=((e.title||'')+' '+(e.body||'')+' '+(e.teaser||'')+' '+
-        (e.source?(e.source.real||'')+' '+(e.source.tradition||''):'')).toLowerCase();
-      return hay.indexOf(q)>-1;
-    });
-    if(!hits.length){
-      html='<div class="wsr-head">No entries match &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;</div>';
-    }else{
-      html='<div class="wsr-head">'+hits.length+' entr'+(hits.length===1?'y':'ies')+' match &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;</div>';
-      var byCat={};
-      hits.forEach(function(e){ (byCat[e.cat]=byCat[e.cat]||[]).push(e); });
-      Object.keys(byCat).forEach(function(cid){
-        var cm=catName[cid]||{name:cid,icon:'\u2738'};
-        html+='<div class="wsr-cat">'+(cm.icon||'')+' '+cm.name+'</div>';
-        byCat[cid].forEach(function(e){
-          var got=owned[e.id];
-          if(got){
-            html+='<div class="went"><div class="et">'+(cm.icon||'')+' '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+'</div>';
-          }else{
-            html+='<div class="went lock"><div class="et">&#128274; '+e.title+'</div><div class="eb">'+(e.teaser||'A discovery waits to be found.')+'</div></div>';
-          }
-        });
-      });
-    }
-    document.getElementById('weaveBody').innerHTML=html;
-    return;
+    var hits=WEAVE.entries.filter(function(e){ return ((e.title||'')+' '+(e.body||'')+' '+(e.teaser||'')).toLowerCase().indexOf(q)>-1; });
+    var mine=hits.filter(function(e){return owned[e.id];});
+    title.textContent='Search';
+    if(!hits.length){ body.innerHTML='<div class="wv-note">No entries match &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;. Try a name, a place or a relic.</div>'; return; }
+    h+='<div class="wv-note">'+mine.length+' discovered '+(mine.length===1?'entry matches':'entries match')+' &ldquo;'+wEsc(WEAVE_Q)+'&rdquo;'+(hits.length>mine.length?'. '+(hits.length-mine.length)+' more are still hidden.':'.')+'</div>';
+    mine.forEach(function(e){ h+=wvEntryRow(e); });
+    h+=wvHidden(hits, owned);
+    body.innerHTML=h; return;
   }
-
-  if(WEAVE_TAB==='timeline'){
-    var tl=WEAVE.timeline;
-    if(tl){
-      if(tl.note) html+='<div class="tlnote">'+tl.note+'</div>';
-      if(tl.image) html+='<img class="tlimg" src="'+tl.image+'" alt="The Godsverse Timeline">';
-      var lastEpoch=null;
-      tl.events.forEach(function(ev){
-        if(ev.epoch && ev.epoch!==lastEpoch){ html+='<div class="tlepoch">The Deep Past</div>'; lastEpoch=ev.epoch; }
-        else if(!ev.epoch && lastEpoch!=='main'){ html+='<div class="tlepoch">The Main Span</div>'; lastEpoch='main'; }
-        var go='';
-        if(ev.comic) go+='<div class="tlgo" onclick="jumpFromWeave(\''+'comic\',\''+ev.comic+'\')">▸ Read the comic</div>';
-        if(ev.book)  go+='<div class="tlgo" onclick="jumpFromWeave(\''+'book\',\''+ev.book+'\')">▸ Read '+(ev.in||'')+'</div>';
-        html+='<div class="tlev"><div class="tld">'+ev.date+'</div><div class="tls">'+
-          '<div class="tlst">'+ev.story+'</div><div class="tlin">'+(ev['in']||'')+'</div>'+go+'</div></div>';
-      });
-    } else html+='<div class="wprog">No timeline entries yet \u2014 keep reading to reveal this thread.</div>';
-  }
-  else if(WEAVE_TAB==='threads'){
-    html+='<div class="tlnote">Reality is a tapestry of reincarnating universes — threads. Here is which story lives in which thread.</div>';
+  if(WV.view==='home'){
+    title.textContent='The Weave';
+    h+='<div class="wv-me"><div class="wv-rank">'+wEsc(wvRank())+'</div><div class="wv-count"><b>'+nOwned+'</b> of '+all.length+' secrets discovered</div>'+wvBar(nOwned,all.length)+'</div>';
+    h+='<div class="wv-h2">The threads</div><div class="wv-sub">Every universe in these stories is a thread. Tap one to walk it.</div><div class="wv-threads">';
     (WEAVE.threads||[]).forEach(function(t){
-      var bks=(t.books||[]).map(function(b){return '<div class="tbk">• '+b+'</div>';}).join('');
-      html+='<div class="wthread"><div class="tn">'+t.name+'</div><div class="td">'+t.blurb+'</div>'+
-        (t.dreamer&&t.dreamer!=='unknown'?'<div class="tm">Dreamer: '+t.dreamer+(t.number?' · Thread '+t.number:'')+'</div>':(t.number?'<div class="tm">Thread '+t.number+'</div>':''))+
-        (bks?'<div class="tbooks">'+bks+'</div>':'')+'</div>';
+      var ents=X.byThread[t.id]||[], got=ents.filter(function(e){return owned[e.id];}).length, col=WV_THREAD_COLOR[t.id]||'#e8b53a';
+      var art=WV_THREAD_ART[t.id];
+      h+='<button class="wv-thread" style="--c:'+col+'" onclick="wvGo(\'thread\',\''+t.id+'\')">'+(art?'<img src="site/covers/'+art+'.webp" alt="" loading="lazy">':'')+
+        '<span class="wv-tb"><span class="wv-tn">'+wEsc(t.name)+'</span><span class="wv-td">'+wEsc(t.blurb)+'</span><span class="wv-tc">'+got+' of '+ents.length+' found</span>'+wvBar(got,ents.length,col)+'</span></button>';
     });
+    h+='</div><div class="wv-h2">The codex</div><div class="wv-sub">Everything you have uncovered, sorted.</div><div class="wv-kinds">';
+    WV_KIND_ORDER.forEach(function(k){ var tot=all.filter(function(e){return e.cat===k;}).length; if(!tot) return; var got=all.filter(function(e){return e.cat===k&&owned[e.id];}).length;
+      h+='<button class="wv-kind" onclick="wvGo(\'codex\',\''+k+'\')"><b>'+WV_KIND[k]+'</b><span>'+got+' of '+tot+'</span></button>'; });
+    h+='</div>';
   }
-  else if(WEAVE_TAB==='places'){
-    var pents=WEAVE.entries.filter(function(e){return e.cat==='places';});
-    var pOwned=pents.filter(function(e){return owned[e.id];}).length;
-    html+='<div class="tlnote">&#9046; Every world, realm, and waypoint of the Weave you have discovered. <b>'+pOwned+'</b> of <b>'+pents.length+'</b> locations charted — keep reading to find more.</div>';
-    pents.forEach(function(e){
-      var got=owned[e.id];
-      if(got){
-        var linkhtml='';
-        if(e.links&&e.links.length){
-          var ls=e.links.map(function(lid){
-            var le=WEAVE.entries.find(function(x){return x.id===lid;});
-            if(!le) return '';
-            var lon=owned[lid];
-            return '<span class="elink'+(lon?'':' dim')+'">'+(le.title)+'</span>';
-          }).filter(Boolean).join('');
-          if(ls) linkhtml='<div class="elinks">Connects to: '+ls+'</div>';
-        }
-        html+='<div class="went"><div class="et">&#9046; '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+linkhtml+'</div>';
-      }else{
-        html+='<div class="went lock"><div class="et">&#9046; ???</div><div class="eb">'+(e.teaser||'A place waits to be charted.')+'</div></div>';
-      }
-    });
-    if(!pents.length) html='<div class="wprog">No locations yet.</div>';
-  }
-  else { // codex
-    WEAVE.categories.forEach(function(cat){
-      var ents=WEAVE.entries.filter(function(e){return e.cat===cat.id;});
-      if(!ents.length) return;
-      html+='<div class="wcat">'+cat.icon+' '+cat.name+'</div>';
-      ents.forEach(function(e){
-        var got=owned[e.id];
-        if(got){
-          var linkhtml='';
-          if(e.links&&e.links.length){
-            var ls=e.links.map(function(lid){
-              var le=WEAVE.entries.find(function(x){return x.id===lid;});
-              if(!le) return '';
-              var lon=owned[lid];
-              return '<span class="elink'+(lon?'':' dim')+'">'+(le.title)+'</span>';
-            }).filter(Boolean).join('');
-            if(ls) linkhtml='<div class="elinks">Connects to: '+ls+'</div>';
-          }
-          html+='<div class="went"><div class="et">'+cat.icon+' '+e.title+'</div><div class="eb">'+e.body+'</div>'+weaveLayers(e,owned)+linkhtml+'</div>';
-        }else{
-          html+='<div class="went lock"><div class="et">&#128274; ???</div><div class="eb">'+(e.teaser||'A discovery waits to be found.')+'</div></div>';
-        }
+  else if(WV.view==='thread'){
+    var t=wvThread(WV.thread)||{}, col=WV_THREAD_COLOR[t.id]||'#e8b53a', ents=X.byThread[t.id]||[], got=ents.filter(function(e){return owned[e.id];});
+    title.textContent=t.name||'Thread';
+    h+='<div class="wv-thero" style="--c:'+col+'">'+(WV_THREAD_ART[t.id]?'<img src="site/covers/'+WV_THREAD_ART[t.id]+'.webp" alt="">':'')+'<div><div class="wv-tn">'+wEsc(t.name)+'</div><p>'+wEsc(t.blurb||'')+'</p>'+
+      (t.dreamer&&t.dreamer!=='unknown'?'<div class="wv-meta">Dreamer: '+wEsc(t.dreamer)+'</div>':'')+'<div class="wv-meta">'+got.length+' of '+ents.length+' found</div>'+wvBar(got.length,ents.length,col)+'</div></div>';
+    var bks=X.books[t.id]||[];
+    if(bks.length){ h+='<div class="wv-h3">The stories in this thread</div><div class="wv-shelf">';
+      bks.forEach(function(it){ h+='<button class="wv-book" onclick="wvOpen(\''+it.kind+'\',\''+wEsc(it.id)+'\')">'+wvCover(it)+'<span>'+wEsc(it.title)+'</span></button>'; }); h+='</div>'; }
+    if(t.id==='thread27' && WEAVE.timeline && WEAVE.timeline.events){
+      h+='<div class="wv-h3">Timeline of the Godsverse</div><div class="wv-tl">';
+      WEAVE.timeline.events.forEach(function(ev){
+        var it=ev.comic?wvItem(ev.comic):(ev.book?wvItem(ev.book):null);
+        h+='<button class="wv-ev"'+(it?' onclick="wvOpen(\''+it.kind+'\',\''+wEsc(it.id)+'\')"':' disabled')+'><span class="wv-date">'+wEsc(ev.date)+'</span><span class="wv-dot"></span><span class="wv-evb"><b>'+wEsc(ev.story)+'</b><small>'+wEsc(ev['in']||'')+'</small></span>'+(it?'<span class="wv-go">'+(it.kind==='comic'?'Read the comic':'Read')+'</span>':'')+'</button>';
       });
-    });
-    if(!html) html='<div class="wprog">No codex entries yet.</div>';
+      h+='</div>';
+    }
+    if(got.length){ h+='<div class="wv-h3">Discovered here</div>'+wvKindChips(ents, owned, WV.kind, 'wvSetKind');
+      got.filter(function(e){return !WV.kind||e.cat===WV.kind;}).forEach(function(e){ h+=wvEntryRow(e); }); }
+    h+=wvHidden(ents.filter(function(e){return !WV.kind||e.cat===WV.kind;}), owned);
   }
-  document.getElementById('weaveBody').innerHTML=html;
+  else if(WV.view==='codex'){
+    title.textContent=WV.kind?WV_KIND[WV.kind]:'The codex';
+    var list=all.filter(function(e){ return (!WV.kind||e.cat===WV.kind) && (!WV.tf||(e._th||wvThreadsOf(e)).indexOf(WV.tf)>-1); });
+    h+=wvKindChips(all.filter(function(e){return !WV.tf||(e._th||wvThreadsOf(e)).indexOf(WV.tf)>-1;}), owned, WV.kind, 'wvSetKind');
+    h+='<div class="wv-chips small"><button class="wv-chip'+(!WV.tf?' on':'')+'" onclick="wvSetTF(null)">Every thread</button>';
+    (WEAVE.threads||[]).forEach(function(t){ h+='<button class="wv-chip'+(WV.tf===t.id?' on':'')+'" style="--c:'+(WV_THREAD_COLOR[t.id]||'#e8b53a')+'" onclick="wvSetTF(\''+t.id+'\')">'+wEsc(t.name.replace(/^Thread \d+ — /,''))+'</button>'; });
+    h+='</div>';
+    var mine=list.filter(function(e){return owned[e.id];});
+    h+='<div class="wv-note">'+mine.length+' of '+list.length+' discovered</div>';
+    if(WV.tf){ mine.forEach(function(e){ h+=wvEntryRow(e); }); }
+    else {
+      // grouped by thread so a long list can be scanned
+      var groups={}, order=[];
+      mine.forEach(function(e){ var k=(e._th||wvThreadsOf(e))[0]||'_'; if(!groups[k]){groups[k]=[];order.push(k);} groups[k].push(e); });
+      var tord=(WEAVE.threads||[]).map(function(t){return t.id;}); order.sort(function(a,b){ return (tord.indexOf(a)<0?99:tord.indexOf(a))-(tord.indexOf(b)<0?99:tord.indexOf(b)); });
+      order.forEach(function(k){ var t=wvThread(k); h+='<div class="wv-gh" style="--c:'+(WV_THREAD_COLOR[k]||'#9b91ac')+'">'+wEsc(t?t.name:'Across the Weave')+' <span>'+groups[k].length+'</span></div>';
+        groups[k].sort(function(a,b){return a.title.localeCompare(b.title);}).forEach(function(e){ h+=wvEntryRow(e); }); });
+    }
+    h+=wvHidden(list, owned);
+  }
+  body.innerHTML=h;
 }
+function wvEntry(id){
+  var e=entryById(id); if(!e) return;
+  var owned=weaveUnlocked(), got=owned[e.id];
+  var th=(e._th||wvThreadsOf(e)).map(function(t){ var x=wvThread(t); return x?'<button class="wv-tag" style="--c:'+(WV_THREAD_COLOR[t]||'#e8b53a')+'" onclick="wvSheetClose();wvGo(\'thread\',\''+t+'\')">'+wEsc(x.name.replace(/^Thread \d+ — /,''))+'</button>':''; }).join('');
+  var h='<div class="wv-skind">'+wEsc(WV_KIND[e.cat]||'')+'</div><h3>'+wEsc(got?e.title:'Still hidden')+'</h3>'+(th?'<div class="wv-tags">'+th+'</div>':'');
+  if(got){
+    h+='<div class="wv-sbody">'+wEsc(e.body)+'</div>'+weaveLayers(e,owned);
+  } else {
+    h+='<div class="wv-sbody"><i>'+wEsc(e.teaser||'A discovery waits to be found.')+'</i></div>';
+  }
+  var seen={}, ap=(e.anchors||[]).filter(function(a){ if(seen[a.book]) return false; seen[a.book]=1; return true; });
+  if(ap.length){ h+='<div class="wv-h3">'+(got?'Appears in':'Revealed in')+'</div>';
+    ap.forEach(function(a){ var it=wvItem(a.book); h+='<button class="wv-hrow" onclick="wvSheetClose();wvOpen(\''+it.kind+'\',\''+wEsc(it.id)+'\')">'+wvCover(it,'wv-hcov')+'<span class="wv-ht"><b>'+wEsc(it.title)+'</b>'+(a.chapter?'<small>Chapter '+wEsc(a.chapter)+'</small>':'')+'</span><span class="wv-go">'+(it.kind==='game'?'Play':'Read')+'</span></button>'; }); }
+  if(got && e.links && e.links.length){
+    h+='<div class="wv-h3">Connected</div><div class="wv-links">';
+    e.links.forEach(function(l){ var le=entryById(l); if(!le) return; var on=owned[l];
+      h+='<button class="wv-link'+(on?'':' dim')+'" onclick="wvEntry(\''+wEsc(l)+'\')">'+(on?wEsc(le.title):'Hidden: '+wEsc(le.teaser||'')) +'</button>'; });
+    h+='</div>';
+  }
+  document.getElementById('wvSheetBody').innerHTML=h;
+  var s=document.getElementById('wvSheet'); s.classList.add('on'); document.getElementById('wvSheetBody').scrollTop=0;
+}
+function wvSheetClose(){ document.getElementById('wvSheet').classList.remove('on'); }
+
 var pendingUnlocks=[];
 function showUnlockModal(ids){
   if(!WEAVE) { loadWeave(); }
@@ -1894,7 +2042,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){ var b=document.getElementById('boot'); if(b){ b.classList.add('gone'); setTimeout(function(){ b.style.display='none'; },600); } }, 900);
   // in-app version stamp (confirms which build is live after a deploy)
   try{
-    var TW_APP_VERSION=window.TW_APP_VERSION="1.17.3";
+    var TW_APP_VERSION=window.TW_APP_VERSION="1.18.0";
     if(!document.getElementById('twVer')){
       var v=document.createElement('div'); v.id='twVer';
       v.textContent='v'+TW_APP_VERSION;
