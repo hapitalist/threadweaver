@@ -176,7 +176,7 @@ async function shot(page, why) {
 function watch(page) {
   const w = { errors: [], failed: [], calls: [], dialogs: [] };
   // Playwright's own service-worker blocking reaches into sandboxed frames (an email preview) and throws there; a reader's browser never does
-  const ours = (m) => /Failed to read the 'serviceWorker' property from 'Navigator'/.test(m);
+  const ours = (m) => /Failed to read the 'serviceWorker' property from 'Navigator'|Service Worker is disabled because the context is sandboxed/i.test(m);
   page.on("pageerror", (e) => { if (!ours(e.message)) w.errors.push(clip(e.message, 300)); });
   page.on("console", (m) => { if (m.type() === "error") { const t = m.text(); if (!/favicon|ERR_BLOCKED_BY_CLIENT|Failed to load resource/.test(t) && !ours(t)) w.errors.push(clip(t, 300)); } });
   page.on("response", (r) => {
