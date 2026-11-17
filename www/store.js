@@ -193,6 +193,16 @@
 
   // --- full-screen login wall: email + password, with Log In / Sign Up tabs ---
   var _authMode = "login"; // or "signup"
+  // 1.17.0: someone arriving from the sales page with a buy or start-free button is (usually) new. They land on Sign Up, told
+  // what happens next; after they are in, serials.js opens that purchase (/app?buy=...).
+  function enterWall() {
+    var q = new URLSearchParams(location.search), buy = q.get("buy"), start = q.get("start");
+    if (!buy && !start) { showLoginWall("Sign in to enter Thread Weaver."); return; }
+    var say = buy ? "Make your free account (or log in) and checkout opens next." : "Make your free account to start reading.";
+    showLoginWall(say);
+    var t = document.getElementById("lwTabSignup"); if (t) { try { t.click(); } catch (e) {} }
+    var m = document.getElementById("lwMsg"); if (m) { m.style.color = "#cdbfe6"; m.textContent = say; }
+  }
   function showLoginWall(msg) {
     var w = document.getElementById("loginWall");
     // The wall is built once, then hidden/shown. hideLoginWall() sets display:none,
@@ -815,7 +825,7 @@
         document.body.classList.remove("pre-auth");
       } else {
         document.body.classList.add("pre-auth");
-        showLoginWall("Sign in to enter Thread Weaver.");
+        enterWall();
       }
 
       // Arrived from a password-reset link: /auth/confirm established the
@@ -886,7 +896,7 @@
           document.body.classList.remove("pre-auth");
         } else {
           document.body.classList.add("pre-auth");
-          showLoginWall("Sign in to enter Thread Weaver.");
+          enterWall();
         }
         if (session) { refreshEntitlements(); flushPendingIAP(); }
       });
