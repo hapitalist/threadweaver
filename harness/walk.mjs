@@ -104,7 +104,7 @@ async function browserFor(dev) {
   if (BROWSERS[dev]) return BROWSERS[dev];
   if (dev === "phone") {
     try { BROWSERS.phone = { b: await webkit.launch(), kind: "webkit" }; }
-    catch (_) { BROWSERS.phone = { b: await chromium.launch({ args: ["--no-sandbox"] }), kind: "chromium" }; }
+    catch (_) { BROWSERS.phone = { b: await chromium.launch({ args: ["--no-sandbox"] }), kind: "chromium" }; console.log("(The phone is walked in Chromium with an iPhone's screen: WebKit is not installed here.)"); }
   } else BROWSERS[dev] = { b: await chromium.launch({ args: ["--no-sandbox"] }), kind: "chromium" };
   return BROWSERS[dev];
 }

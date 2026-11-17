@@ -23,7 +23,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   walk:
-    runs-on: ubuntu-latest
+    # pinned: Playwright's --with-deps needs an Ubuntu it knows (Joy Looper's walkers pin ubuntu-24.04 for the same reason;
+    # the first run on ubuntu-latest failed in 9 seconds on 17 Nov)
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +34,12 @@ jobs:
           node-version: 22
       - name: Install the browsers (Chromium for the laptop, WebKit - Safari's engine - for the phone)
         working-directory: harness
-        run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium webkit
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          # WebKit (Safari's engine) for the phone; if it will not install, the walker walks the phone in Chromium and says so
+          npx playwright install --with-deps webkit || echo "::warning::WebKit did not install; the phone is walked in Chromium"
+
       - name: Wait for Netlify to publish this commit
         if: github.event_name == 'push'
         run: |
