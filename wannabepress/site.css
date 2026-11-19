@@ -336,3 +336,22 @@ section.dark .bk p,section.dark .bk .k{color:#f3d9d0}
 .pitem i{float:none;grid-column:2;grid-row:1;white-space:nowrap}
 .pitem b{grid-column:1;grid-row:1}
 .pitem span{grid-column:1/-1}
+
+/* 18 Nov 2026: the shop's checkout, right on the page (shop.js) */
+.shopdlg{position:fixed;inset:0;z-index:100;background:rgba(27,18,16,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.shopbox{position:relative;background:var(--paper);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);max-width:480px;width:100%;max-height:92vh;overflow:auto;padding:26px 22px 20px}
+.shopbox h3{font-size:34px;padding-right:44px;margin-bottom:10px}
+.shopx{position:absolute;top:8px;right:8px;width:44px;height:44px;border:2px solid var(--ink);background:#fff;font-size:26px;line-height:1;cursor:pointer}
+.shopgets{color:var(--ink2);margin-bottom:8px}
+.shopprice{font-family:var(--display);font-size:32px;color:var(--maroon);margin-bottom:14px}
+.shopsoon{font-family:var(--mono);font-weight:700}
+.shopform label{display:block;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin:12px 0 6px}
+.shopform select,.shopform input{width:100%;min-height:48px;font:17px var(--serif);border:2px solid var(--ink);background:#fff;padding:8px 10px}
+.shopgo{width:100%;margin-top:18px}
+.shopgo[disabled]{opacity:.7;cursor:wait}
+.shopmsg{color:var(--blood);font-weight:700;margin:10px 0 0;min-height:1em}
+.shopnote{font-size:15px;color:var(--ink2);margin-top:10px}
+.shopdone{background:#fff;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:22px;margin:10px 0 28px}
+.shoplinks{list-style:none;margin:12px 0;padding:0}
+.shoplinks li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--paper2)}
+.shoplinks .btn{min-height:44px;padding:0 16px}

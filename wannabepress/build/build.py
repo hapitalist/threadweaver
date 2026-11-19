@@ -1,12 +1,37 @@
 # -*- coding: utf-8 -*-
 """Builds the Wannabe Press site into ../ (static pages). Run: python3 build.py"""
-import os, html, json
+import os, html, json, re
 from data import *
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 E = lambda s: html.escape(str(s), quote=True)
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Mono:wght@400;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">'
 V = "2"
+
+# 18 Nov 2026 - Russell: "I asked for a shop on Wannabe press netlify and it's still going to my gumroad store." Every
+# Gumroad link (store.russellnohelty.com) becomes the same product in our own shop: /shop/#<key> opens its checkout
+# right on the page (shop.js), paid with Stripe and sent as BookFunnel links. The keys are shop_products.key (store
+# 'wannabe'). A Gumroad link with no product here would stay a Gumroad link, so own_shop() refuses to build instead.
+GUMROAD_TO_SHOP = {
+    "godsversecomplete": "wp-godsverse", "aftwwj": "wp-godsverse", "dbptdz": "wp-obsidian", "ichabodcomplete": "wp-ichabod", "xtuhx": "wp-ichabod",
+    "dragonstrife": "wp-dragon-strife", "enlcor": "wp-dragon-strife", "cthulhuishardtospell": "wp-cthulhu", "mkxcw": "wp-cthulhu",
+    "wtmdih": "wp-wicked-witch-academy", "katrina": "wp-katrina", "ijvkb": "wp-katrina", "bmh": "wp-bmh", "zgadg": "wp-bmh",
+    "pixiedust": "wp-pixie-dust", "iyzcs": "wp-pixie-dust", "hardcoverbook": "wp-hardcover", "xsbgz": "wp-hardcover",
+    "drawnbyme": "wp-drawn", "mvhgij": "wp-drawn", "yjwajm": "wp-time-circle", "xtijuu": "wp-skritch", "worstthing": "wp-worst-thing",
+    "voidaudiodrama": "wp-void", "eqmee": "wp-void", "thevessel": "wp-vessel", "oyasw": "wp-vessel", "sorryforexisting": "wp-sorry", "bhown": "wp-sorry",
+    "rqxzl": "wp-little-bird", "mfdkh": "wp-mfdkh", "tmost": "wp-mfdkh", "markedones": "wp-marked-ones", "yhyvd": "wp-marked-ones",
+    "invasion": "wp-invasion", "hzaaoj": "wp-invasion", "gumshoes": "wp-gumshoes", "vdszb": "wp-gumshoes", "ejxbkd": "wp-vengeance",
+    "anna": "wp-anna", "xmbfoe": "wp-anna", "aqmez": "wp-pins-2in", "bubju": "wp-pins-1in",
+}
+def own_shop(doc):
+    def to_key(m):
+        k = GUMROAD_TO_SHOP.get(m.group(1))
+        if not k: raise SystemExit("a Gumroad link with no product in our shop: " + m.group(0))
+        return "/shop/#" + k
+    doc = re.sub(r'https://store\.russellnohelty\.com/l/([A-Za-z0-9_-]+)', to_key, doc)
+    doc = doc.replace('href="https://store.russellnohelty.com/"', 'href="/shop/"').replace('href="https://store.russellnohelty.com"', 'href="/shop/"')
+    if "store.russellnohelty.com" in doc or "gumroad.com" in doc: raise SystemExit("a Gumroad link is still on the page")
+    return doc
 
 def page(path, title, desc, body, og="/img/og.jpg", home=False):
     canon = "https://wannabepress.com" + path
@@ -29,7 +54,9 @@ def page(path, title, desc, body, og="/img/og.jpg", home=False):
 {sticky()}
 <script src="/quiz.js?v={V}" defer></script>
 <script src="/site.js?v={V}" defer></script>
+<script src="/shop.js?v={V}" defer></script>
 </body></html>"""
+    doc = own_shop(doc)
     out = os.path.join(ROOT, path.strip("/"), "index.html") if path != "/" else os.path.join(ROOT, "index.html")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     open(out, "w", encoding="utf-8").write(doc)
@@ -416,14 +443,17 @@ SHOP_ITEMS = [
  ("My Father Didn't Kill Himself", "$5+", "Ebook.", "mfdkh", "my-father-didnt-kill-himself"),
  ("Gumshoes: The Case of Madison's Father", "Pay what you want", "Ebook.", "gumshoes", "gumshoes"),
  ("The Little Bird and The Little Worm", "$5+", "Children’s picture book.", "rqxzl", "the-little-bird-and-the-little-worm"),
+ ('2" enamel pins', "$20", "Hard enamel. Choose from four.", "aqmez", "cth-vol1"),
+ ('1" enamel pins', "$10", "Hard enamel. Choose from five.", "bubju", "cth-vol1"),
 ]
 def build_shop():
     items = "".join(f'<a class="bk shopitem" href="{shop("%s" % sl)}">{cover(img, t)}<b>{E(t)}</b><p>{E(d)}</p><span class="price">{E(p)}</span></a>' for t, p, d, sl, img in SHOP_ITEMS)
     body = f"""{quizband()}
 <section class="phero" style="padding-bottom:26px"><div class="wrap" style="grid-template-columns:1fr"><div><div class="crumbs"><a href="/">Home</a> / Shop</div><h1>The shop</h1>
 <p style="max-width:42em">Buy direct from me. Bundles, audiobooks, audio commentary and hardcovers you can only get here. Checkout opens right on this page.</p>
-<div class="ctas"><a class="btn" href="{TW}/app?buy=everything">Everything in Thread Weaver · $99.99</a><a class="btn alt" href="{SHOP}/">Open the full shop</a></div></div></div></section>
-<section><div class="wrap"><div class="bkgrid">{items}</div></div></section>
+<div class="ctas"><a class="btn" href="{TW}/app?buy=everything">Everything in Thread Weaver · $99.99</a><a class="btn alt" href="#shopgrid">See everything below</a></div></div></div></section>
+<section id="shopdone" hidden><div class="wrap"><div id="shopdoneIn" class="shopdone" role="status" aria-live="polite"></div></div></section>
+<section id="shopgrid"><div class="wrap"><div class="bkgrid">{items}</div></div></section>
 {signup()}"""
     page("/shop/", "Shop · Wannabe Press", "Buy Russell Nohelty's books, bundles, audiobooks and hardcovers direct.", body)
 
