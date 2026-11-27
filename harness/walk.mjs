@@ -625,11 +625,14 @@ async function playGame(run, page, g, pk) {
       text = clip(await fr.evaluate(() => document.body.innerText).catch(() => ""), 4000);
       if (!closed) closed = text === before;
       run.step({ action: "choose", target: pick.label, page: pk, passed: true, note: closed ? "a panel opened; looked and closed it" : "a panel opened; it had no Close to press" });
+      if (closed) run.ok(pk, "choice: " + pick.label);
       if (!closed) { run.find({ page: pk, step: "panel: " + pick.label, kind: "panel would not close", message: `In ${g.title}, "${pick.label}" opened a panel with no way to close it`, shot: await shot(page, "panel-" + g.id) }); dead++; break; }
       continue;
     }
     if (changed) { moves++; tried = new Set(); }
     run.step({ action: "choose", target: pick.label, page: pk, step: "move " + (moves), page_said: text.slice(0, 500), passed: any || !pick.real });
+    // 27 Nov 2026: a choice that answered is reported clean, so a "choice did nothing" ticket for it can close itself
+    if (any) run.ok(pk, "choice: " + pick.label);
     if (!any && pick.real) { dead++; run.find({ page: pk, step: "choice: " + pick.label, kind: "choice did nothing", message: `In ${g.title}, pressing "${pick.label}" did nothing`, shot: await shot(page, "choice-" + g.id) }); break; }
   }
   run.step({ action: "note", page: pk, note: `${g.title}: ${moves} story moves played` });
