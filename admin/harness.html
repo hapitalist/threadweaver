@@ -83,8 +83,8 @@ tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
 (function () {
   'use strict';
   var root = document.getElementById('root'), sb = null, session = null;
-  var TABS = [['board', 'What needs doing'], ['tests', 'Tests'], ['runs', 'Test runs'], ['schedule', 'Runs by itself'], ['checks', 'Checks'], ['bugs', 'Bug report']];
-  var state = { tab: (location.hash || '#board').slice(1), board: 'open', tests: 'active', bugs: 'visitor', run: null, summary: null };
+  var TABS = [['board', 'What needs doing'], ['logged', 'Logged'], ['builds', 'Build board'], ['expect', 'What good looks like'], ['tests', 'Tests'], ['runs', 'Test runs'], ['schedule', 'Runs by itself'], ['checks', 'Checks'], ['bugs', 'Bug report']];
+  var state = { tab: (location.hash || '#board').slice(1), board: 'fix', builds: 'building', tests: 'active', bugs: 'visitor', run: null, summary: null };
   if (!TABS.some(function (t) { return t[0] === state.tab.split('/')[0]; })) state.tab = 'board';
 
   function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -112,7 +112,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
     });
     var body = el('section'); root.appendChild(body);
     var tab = state.tab.split('/')[0];
-    ({ board: drawBoard, tests: drawTests, runs: drawRuns, schedule: drawSchedule, checks: drawChecks, bugs: drawBugs })[tab](body);
+    ({ board: drawBoard, logged: drawLogged, builds: drawBuilds, expect: drawExpect, tests: drawTests, runs: drawRuns, schedule: drawSchedule, checks: drawChecks, bugs: drawBugs })[tab](body);
   }
 
   function drawTop(top) {
@@ -123,19 +123,26 @@ tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
       if (!st.length) top.appendChild(el('span', 'pill amb', 'Self-test: not run yet'));
       else if (blind.length) top.appendChild(el('span', 'pill red', 'The harness missed: ' + blind.map(function (b) { return b.device + ' — ' + (b.missed || []).join(', '); }).join('; ')));
       else top.appendChild(el('span', 'pill ok', 'Self-test passed ' + ago(st.map(function (x) { return x.at; }).sort()[0])));
-      top.appendChild(el('span', 'pill' + (s.open ? ' red' : ' ok'), s.open + ' to do'));
+      // the counts say what they count (27 Nov 2026, Command Center 1.11.0)
+      top.appendChild(el('span', 'pill' + (s.fix ? ' red' : ' ok'), (s.fix || 0) + ' to fix'));
+      if (s.watch) top.appendChild(el('span', 'pill amb', s.watch + ' watching'));
+      if (s.real_person) top.appendChild(el('span', 'pill red', s.real_person + ' a real person hit'));
+      if (s.logged) top.appendChild(el('span', 'pill', s.logged + ' logged'));
+      if (s.building) top.appendChild(el('span', 'pill', s.building + ' being built'));
       if (s.fix_waiting) top.appendChild(el('span', 'pill amb', s.fix_waiting + ' fix waiting'));
       top.appendChild(el('span', 'pill', 'Last walk ' + ago(s.last_walk)));
       top.appendChild(el('span', 'pill' + (s.checks_red ? ' red' : ' ok'), s.checks_red ? s.checks_red + ' checks red' : 'Checks green'));
       if (s.reports_day) top.appendChild(el('span', 'pill', s.reports_day + ' visitor reports today'));
+      [['fix', 'To fix'], ['watch', 'Watching']].forEach(function (l) { var c = document.querySelector('.chip[data-lane="' + l[0] + '"]'); if (c) c.textContent = l[1] + ' (' + (s[l[0]] || 0) + ')'; });
     }).catch(function (e) { fail(top, e); });
   }
 
   // ------------------------------------------------------------------ What needs doing
   function drawBoard(box) {
     var bar = el('div', 'bar'); box.appendChild(bar);
-    [['open', 'Open'], ['done', 'Done (30 days)'], ['removed', 'Removed']].forEach(function (f) {
-      var c = el('button', 'chip' + (state.board === f[0] ? ' on' : ''), f[1]); c.type = 'button';
+    var sm = state.summary || {};
+    [['fix', 'To fix' + (sm.fix != null ? ' (' + sm.fix + ')' : '')], ['watch', 'Watching' + (sm.watch != null ? ' (' + sm.watch + ')' : '')], ['done', 'Done (30 days)'], ['removed', 'Removed']].forEach(function (f) {
+      var c = el('button', 'chip' + (state.board === f[0] ? ' on' : ''), f[1]); c.type = 'button'; c.setAttribute('data-lane', f[0]);
       c.onclick = function () { state.board = f[0]; draw(); }; bar.appendChild(c);
     });
     var add = el('button', 'btn go small', '+ New'); add.type = 'button'; bar.appendChild(add);
@@ -160,16 +167,20 @@ tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
     var list = el('div'); box.appendChild(list); list.appendChild(el('p', 'sub', 'Loading the list…'));
     rpc('hx_admin_items', { p_status: state.board }).then(function (items) {
       list.innerHTML = '';
-      if (!items.length) { list.appendChild(el('div', 'empty', state.board === 'open' ? 'Nothing needs doing.' : 'Nothing here.')); return; }
+      if (!items.length) { list.appendChild(el('div', 'empty', state.board === 'fix' ? 'Nothing to fix.' : state.board === 'watch' ? 'Nothing being watched. Server slowdowns and checks that are still settling show here, apart from what needs fixing.' : 'Nothing here.')); return; }
+      if (state.board === 'watch') list.appendChild(el('p', 'sub', 'Watching: things that may be outside the pages (a slow server, a check settling). They close by themselves when they clear.'));
       items.forEach(function (it) { list.appendChild(itemCard(it)); });
     }).catch(function (e) { list.innerHTML = ''; fail(list, e); });
   }
   function itemCard(it) {
     var c = el('div', 'card' + (it.status === 'fix_waiting' ? ' fix' : '') + (it.status === 'done' ? ' done' : ''));
     var head = el('div', 't'); head.appendChild(el('span', 'tag ' + it.source, it.source === 'walk' ? 'a walk' : it.source === 'visitor' ? 'visitors' : it.source === 'admin' ? 'you' : it.source));
+    if (it.real_person) head.appendChild(el('span', 'tag visitor', it.people > 1 ? it.people + ' real people hit this' : 'a real person hit this'));
     head.appendChild(document.createTextNode(it.title)); c.appendChild(head);
     var m = 'Opened ' + when(it.opened_at);
-    if (it.times) m += ' · seen ' + it.times + ' time' + (it.times === 1 ? '' : 's');
+    var seen = Math.max(it.times || 0, it.seen_times || 0);
+    if (seen > 1) m += ' · seen ' + seen + ' times';
+    if (it.last_seen_at) m += ', last ' + ago(it.last_seen_at);
     if (it.seen_devices && it.seen_devices.length) m += ' on ' + it.seen_devices.join(' and ');
     if (it.clean_devices && it.clean_devices.length && it.status !== 'done') m += ' · clean since on ' + it.clean_devices.join(' and ');
     if (it.held) m += ' · ' + it.claimed_by + ' is on it';
@@ -226,11 +237,121 @@ tr.click{cursor:pointer}tr.click:hover td{background:#1a1326}
         ok.onclick = function () { after(rpc('hx_admin_item_change', { p_id: it.id, p_title: t.value, p_detail: d.value, p_who_told: w.value }), 'Saved.'); };
       });
       mi('Add a note', function () { ask('Note', '', function (v) { return after(rpc('hx_admin_item_note', { p_id: it.id, p_note: v }), 'Noted.'); }); });
+      if (it.fp && !/^admin:/.test(it.fp)) mi('Not a problem', function () { ask('Why is this not a problem? The same thing again is counted under Logged, not listed.', 'For example: it is the payment page, it is meant to look like that', function (v) { return after(rpc('hx_admin_item_not_problem', { p_id: it.id, p_why: v }), 'Remembered. The same thing again goes under Logged.'); }); });
       mi('Remove', function () { after(rpc('hx_admin_item_remove', { p_id: it.id }), 'Removed. It waits under Removed.').then(function (r) { if (r && r.ok !== false) { var u = el('button', 'btn small', 'Undo'); u.type = 'button'; u.onclick = function () { after(rpc('hx_admin_item_putback', { p_id: it.id }), 'Put back.'); }; msg.appendChild(document.createTextNode(' ')); msg.appendChild(u); } }); });
     } else mi('Put it back', function () { after(rpc('hx_admin_item_putback', { p_id: it.id }), 'Put back.'); });
     return c;
   }
   document.addEventListener('click', function () { [].forEach.call(document.querySelectorAll('.menu'), function (m) { m.hidden = true; }); });
+
+  // ------------------------------------------------------------------ Logged (27 Nov 2026, Command Center 1.10.0 and 1.13.0)
+  function drawLogged(box) {
+    box.appendChild(el('p', 'sub', 'Counted but not listed: dropped connections, an old tab after an update, the same words as something already closed with proof, and what you said is not a problem. Anything here can go on the list.'));
+    var list = el('div'); box.appendChild(list); list.appendChild(el('p', 'sub', 'Loading…'));
+    rpc('hx_admin_logged').then(function (d) {
+      list.innerHTML = '';
+      var rows = d.rows || [];
+      if (!rows.length) { list.appendChild(el('div', 'empty', 'Nothing logged in the last 30 days.')); return; }
+      rows.forEach(function (g) {
+        var c = el('div', 'card'), head = el('div', 't');
+        head.appendChild(el('span', 'tag ' + (g.source || 'walk'), g.why_logged)); head.appendChild(document.createTextNode(g.title || g.fp)); c.appendChild(head);
+        c.appendChild(el('div', 'meta', g.times + ' time' + (g.times === 1 ? '' : 's') + ' · first ' + when(g.first_seen) + ', last ' + ago(g.last_seen) + (g.filed_at ? ' · put on the list ' + ago(g.filed_at) : '')));
+        if (g.verdict) c.appendChild(el('div', 'pre', 'Not a problem: ' + g.verdict + (g.decided_by ? ' (' + g.decided_by + ')' : '')));
+        else if (g.sample) c.appendChild(el('div', 'pre', g.sample));
+        var acts = el('div', 'acts'), msg = el('div', 'msg'); c.appendChild(acts); c.appendChild(msg);
+        var b = el('button', 'btn small', 'Put it on the list now'); b.type = 'button'; acts.appendChild(b);
+        b.onclick = function () { b.disabled = true; rpc('hx_admin_logged_list', { p_fp: g.fp }).then(function (r) { if (r.ok === false) { msg.className = 'msg err'; msg.textContent = r.reason; b.disabled = false; return; } msg.className = 'msg ok'; msg.textContent = r.id ? 'On What needs doing.' : 'It was already on the list.'; }).catch(function (e) { b.disabled = false; msg.className = 'msg err'; msg.textContent = e.message; }); };
+        list.appendChild(c);
+      });
+    }).catch(function (e) { list.innerHTML = ''; fail(list, e); });
+  }
+
+  // ------------------------------------------------------------------ Build board (27 Nov 2026, Command Center 1.18.0): what is being built, apart from the faults
+  function drawBuilds(box) {
+    var bar = el('div', 'bar'); box.appendChild(bar);
+    [['building', 'Being built'], ['done', 'Done'], ['removed', 'Removed']].forEach(function (f) {
+      var c = el('button', 'chip' + (state.builds === f[0] ? ' on' : ''), f[1]); c.type = 'button'; c.onclick = function () { state.builds = f[0]; draw(); }; bar.appendChild(c);
+    });
+    var add = el('button', 'btn go small', '+ New'); add.type = 'button'; bar.appendChild(add);
+    var form = el('div', 'form'); form.hidden = true; box.appendChild(form);
+    add.onclick = function () { form.hidden = false; form.innerHTML = ''; form.appendChild(buildForm({})); };
+    var list = el('div'); box.appendChild(list); list.appendChild(el('p', 'sub', 'Loading…'));
+    rpc('hx_admin_builds', { p_which: state.builds }).then(function (d) {
+      list.innerHTML = '';
+      var rows = d.rows || [];
+      if (!rows.length) { list.appendChild(el('div', 'empty', state.builds === 'building' ? 'Nothing being built. Add what you are working on that is not a fault.' : 'Nothing here.')); return; }
+      rows.forEach(function (b) {
+        var c = el('div', 'card'); c.appendChild(el('div', 't', b.title));
+        c.appendChild(el('div', 'meta', (b.status === 'done' ? 'Done ' + when(b.done_at) : 'Started ' + when(b.created_at) + ' · updated ' + ago(b.updated_at)) + (b.who ? ' · ' + b.who : '')));
+        if (b.detail) c.appendChild(el('div', 'pre', b.detail));
+        if (b.next_step && b.status !== 'done') c.appendChild(el('div', 'meta', 'Next: ' + b.next_step));
+        if (b.done_note) c.appendChild(el('div', 'pre', 'Done: ' + b.done_note));
+        var acts = el('div', 'acts'), msg = el('div', 'msg'), f2 = el('div', 'form'); f2.hidden = true; c.appendChild(acts); c.appendChild(f2); c.appendChild(msg);
+        function btn(label, go, cls) { var x = el('button', 'btn small' + (cls ? ' ' + cls : ''), label); x.type = 'button'; x.onclick = go; acts.appendChild(x); }
+        function after(p, t) { p.then(function (r) { if (r && r.ok === false) { msg.className = 'msg err'; msg.textContent = r.reason || 'That did not work.'; return; } msg.className = 'msg ok'; msg.textContent = t; setTimeout(draw, 700); }).catch(function (e) { msg.className = 'msg err'; msg.textContent = e.message; }); }
+        if (b.removed_at) btn('Put it back', function () { after(rpc('hx_admin_build_remove', { p_id: b.id, p_back: true }), 'Put back.'); });
+        else {
+          if (b.status === 'building') {
+            btn('Change', function () { f2.hidden = false; f2.innerHTML = ''; f2.appendChild(buildForm(b)); });
+            btn('Done', function () { f2.hidden = false; f2.innerHTML = ''; f2.appendChild(el('label', null, 'What came of it (optional)')); var t = el('textarea'); f2.appendChild(t); var a = el('div', 'acts'), ok = el('button', 'btn go small', 'Mark it done'); ok.type = 'button'; a.appendChild(ok); f2.appendChild(a); ok.onclick = function () { after(rpc('hx_admin_build_done', { p_id: b.id, p_note: t.value }), 'Done.'); }; }, 'go');
+          }
+          btn('Remove', function () { after(rpc('hx_admin_build_remove', { p_id: b.id, p_back: false }), 'Removed. It waits under Removed.'); });
+        }
+        list.appendChild(c);
+      });
+    }).catch(function (e) { list.innerHTML = ''; fail(list, e); });
+  }
+  function buildForm(b) {
+    var f = el('div');
+    f.appendChild(el('label', null, 'What is being built')); var t = el('input'); t.type = 'text'; t.value = b.title || ''; f.appendChild(t);
+    f.appendChild(el('label', null, 'Detail')); var d = el('textarea'); d.value = b.detail || ''; f.appendChild(d);
+    f.appendChild(el('label', null, 'Next step')); var n = el('input'); n.type = 'text'; n.value = b.next_step || ''; f.appendChild(n);
+    var a = el('div', 'acts'), ok = el('button', 'btn go small', 'Save'), msg = el('div', 'msg'); ok.type = 'button'; a.appendChild(ok); f.appendChild(a); f.appendChild(msg);
+    ok.onclick = function () { ok.disabled = true; rpc('hx_admin_build_save', { p: { id: b.id || null, title: t.value, detail: d.value, next_step: n.value } }).then(function (r) { ok.disabled = false; if (r.ok === false) { msg.className = 'msg err'; msg.textContent = r.reason; return; } msg.className = 'msg ok'; msg.textContent = r.same ? 'That one was already on the board: updated.' : 'Saved.'; setTimeout(draw, 700); }).catch(function (e) { ok.disabled = false; msg.className = 'msg err'; msg.textContent = e.message; }); };
+    return f;
+  }
+
+  // ------------------------------------------------------------------ What good looks like (27 Nov 2026, Command Center 1.8.0)
+  function drawExpect(box) {
+    box.appendChild(el('p', 'sub', 'Write down what a button should give. Each walk presses it and looks. A new one waits until a walk sees it come true once; after that, a press that does not give it lands on What needs doing.'));
+    var add = el('button', 'btn go small', '+ New'); add.type = 'button'; var bar = el('div', 'bar'); bar.appendChild(add); box.appendChild(bar);
+    var form = el('div', 'form'); form.hidden = true; box.appendChild(form);
+    add.onclick = function () { form.hidden = !form.hidden; };
+    form.appendChild(el('label', null, 'Which page (leave empty for any page)')); var pg = el('input'); pg.type = 'text'; pg.placeholder = '/app'; form.appendChild(pg);
+    form.appendChild(el('label', null, 'The words on the button')); var pr = el('input'); pr.type = 'text'; pr.placeholder = 'Show the chapters'; form.appendChild(pr);
+    form.appendChild(el('label', null, 'After pressing it, the page should')); var kd = el('select'); [['see', 'show these words'], ['not_see', 'not show these words']].forEach(function (o) { var op = el('option', null, o[1]); op.value = o[0]; kd.appendChild(op); }); form.appendChild(kd);
+    var wd = el('input'); wd.type = 'text'; wd.placeholder = 'Chapter one'; wd.style.marginTop = '6px'; form.appendChild(wd);
+    form.appendChild(el('label', null, 'Within how many seconds')); var ws = el('input'); ws.type = 'text'; ws.inputMode = 'numeric'; ws.value = '10'; form.appendChild(ws);
+    form.appendChild(el('label', null, 'Why it matters (optional)')); var why = el('input'); why.type = 'text'; form.appendChild(why);
+    var fa = el('div', 'acts'), save = el('button', 'btn go', 'Save'), fm = el('div', 'msg'); save.type = 'button'; fa.appendChild(save); form.appendChild(fa); form.appendChild(fm);
+    save.onclick = function () {
+      save.disabled = true;
+      rpc('hx_admin_expect_save', { p: { page: pg.value, press: pr.value, kind: kd.value, words: wd.value, within_s: parseInt(ws.value, 10) || 10, why: why.value } }).then(function (r) {
+        save.disabled = false; if (r.ok === false) { fm.className = 'msg err'; fm.textContent = r.reason; return; } draw();
+      }).catch(function (e) { save.disabled = false; fm.className = 'msg err'; fm.textContent = e.message; });
+    };
+    var list = el('div'); box.appendChild(list); list.appendChild(el('p', 'sub', 'Loading…'));
+    rpc('hx_admin_expects').then(function (rows) {
+      list.innerHTML = '';
+      if (!rows.length) { list.appendChild(el('div', 'empty', 'Nothing written down yet.')); return; }
+      rows.forEach(function (e) {
+        var c = el('div', 'card' + (e.state === 'removed' ? ' done' : '')), head = el('div', 't');
+        head.appendChild(el('span', 'tag ' + (e.state === 'on' ? 'pass' : e.state === 'removed' ? '' : 'check'), e.state === 'on' ? 'on' : e.state === 'removed' ? 'removed' : 'waiting for a walk to see it once'));
+        head.appendChild(document.createTextNode('Pressing “' + e.press + '”' + (e.page ? ' on ' + e.page : '') + (e.kind === 'not_see' ? ' must not show “' : ' shows “') + e.words + '” within ' + e.within_s + ' s'));
+        c.appendChild(head);
+        var m = 'Added ' + when(e.created_at) + (e.created_by ? ' by ' + e.created_by : '');
+        if (e.proven_at) m += ' · first seen true ' + when(e.proven_at);
+        if (e.last_at) m += ' · last walk ' + ago(e.last_at) + ': ' + (e.last_ok ? 'as it should' : 'did not');
+        c.appendChild(el('div', 'meta', m));
+        if (e.last_said) c.appendChild(el('div', 'pre', e.last_said));
+        if (e.why) c.appendChild(el('div', 'meta', 'Why: ' + e.why));
+        var acts = el('div', 'acts'), msg = el('div', 'msg'); c.appendChild(acts); c.appendChild(msg);
+        var b = el('button', 'btn small', e.removed_at ? 'Put it back' : 'Remove'); b.type = 'button'; acts.appendChild(b);
+        b.onclick = function () { rpc('hx_admin_expect_remove', { p_id: e.id, p_back: !!e.removed_at }).then(draw).catch(function (x) { msg.className = 'msg err'; msg.textContent = x.message; }); };
+        list.appendChild(c);
+      });
+    }).catch(function (e) { list.innerHTML = ''; fail(list, e); });
+  }
 
   // ------------------------------------------------------------------ Tests
   var STEP_HELP = 'One step a line:\n  goto /app\n  tap Store\n  type Email = someone@test.invalid\n  see Unlock Everything\n  not_see Something went wrong\n  url contains /app\n  wait 2000\n  sweep            (look for bugs on this page)';

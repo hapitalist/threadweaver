@@ -123,6 +123,9 @@ async function newContext(dev, { native = false, storage } = {}) {
   opts.ignoreHTTPSErrors = true;
   if (storage) opts.storageState = storage;
   const ctx = await b.newContext(opts);
+  // 27 Nov 2026 (Command Center 1.9.0): the widest each picture has been drawn, so a picture that shows big and then shrinks is seen
+  await ctx.addInitScript(() => { try { const M = window.__hxMaxw = new WeakMap(); const RO = new ResizeObserver((es) => { for (const e of es) { const w = e.target.getBoundingClientRect().width; if (w > (M.get(e.target) || 0)) M.set(e.target, w); } });
+    const pics = () => { for (const im of document.images) if (!im.__hxw) { im.__hxw = 1; RO.observe(im); } }; new MutationObserver(pics).observe(document, { childList: true, subtree: true }); } catch (_) {} });
   if (LOCAL || native) await serveLocal(ctx, base, native);
   return { ctx, base };
 }
@@ -141,7 +144,7 @@ function pageKey(url) {
 }
 class Run {
   constructor(name, kind, persona, device, steps = []) {
-    Object.assign(this, { name, kind, persona, device, started: new Date().toISOString(), steps: [], findings: [], clean: [], testSteps: steps, keys: new Set() });
+    Object.assign(this, { name, kind, persona, device, started: new Date().toISOString(), steps: [], findings: [], clean: [], expect: [], testSteps: steps, keys: new Set() });
   }
   step(s) { this.steps.push({ passed: true, ...s, page_said: clip(s.page_said, 1200), note: clip(s.note, 1200) }); }
   find(f) {
@@ -158,7 +161,7 @@ class Run {
     return { test: { name: this.name, kind: this.kind, persona: this.persona, steps: this.testSteps }, device: this.device, trigger: TRIGGER,
       started_at: this.started, finished_at: new Date().toISOString(), passed: this.passed, build: BUILD,
       summary: this.passed ? `${this.steps.length} steps, nothing wrong` : `${this.findings.length} thing(s) wrong: ` + this.findings.slice(0, 6).map((f) => f.kind + " on " + f.page + (f.step ? " (" + f.step + ")" : "")).join("; "),
-      gh_run: process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : "", steps: this.steps, findings: this.findings, clean: this.clean, ...extra };
+      gh_run: process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : "", steps: this.steps, findings: this.findings, clean: this.clean, expect: this.expect, ...extra };
   }
 }
 let BUILD = "";
@@ -264,8 +267,70 @@ async function openAndLook(run, page, w, url, { label = "", expectText = null } 
   if (status === 404 || NOT_HERE.test(text.slice(0, 400))) { run.find({ page: pageK, step: label, kind: "page not there", message: `${url} answered ${status}: ${clip(text, 120)}`, url, shot: await shot(page, "not-there") }); bad++; }
   if (expectText && !new RegExp(expectText, "i").test(text)) { run.find({ page: pageK, step: label, kind: "wrong thing on the page", message: `Expected "${expectText}" and it is not there: ${clip(text, 160)}`, url, shot: await shot(page, "wrong") }); bad++; }
   bad += await harvest(run, page, w, pageK, label, from);
+  bad += await looks(run, page, pageK, label);
   if (!bad) run.ok(pageK, label);
   return true;
+}
+// 27 Nov 2026 (Command Center 1.9.0, from Hapitalist's own site on 18 Nov): two things a person sees as broken that no error says.
+// A bordered box drawn in a close shade of what is behind it (within 12 delta-E, and not white) reads as an error message; a
+// picture drawn at under 60% of its own size (its width= or the widest it was drawn) although the space around it could hold it
+// whole looks broken - the tarot card that came out 80px of its 260px.
+async function lookExtra(page) {
+  return await page.evaluate(() => {
+    const rgb = (v) => { const m = String(v).match(/rgba?\(([^)]+)\)/); if (!m) return null; const a = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return a.length > 3 && a[3] === 0 ? null : a.slice(0, 3); };
+    const lab = (c) => { const f = (v) => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; const r = f(c[0]), g = f(c[1]), b = f(c[2]); const X = (r * .4124 + g * .3576 + b * .1805) / .95047, Y = r * .2126 + g * .7152 + b * .0722, Z = (r * .0193 + g * .1192 + b * .9505) / 1.08883; const q = (x) => x > .008856 ? Math.cbrt(x) : 7.787 * x + 16 / 116; return [116 * q(Y) - 16, 500 * (q(X) - q(Y)), 200 * (q(Y) - q(Z))]; };
+    const dE = (a, b) => { a = lab(a); b = lab(b); return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); };
+    const behind = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor); if (c) return c; } return [255, 255, 255]; };
+    const samebox = [];
+    for (const el of document.querySelectorAll("body *")) { const cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden" || cs.position === "fixed" || cs.position === "sticky") continue;
+      if ((parseFloat(cs.borderTopWidth) || 0) < 2 || cs.borderTopStyle === "none" || /^(INPUT|SELECT|TEXTAREA|BUTTON|A|IMG|LABEL)$/.test(el.tagName)) continue;
+      const rc = el.getBoundingClientRect(); if (rc.width < 120 || rc.height < 40) continue; const bg = rgb(cs.backgroundColor); if (!bg || bg.join() === "255,255,255") continue;
+      const x = dE(bg, behind(el)); if (x < 12) samebox.push(((el.innerText || "").trim().slice(0, 40).replace(/\s+/g, " ") || el.tagName.toLowerCase()) + " (" + x.toFixed(1) + " from the page behind it)"); if (samebox.length >= 5) break; }
+    const shrunk = [];
+    for (const i of document.images) { const w = i.getBoundingClientRect().width; if (!(w > 0)) continue;
+      const mx = (window.__hxMaxw && window.__hxMaxw.get(i)) || 0, want = Math.max(parseFloat(i.getAttribute("width")) || 0, mx);
+      if (want < 120 || w >= want * 0.6) continue;
+      let room = innerWidth; for (let e = i.parentElement; e; e = e.parentElement) { const ew = e.getBoundingClientRect().width; if (ew > w * 1.2) { room = ew; break; } }
+      if (room >= want * 0.9) shrunk.push((i.alt || (i.currentSrc || i.src).split("/").pop() || "a picture").slice(0, 60) + " is drawn " + Math.round(w) + "px wide of its " + Math.round(want) + "px");
+      if (shrunk.length >= 5) break; }
+    return { samebox, shrunk };
+  }).catch(() => ({ samebox: [], shrunk: [] }));
+}
+async function looks(run, page, pageK, label) {
+  const x = await lookExtra(page); let n = 0;
+  for (const b of x.samebox.slice(0, 3)) if (run.find({ page: pageK, step: label, kind: "a box the colour of the page", message: "A box drawn in a close shade of the page behind it, so it reads as an error: " + b, url: page.url(), shot: n ? null : await shot(page, "samebox") })) n++;
+  for (const b of x.shrunk.slice(0, 3)) if (run.find({ page: pageK, step: label, kind: "a picture squeezed small", message: "A picture drawn far smaller than it is although there is room for it: " + b, url: page.url(), shot: n ? null : await shot(page, "shrunk") })) n++;
+  return n;
+}
+
+// 27 Nov 2026 (Command Center 1.8.0): what good looks like after a press, written down on /admin/harness.html (page, the button's words,
+// what must or must not show, within how many seconds). A new one waits until a walk sees it come true once; then a walk that presses
+// the button and does not see it lists "a press that did not give its result".
+let EXPECT = null;
+async function expectRules() {
+  if (EXPECT) return EXPECT;
+  try { const r = await fetch(SUPA + "/rest/v1/rpc/hx_expect_rules", { method: "POST", headers: { apikey: ANON, "content-type": "application/json" }, body: "{}" }); const d = await r.json(); EXPECT = Array.isArray(d) ? d : []; }
+  catch (_) { EXPECT = []; }
+  return EXPECT;
+}
+async function checkExpect(run, page, pageK, label, t0) {
+  const rules = (await expectRules()).filter((e) => (!e.page || pageK.toLowerCase().includes(String(e.page).toLowerCase()) || String(e.page).toLowerCase().includes(pageK.toLowerCase())) &&
+    String(e.press).trim().toLowerCase() === String(label).trim().toLowerCase());
+  for (const e of rules) {
+    const want = String(e.words).toLowerCase(); let ok = false, text = "";
+    for (;;) {
+      text = (await bodyText(page)).toLowerCase();
+      ok = e.kind === "not_see" ? !text.includes(want) : text.includes(want);
+      if (ok && e.kind !== "not_see") break;
+      if (Date.now() - t0 > e.within_s * 1000) break;
+      await page.waitForTimeout(500);
+    }
+    const said = ok ? (e.kind === "not_see" ? '"' + e.words + '" did not show' : '"' + e.words + '" showed') : (e.kind === "not_see" ? '"' + e.words + '" showed and should not have' : '"' + e.words + '" did not show within ' + e.within_s + " s");
+    run.expect.push({ id: e.id, ok, said: said + " (" + run.device + ")" });
+    run.step({ action: "see", target: label, page: pageK, passed: ok || !e.on, note: "What good looks like after pressing \"" + label + "\": " + said + (e.on ? "" : " (not on yet: it waits until a walk sees it come true once)") });
+    if (!ok && e.on) run.find({ page: pageK, step: label, kind: "a press that did not give its result", message: 'Pressing "' + label + '" should ' + (e.kind === "not_see" ? "not show" : "show") + ' "' + e.words + '": ' + said, url: page.url(), shot: await shot(page, "expect") });
+  }
+  return rules.length;
 }
 // every link on the page that stays on this site must answer
 async function linksGoSomewhere(run, page, pageK, seen) {
@@ -370,6 +435,7 @@ async function pressEverything(run, ctx, url, { prepare } = {}) {
     if (!answered) { run.find({ page: here, step, kind: "pressed, nothing happened", message: `"${label}" was pressed and nothing on the page changed for 13 s`, url, shot: await shot(page, "dead-" + label) }); n++; }
     else if (ms >= 10000) { run.find({ page: here, step, kind: "an answer that took 10 seconds or more", message: `"${label}" answered after ${Math.round(ms / 1000)} s`, url }); n++; }
     n += await harvest(run, page, w, here, step, from);
+    const nf = run.findings.length; await checkExpect(run, page, here, label, t0); n += run.findings.length - nf;
     const said = (await bodyText(page)).slice(0, 300);
     run.step({ action: "tap", target: label, url: page.url(), page_said: said, ms, passed: n === 0 });
     if (!n) run.ok(here, step);
@@ -597,7 +663,9 @@ async function walkSignedIn(dev) {
 
 // the self-test: one of every break, every one must be caught
 const PLANTED = ["pressed, nothing happened", "an answer that took 10 seconds or more", "pressed again and again", "stalled", "page stuck loading", "error pop-up",
-  "error shown", "script error", "failed call", "broken picture", "junk on the page", "did not finish", "link goes nowhere"];
+  "error shown", "script error", "failed call", "broken picture", "junk on the page", "did not finish", "link goes nowhere",
+  // 27 Nov 2026 (Command Center 1.9.0, 1.11.0)
+  "pressed on a busy page, nothing happened", "a busy page's real answer heard", "a box the colour of the page", "a picture squeezed small"];
 const PHONE_ONLY = ["sideways scroll", "cut off button", "unreadable button"];
 async function walkSelftest(dev) {
   const run = new Run("Self-test", "selftest", "stranger", dev);
@@ -609,6 +677,14 @@ async function walkSelftest(dev) {
   await page.locator("#dead").click({ timeout: 4000 }).catch(() => {});
   run.step({ action: "tap", target: "dead", page: "/admin/selftest.html" });
   await page.waitForTimeout(14500);
+  // the busy page (27 Nov 2026): its helper must not hide a dead button, and must not make a button that answers look dead.
+  // On the phone's zoomed-out page the tap can land beside it, so the press is sent to the button itself when it does.
+  await page.locator("#churnDead").click({ timeout: 4000 }).catch(() => page.locator("#churnDead").dispatchEvent("click").catch(() => {}));
+  run.step({ action: "tap", target: "churnDead", page: "/admin/selftest.html" });
+  await page.waitForTimeout(14500);
+  await page.locator("#churnReal").click({ timeout: 4000 }).catch(() => page.locator("#churnReal").dispatchEvent("click").catch(() => {}));
+  run.step({ action: "tap", target: "churnReal", page: "/admin/selftest.html" });
+  await page.waitForTimeout(1500);
   for (const id of ["slow", "popup", "shown", "crash", "call", "expect", "stall"]) {
     await page.locator("#" + id).click({ timeout: 4000 }).catch(() => {});
     run.step({ action: "tap", target: id, page: "/admin/selftest.html" });
@@ -620,6 +696,12 @@ async function walkSelftest(dev) {
   const f = await eyes(page);
   const caught = new Set(f.map((x) => x.kind));
   if (run.findings.some((x) => x.kind === "link goes nowhere")) caught.add("link goes nowhere");
+  const deadOn = (lbl) => f.some((x) => x.kind === "pressed, nothing happened" && String(x.step || x.message || "").includes(lbl));
+  if (deadOn("Does nothing here too")) caught.add("pressed on a busy page, nothing happened");
+  if (!deadOn("Show the chapters")) caught.add("a busy page's real answer heard");
+  const ex = await lookExtra(page);
+  if (ex.samebox.length) caught.add("a box the colour of the page");
+  if (ex.shrunk.length) caught.add("a picture squeezed small");
   for (const e of w.errors) if (e) caught.add("script error");
   const expected = PLANTED.concat(dev === "phone" ? PHONE_ONLY : []);
   const missed = expected.filter((k) => !caught.has(k));

@@ -170,9 +170,43 @@
   if (_open) window.open = function () { E.changes++; return _open.apply(window, arguments); };
 
   // ---------------------------------------------------------------- everything the page changes (a press that answers changes something)
+  // 27 Nov 2026 (Command Center 1.11.0, from Hapitalist's 19 Nov, "a press nobody answers"): a page helper that adds and takes away a
+  // hidden element several times a second made every press look answered, so a dead button was never caught. A change counts as the
+  // page answering only when a person could have seen it: what is hidden, off the screen, has no size and no words, is marked
+  // data-hx, or is gone again before anyone could look is not an answer.
+  function unseen(n) {
+    try {
+      if (n.nodeType !== 1) { var pe = n.parentElement; return !pe || unseen(pe); }
+      if (n.hasAttribute("data-hx") || (n.closest && n.closest("[data-hx]"))) return true;
+      if (n.hasAttribute("hidden") || n.getAttribute("aria-hidden") === "true") return true;
+      var st = n.getAttribute("style") || "";
+      if (/display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?![.\d])|(left|top)\s*:\s*-\d{3,}px|(clip|clip-path)\s*:/i.test(st)) return true;
+      // something taken away: it was seen if it had words or a picture or a control in it (an empty probe was not)
+      if (!n.isConnected) return !((n.textContent || "").trim() || (n.querySelector && n.querySelector("img,svg,canvas,video,input,button,iframe")));
+      var cs = getComputedStyle(n);
+      if (cs.display === "none" || cs.visibility === "hidden" || +cs.opacity === 0) return true;
+      var b = n.getBoundingClientRect();
+      if (b.width < 1 && b.height < 1 && !(n.textContent || "").trim() && !n.querySelector("img,svg,canvas,video,input,button,iframe")) return true;
+    } catch (e) {}
+    return false;
+  }
+  function seeable(m) {
+    if (m.type !== "childList") return !(m.target && m.target.nodeType === 1 && (m.target.hasAttribute("data-hx") || (m.target.closest && m.target.closest("[data-hx]"))));
+    var nodes = [], k;
+    for (k = 0; k < m.addedNodes.length; k++) nodes.push(m.addedNodes[k]);
+    for (k = 0; k < m.removedNodes.length; k++) nodes.push(m.removedNodes[k]);
+    if (!nodes.length) return false;
+    for (k = 0; k < nodes.length; k++) {
+      var x = nodes[k];
+      if (x.nodeType === 1 && /^(SCRIPT|STYLE|LINK|META)$/.test(x.tagName)) continue;
+      if (x.nodeType === 3 && !(x.nodeValue || "").trim()) continue;
+      if (!unseen(x)) return true;
+    }
+    return false;
+  }
   function track(list) {
     for (var i = 0; i < list.length; i++) {
-      var m = list[i]; E.changes++;
+      var m = list[i]; if (!seeable(m)) continue; E.changes++;
       if (m.type === "childList") {
         for (var j = 0; j < m.addedNodes.length && E.added.length < 80; j++) {
           var a = m.addedNodes[j], t = (a.nodeType === 3 ? a.nodeValue : (a.innerText || a.textContent || "")) || "";

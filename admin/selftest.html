@@ -40,6 +40,10 @@ button{font:inherit;padding:10px 14px;border:1px solid #999;border-radius:8px;ba
   <button id="expect">Promises and breaks it</button>
 </div>
 <div id="out"></div>
+<h2 style="font-size:16px;margin:18px 0 6px">A busy page</h2>
+<p>A helper on this part adds and takes away a hidden marker eight times a second. "Does nothing here too" must still be caught; "Show the chapters" really answers and must not be called dead.</p>
+<div class="row" id="busy"><button id="churnDead">Does nothing here too</button> <button id="churnReal">Show the chapters</button></div>
+<ul id="chapters" hidden><li>Chapter one</li><li>Chapter two</li></ul>
 <div id="outStall"></div>
 <div id="outShown"></div>
 <div id="outSlow"></div>
@@ -48,6 +52,9 @@ button{font:inherit;padding:10px 14px;border:1px solid #999;border-radius:8px;ba
 <p><a href="/admin/no-such-page.html">A link that goes nowhere</a></p>
 <div id="wide"></div>
 <div class="row"><button id="cut">Cut off at the edge</button> <button id="pale">Hard to read</button></div>
+<!-- 27 Nov 2026, from Command Center 1.9.0 and 1.11.0: three more kinds of break -->
+<div style="background:#faf3e0;padding:12px;margin:14px 0"><div id="samebox" style="border:3px solid #1c1a17;border-radius:14px;padding:18px;background:#f5ecd6;max-width:420px">What you get: every book, every game and the whole Weave.</div></div>
+<div id="cardrow" style="display:flex;justify-content:center;width:100%;max-width:400px"><div style="display:flex;flex-direction:column;align-items:center"><span style="display:block;width:260px;max-width:80px"><img id="squeezed" alt="The card you pulled" width="260" height="400" style="width:100%;height:auto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='400'%3E%3Crect width='260' height='400' fill='%23633'/%3E%3C/svg%3E"></span></div></div>
 <script>
 (function () {
   var out = document.getElementById("out");
@@ -60,6 +67,11 @@ button{font:inherit;padding:10px 14px;border:1px solid #999;border-radius:8px;ba
   document.getElementById("shown").onclick = function () { say("Something went wrong. Your bookmark was not saved.", "outShown"); };
   document.getElementById("crash").onclick = function () { setTimeout(function () { null.planted(); }, 10); say("Crashing on purpose."); };
   document.getElementById("call").onclick = function () { say("Calling..."); fetch("https://planted.invalid/never").then(function () {}, function () { say("Called."); }); };
+  // the busy helper: a hidden marker added and taken away about 8 times a second (a person sees nothing)
+  var busy = document.getElementById("busy");
+  setInterval(function () { var m = document.createElement("span"); m.hidden = true; m.className = "probe"; busy.appendChild(m); setTimeout(function () { m.remove(); }, 60); }, 120);
+  document.getElementById("churnDead").onclick = function () {};
+  document.getElementById("churnReal").onclick = function () { document.getElementById("chapters").hidden = false; };
   document.getElementById("expect").onclick = function () { say("Promised."); window.twExpect("Planted promise", function () { return false; }, 3000, "The planted promise did not come true in 3 s"); };
 })();
 </script>
