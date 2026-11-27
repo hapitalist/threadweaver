@@ -176,12 +176,15 @@ async function shot(page, why) {
 }
 
 // what the browser itself saw on a page (crashes, failed calls, broken pictures), on top of the page's own eyes
+// 27 Nov 2026: a frame locked on purpose (the book reader runs each chapter with scripts off; the email previews too) says this when
+// the book or email carries a script. The lock working is not a fault; whether the reader sees the words is checked by looking.
+const SANDBOXED = /Blocked script execution in 'about:(srcdoc|blank)' because the document's frame is sandboxed/;
 function watch(page) {
   const w = { errors: [], failed: [], calls: [], dialogs: [] };
   // Playwright's own service-worker blocking reaches into sandboxed frames (an email preview) and throws there; a reader's browser never does
   const ours = (m) => /Failed to read the 'serviceWorker' property from 'Navigator'|Service Worker is disabled because the context is sandboxed/i.test(m);
   page.on("pageerror", (e) => { if (!ours(e.message)) w.errors.push(clip(e.message, 300)); });
-  page.on("console", (m) => { if (m.type() === "error") { const t = m.text(); if (!/favicon|ERR_BLOCKED_BY_CLIENT|Failed to load resource/.test(t) && !ours(t)) w.errors.push(clip(t, 300)); } });
+  page.on("console", (m) => { if (m.type() === "error") { const t = m.text(); if (!/favicon|ERR_BLOCKED_BY_CLIENT|Failed to load resource/.test(t) && !SANDBOXED.test(t) && !ours(t)) w.errors.push(clip(t, 300)); } });
   page.on("response", (r) => {
     const t = r.request().resourceType(), s = r.status(), u = r.url();
     if (/hx_report|hx-ingest/.test(u)) return;
@@ -615,9 +618,16 @@ async function readBook(run, page, w, b, native) {
       for (const f of page.frames()) if (f.parentFrame() === rf) { const t = await f.evaluate(() => document.body ? document.body.innerText : "").catch(() => ""); if (t.length > now.length) now = t; }
       const pct = await rf.evaluate(() => (document.getElementById("pct") || {}).textContent || "").catch(() => "");
       if (now !== last || pct) turned++;
+      if (now.trim().length > (words || "").trim().length) words = now;
       last = now;
     }
-    run.step({ action: "turn pages", target: b.title, page: pk, passed: turned > 0, note: `turned ${turned} of 3` });
+    // 27 Nov 2026: a cover alone is not reading. Words must show by the third page, or it is listed.
+    let most = words;
+    for (const f of page.frames()) if (f.parentFrame() === rf) { const t = await f.evaluate(() => document.body ? document.body.innerText : "").catch(() => ""); if (t.trim().length > most.trim().length) most = t; }
+    if (last && last.trim().length > most.trim().length) most = last;
+    const wordsShown = most.trim().split(/\s+/).filter(Boolean).length;
+    run.step({ action: "turn pages", target: b.title, page: pk, passed: turned > 0 && wordsShown >= 15, note: `turned ${turned} of 3; ${wordsShown} words showing`, page_said: clip(most, 300) });
+    if (turned && wordsShown < 15) run.find({ page: pk, step: "read", kind: "book shows no words", message: `"${b.title}" opened and turned, but after three pages only ${wordsShown} words show: "${clip(most, 120)}"`, shot: await shot(page, "words-" + b.id) });
     if (!turned) run.find({ page: pk, step: "next page", kind: "page did not turn", message: `In "${b.title}", next page did nothing`, shot: await shot(page, "turn-" + b.id) });
   }
   const n = await harvest(run, page, w, pk, "", from);

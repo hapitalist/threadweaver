@@ -69,6 +69,9 @@ create or replace function public._hx_not_code(p_text text) returns text languag
       then 'the browser cancelled the request itself because the page was left or reloaded'
     when p_text ~* '(57014|canceling statement due to statement timeout|the server did not answer in \d+ ?s|connection dropped before the server could answer|answered 50[234]\y|answered 544\y|upstream request timeout|gateway time-?out)'
       then 'the server was slow or did not answer, which is not a fault in a page'
+    -- 27 Nov 2026: the book reader and the email previews run their contents with scripts off on purpose; this is that lock working
+    when p_text ~* 'Blocked script execution in ''about:(srcdoc|blank)'' because the document''s frame is sandboxed'
+      then 'a frame locked on purpose (the book reader, an email preview) kept a script inside the book or email from running'
   end $$;
 
 -- lines that only describe the size or age of the list
