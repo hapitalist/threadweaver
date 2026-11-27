@@ -41,7 +41,8 @@
   var BUSY = /(^.{0,30}?\b(loading|opening|saving|sending|creating|submitting|uploading|processing|connecting|checking|updating|finding|fetching|downloading|unlocking|restoring|signing you in|signing in|please wait|one moment|one sec|just a (sec|moment)|generating|writing|thinking|drafting|building|preparing)\b[^\n.…]{0,40}(\.\.\.|…|\. \. \.)\s*$|^[^a-z0-9]{0,3}(loading|please wait|one moment|one sec)\b[^\n]{0,40}$)/i;
   var BUSY_AI = /\b(generating|writing|thinking|drafting|building)\b/i;
   var ERR = /(something went wrong|went wrong|couldn'?t (?:save|load|find|reach|connect|send|open|complete|finish|get|read|sign|do that|unlock|restore)|could not|failed|\berrors?\b|not allowed|permission denied|violates|unable to|is not available|not found|timed out|did not save|didn'?t save|network (?:error|problem|request|connection))/i;
-  var NOT_ERR = /(no errors?|error-free|without error|nothing failed|try again tomorrow)/i;
+  // 27 Nov 2026: a story game's dice say "6 +0 = 6 vs DC 7 · Failed · Accept the cost" - that is the story, not the site
+  var NOT_ERR = /(no errors?|error-free|without error|nothing failed|try again tomorrow|\bvs\.? DC \d+|accept the cost)/i;
   var JUNK = [
     [/(^|[\s>:("'])undefined([\s<.,)"']|$)/, "the word undefined"],
     [/(^|[\s>:("'])NaN([\s<.,%)"']|$)/, "NaN"],

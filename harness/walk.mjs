@@ -180,7 +180,9 @@ async function shot(page, why) {
 // the book or email carries a script. The lock working is not a fault; whether the reader sees the words is checked by looking.
 const SANDBOXED = /Blocked script execution in 'about:(srcdoc|blank)' because the document's frame is sandboxed/;
 function watch(page) {
-  const w = { errors: [], failed: [], calls: [], dialogs: [] };
+  const w = { errors: [], failed: [], calls: [], dialogs: [], loads: 0 };
+  // 27 Nov 2026: a link to the page you are on reloads it and takes you to the top - that is an answer (the site name on the home page)
+  page.on("framenavigated", (f) => { if (f === page.mainFrame()) w.loads++; });
   // Playwright's own service-worker blocking reaches into sandboxed frames (an email preview) and throws there; a reader's browser never does
   const ours = (m) => /Failed to read the 'serviceWorker' property from 'Navigator'|Service Worker is disabled because the context is sandboxed/i.test(m);
   page.on("pageerror", (e) => { if (!ours(e.message)) w.errors.push(clip(e.message, 300)); });
@@ -420,7 +422,7 @@ async function pressEverything(run, ctx, url, { prepare } = {}) {
     const from = mark(w);
     const el = await findByLabel(page, label);
     if (!el) { await fresh(); continue; }
-    const before = await page.evaluate(() => ({ c: window.__twEyes ? window.__twEyes.changes : 0, u: location.href })).catch(() => ({ c: 0, u: "" }));
+    const before = await page.evaluate(() => ({ c: window.__twEyes ? window.__twEyes.changes : 0, u: location.href })).catch(() => ({ c: 0, u: "" })), loads0 = w.loads;
     const t0 = Date.now();
     try { await el.click({ timeout: 5000 }); } catch (e) { run.step({ action: "tap", target: label, passed: true, note: "could not be pressed: " + clip(e.message, 100) }); await fresh(); continue; }
     // the answer: any change on the page, a new page, a pop-up (watched up to 13 s like the eyes)
@@ -428,7 +430,7 @@ async function pressEverything(run, ctx, url, { prepare } = {}) {
     for (let i = 0; i < 26; i++) {
       await page.waitForTimeout(500);
       const now = await page.evaluate(() => ({ c: window.__twEyes ? window.__twEyes.changes : 0, u: location.href })).catch(() => ({ c: -1, u: "gone" }));
-      if (now.c !== before.c || now.u !== before.u || w.dialogs.length) { answered = true; ms = Date.now() - t0; break; }
+      if (now.c !== before.c || now.u !== before.u || w.dialogs.length || w.loads !== loads0) { answered = true; ms = Date.now() - t0; break; }
       if (i === 11 && !answered) continue;
     }
     await page.waitForTimeout(800);
@@ -538,7 +540,18 @@ async function walkApp(dev, { persona = "new reader", native = true, storage = n
   await ctx.close();
   return run;
 }
+async function dismissCelebration(run, page, pk) {
+  const what = await page.evaluate(() => {
+    const tk = document.getElementById("funTakeover"), um = document.getElementById("unlockModal");
+    if (tk && tk.classList.contains("on")) { const t = (tk.innerText || "").replace(/\s+/g, " ").trim().slice(0, 140); document.getElementById("tkBtn").click(); return t; }
+    if (um && um.classList.contains("on")) { const t = (um.innerText || "").replace(/\s+/g, " ").trim().slice(0, 140); if (window.closeUnlockModal) closeUnlockModal(); else um.classList.remove("on"); return t; }
+    return "";
+  }).catch(() => "");
+  if (what) { run.step({ action: "tap", target: "Continue", page: pk, note: "A celebration opened over the game; pressed Continue like a reader: " + what }); await page.waitForTimeout(500); }
+  return !!what;
+}
 async function playGame(run, page, g, pk) {
+  await dismissCelebration(run, page, pk);
   const fr = page.frames().find((f) => f !== page.mainFrame() && /^blob:/.test(f.url()));
   if (!fr) { run.find({ page: pk, step: "open", kind: "game did not open", message: `${g.title}: no game frame appeared`, shot: await shot(page, "game-" + g.id) }); return; }
   try { await fr.waitForLoadState("domcontentloaded", { timeout: 10000 }); } catch (_) {}
@@ -550,9 +563,15 @@ async function playGame(run, page, g, pk) {
   // play like a reader: press what moves the story on (begin / continue / a choice), picking a card or an option first when a
   // screen needs one; never save / load / restart / quit. Every real button pressed must do something; 25 story changes is enough.
   let dead = 0, moves = 0, tried = new Set();
+  // 27 Nov 2026: a game's own panels (Character, Case Board, Dossier, The Ledger, Travel) are pressed once each and closed again,
+  // like a reader looking and going back to the story. Until today the walk opened one, never closed it, pressed the same tab
+  // behind the open panel and called it dead (Obsidian's Character), or pressed it four times running (Dossier, The Ledger).
+  const panels = new Set(), PANEL = /^\W*(character|case board|dossier|the ledger|ledger)\W*$/i;
   for (let i = 0; i < 60 && moves < 25; i++) {
     const pick = await fr.evaluate((tried) => {
-      const bad = /\b(save|load|restart|new game|quit|reset|menu|journal|close|back|share|copy|seed|delete|erase|start over|settings|sound|music)\b/i;
+      // 27 Nov 2026: "back", "menu", "journal" and "close" are skipped only as a whole button (◈ Journal, Close); a story choice like
+      // "Back to the room ▸" is the story going on, and skipping it stopped Dragon Strife after five moves
+      const bad = { test: (t) => /\b(save|load|restart|new game|quit|reset|share|copy|seed|delete|erase|start over|settings|sound|music)\b/i.test(t) || /^\W*(back|menu|journal|close)\W*$/i.test(String(t).trim()) };
       const vis = (e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 4 && r.height > 4 && cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.1; };
       const all = [...document.querySelectorAll("button, [onclick], [role=button], a[href^='#'], .choice, .ch, .opt, .option, .card, .tile, .pick, li, label, div, span")]
         .filter((e) => vis(e) && !e.disabled && /\w/.test(e.textContent) && e.textContent.trim().length < 400 && !bad.test(e.textContent))
@@ -568,10 +587,25 @@ async function playGame(run, page, g, pk) {
       p.setAttribute("data-hx-pick", "1");
       return { key: key(p), label: p.textContent.replace(/\s+/g, " ").trim().slice(0, 80), real: real(p) };
     }, [...tried]).catch(() => null);
+    if (pick && PANEL.test(pick.label) && pick.label.length < 40) {
+      if (panels.has(pick.label.toLowerCase())) { tried.add(pick.key); continue; }
+      panels.add(pick.label.toLowerCase());
+    }
     if (!pick) { run.step({ action: "note", page: pk, note: `After ${moves} story moves there was nothing left to press (an ending, or a screen with no choices)`, page_said: clip(await fr.evaluate(() => document.body.innerText).catch(() => ""), 400) }); break; }
     tried.add(pick.key);
+    // 27 Nov 2026: the app celebrates over the game (a rare Weave thread, a rank-up, new Weave entries). A reader presses Continue
+    // and plays on; the walk does the same and says so. Until today it pressed the game underneath and called the choice dead.
+    await dismissCelebration(run, page, pk);
     const before = text, c0 = await fr.evaluate(() => (window.__twEyes ? window.__twEyes.changes : 0)).catch(() => 0);
-    await fr.locator("[data-hx-pick]").first().click({ timeout: 4000 }).catch(() => {});
+    let missed = false;
+    await fr.locator("[data-hx-pick]").first().click({ timeout: 4000 }).catch(() => { missed = true; });
+    if (missed) {
+      // the press did not land. Inside the game (its own dice box, its own panel) the game is mid-move and the loop below goes on;
+      // something of the app's over the game that is not a celebration with a Continue is what a reader meets too, and is listed
+      const over = await page.evaluate(() => { const f = document.getElementById("frame"); if (!f) return ""; const r = f.getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        if (!e || e === f) return ""; const box = e.closest("[id]") || e; return (box.id ? "#" + box.id + ": " : "") + (box.innerText || "").replace(/\s+/g, " ").trim().slice(0, 160); }).catch(() => "");
+      if (over) { run.find({ page: pk, step: "choice: " + pick.label, kind: "game covered", message: `In ${g.title}, "${pick.label}" could not be pressed: something of the app is over the game (${over})`, shot: await shot(page, "covered-" + g.id) }); dead++; break; }
+    }
     let changed = false, any = false;
     for (let k = 0; k < 12 && !changed; k++) {
       await page.waitForTimeout(400);
@@ -579,6 +613,20 @@ async function playGame(run, page, g, pk) {
       text = clip(await fr.evaluate(() => document.body.innerText).catch(() => ""), 4000);
       changed = text !== before;
       any = any || changed || (await fr.evaluate(() => (window.__twEyes ? window.__twEyes.changes : 0)).catch(() => 0)) !== c0;
+    }
+    if (changed && PANEL.test(pick.label) && pick.label.length < 40) {
+      // a panel opened: look, then close it the way a reader does, and do not count it as a story move
+      // its Close (an overlay), or the same tab again (a panel that opens in place, like Dossier and The Ledger)
+      let closed = await fr.evaluate(() => { const vis = (e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 4 && r.height > 4 && cs.visibility !== "hidden" && cs.display !== "none"; };
+        const c = [...document.querySelectorAll("button, [onclick], [role=button]")].find((e) => vis(e) && /^(close|done|×|✕)$/i.test(e.textContent.trim()));
+        if (c) { c.click(); return true; } return false; }).catch(() => false);
+      if (!closed) { await fr.locator("[data-hx-pick]").first().click({ timeout: 3000 }).catch(() => {}); }
+      await page.waitForTimeout(500);
+      text = clip(await fr.evaluate(() => document.body.innerText).catch(() => ""), 4000);
+      if (!closed) closed = text === before;
+      run.step({ action: "choose", target: pick.label, page: pk, passed: true, note: closed ? "a panel opened; looked and closed it" : "a panel opened; it had no Close to press" });
+      if (!closed) { run.find({ page: pk, step: "panel: " + pick.label, kind: "panel would not close", message: `In ${g.title}, "${pick.label}" opened a panel with no way to close it`, shot: await shot(page, "panel-" + g.id) }); dead++; break; }
+      continue;
     }
     if (changed) { moves++; tried = new Set(); }
     run.step({ action: "choose", target: pick.label, page: pk, step: "move " + (moves), page_said: text.slice(0, 500), passed: any || !pick.real });
